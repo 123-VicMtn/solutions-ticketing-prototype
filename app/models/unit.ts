@@ -3,6 +3,7 @@ import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import Building from '#models/building'
 import UserUnit from '#models/user_unit'
+import Ticket from '#models/ticket'
 
 export default class Unit extends BaseModel {
   @column({ isPrimary: true })
@@ -31,4 +32,7 @@ export default class Unit extends BaseModel {
 
   @hasMany(() => UserUnit)
   declare userUnits: HasMany<typeof UserUnit>
+
+  @hasMany(() => Ticket)
+  declare tickets: HasMany<typeof Ticket>
 }
