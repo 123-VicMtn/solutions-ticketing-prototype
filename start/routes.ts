@@ -17,6 +17,12 @@ router
 router
   .group(() => {
     router.post('logout', [controllers.Session, 'destroy'])
+
+    router.get('tickets', [controllers.Tickets, 'index']).as('tickets.index')
+    router.get('tickets/create', [controllers.Tickets, 'create']).as('tickets.create')
+    router.post('tickets', [controllers.Tickets, 'store']).as('tickets.store')
+    router.get('tickets/:id', [controllers.Tickets, 'show']).as('tickets.show')
+    router.post('tickets/:id/comments', [controllers.Tickets, 'addComment']).as('tickets.comments.store')
   })
   .use(middleware.auth())
 
@@ -35,6 +41,8 @@ router
     router.get('units/:id/edit', [controllers.Units, 'edit']).as('units.edit')
     router.put('units/:id', [controllers.Units, 'update']).as('units.update')
     router.delete('units/:id', [controllers.Units, 'destroy']).as('units.destroy')
+
+    router.put('tickets/:id/status', [controllers.Tickets, 'updateStatus']).as('tickets.status.update')
   })
   .prefix('admin')
   .as('admin')
