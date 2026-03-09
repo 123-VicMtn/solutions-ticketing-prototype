@@ -26,6 +26,77 @@ export class BuildingSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class TicketAttachmentSchema extends BaseModel {
+  static $columns = ['createdAt', 'filePath', 'id', 'mimeType', 'originalName', 'sizeBytes', 'ticketId', 'updatedAt', 'userId'] as const
+  $columns = TicketAttachmentSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare filePath: string
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare mimeType: string
+  @column()
+  declare originalName: string
+  @column()
+  declare sizeBytes: number
+  @column()
+  declare ticketId: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number
+}
+
+export class TicketCommentSchema extends BaseModel {
+  static $columns = ['content', 'createdAt', 'id', 'isInternal', 'ticketId', 'updatedAt', 'userId'] as const
+  $columns = TicketCommentSchema.$columns
+  @column()
+  declare content: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare isInternal: boolean
+  @column()
+  declare ticketId: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number
+}
+
+export class TicketSchema extends BaseModel {
+  static $columns = ['category', 'createdAt', 'description', 'id', 'priority', 'reference', 'resolvedAt', 'status', 'title', 'unitId', 'updatedAt', 'userId'] as const
+  $columns = TicketSchema.$columns
+  @column()
+  declare category: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare description: string
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare priority: string
+  @column()
+  declare reference: string | null
+  @column.dateTime()
+  declare resolvedAt: DateTime | null
+  @column()
+  declare status: string
+  @column()
+  declare title: string
+  @column()
+  declare unitId: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number
+}
+
 export class UnitSchema extends BaseModel {
   static $columns = ['buildingId', 'createdAt', 'floor', 'id', 'label', 'type', 'updatedAt'] as const
   $columns = UnitSchema.$columns
