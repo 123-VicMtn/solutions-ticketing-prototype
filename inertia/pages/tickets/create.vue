@@ -58,11 +58,14 @@ async function submitTicket(event: Event) {
         <div>
           <label for="category" class="mb-1.5 block text-sm font-medium text-gray-700">Catégorie</label>
           <select name="category" id="category" class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
-            <option value="plumbing">Plomberie</option>
-            <option value="electricity">Electricité</option>
-            <option value="heating">Chauffage</option>
-            <option value="general">Général</option>
-            <option value="other">Autre</option>
+            <option value="Technique & Maintenance">Technique & Maintenance</option>
+            <option value="Entretien & Nettoyage">Entretien & Nettoyage</option>
+            <option value="Administratifs & Contrats">Administratifs & Contrats</option>
+            <option value="Finance & Facturation">Finance & Facturation</option>
+            <option value="Relations & Conflits">Relations & Conflits</option>
+            <option value="Gestion des accès">Gestion des accès</option>
+            <option value="Déménagement">Déménagement</option>
+            <option value="Urgences">Urgences</option>
           </select>
         </div>
         <div>
