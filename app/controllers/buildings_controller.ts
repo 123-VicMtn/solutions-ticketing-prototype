@@ -5,7 +5,12 @@ import type { HttpContext } from '@adonisjs/core/http'
 export default class BuildingsController {
   async index({ inertia }: HttpContext) {
     const buildings = await Building.query().withCount('units').orderBy('name')
-    return inertia.render('admin/buildings/index', { buildings })
+    return inertia.render('admin/buildings/index', {
+      buildings: buildings.map((b) => ({
+        ...b.serialize(),
+        unitsCount: Number(b.$extras.units_count),
+      })),
+    })
   }
 
   async create({ inertia }: HttpContext) {

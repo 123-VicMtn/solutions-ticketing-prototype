@@ -9,7 +9,7 @@ defineProps<{
     address: string
     city: string
     postalCode: string
-    $extras: { units_count: number }
+    unitsCount: number
   }>
 }>()
 </script>
@@ -59,7 +59,7 @@ defineProps<{
             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ building.address }}</td>
             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ building.city }}</td>
             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ building.postalCode }}</td>
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ building.$extras.units_count }}</td>
+            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ building.unitsCount }}</td>
             <td class="whitespace-nowrap px-6 py-4 text-right text-sm">
               <Link
                 route="admin.buildings.edit"
