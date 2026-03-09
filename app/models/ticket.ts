@@ -34,7 +34,7 @@ export default class Ticket extends BaseModel {
   declare priority: 'basse' | 'moyenne' | 'élevée' | 'urgente'
 
   @column()
-  declare status: 'ouvert' | 'assigné' | 'en_cours' | 'résolu' | 'fermé'
+  declare status: 'ouvert' | 'assigné' | 'en cours' | 'résolu' | 'fermé'
 
   @column()
   declare title: string
