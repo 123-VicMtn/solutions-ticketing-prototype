@@ -1,0 +1,40 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ticketing-app
+    restart: unless-stopped
+    ports:
+      - '${PORT:-3333}:3333'
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      DB_HOST: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - uploads:/app/tmp/uploads
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: ticketing-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-ticketing}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-ticketing}
+      POSTGRES_DB: ${DB_DATABASE:-ticketing_prod}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-ticketing} -d ${DB_DATABASE:-ticketing_prod}']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+  uploads:
