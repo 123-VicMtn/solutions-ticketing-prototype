@@ -5,6 +5,9 @@ import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
 import UserUnit from '#models/user_unit'
+import Ticket from '#models/ticket'
+import TicketComment from '#models/ticket_comment'
+import TicketAttachment from '#models/ticket_attachment'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -44,6 +47,15 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
   @hasMany(() => UserUnit)
   declare userUnits: HasMany<typeof UserUnit>
+
+  @hasMany(() => Ticket)
+  declare tickets: HasMany<typeof Ticket>
+
+  @hasMany(() => TicketComment)
+  declare ticketComments: HasMany<typeof TicketComment>
+
+  @hasMany(() => TicketAttachment)
+  declare ticketAttachments: HasMany<typeof TicketAttachment>
 
   get fullName() {
     if (this.firstName && this.lastName) return `${this.firstName} ${this.lastName}`
