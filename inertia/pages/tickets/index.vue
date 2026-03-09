@@ -17,8 +17,8 @@ const props = defineProps<{
   isAdmin: boolean
 }>()
 
-const statuses = ['open', 'assigned', 'in_progress', 'resolved', 'closed']
-const priorities = ['low', 'medium', 'high', 'urgent']
+const statuses = ['ouvert', 'assigné', 'en cours', 'résolu', 'fermé']
+const priorities = ['basse', 'moyenne', 'élevée', 'urgente']
 
 function applyFilters(form: HTMLFormElement) {
   const fd = new FormData(form)
