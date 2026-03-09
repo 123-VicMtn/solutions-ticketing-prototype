@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  lint-and-typecheck:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+
+  test:
+    runs-on: ubuntu-latest
+    needs: lint-and-typecheck
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: ticketing
+          POSTGRES_PASSWORD: ticketing
+          POSTGRES_DB: ticketing_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ticketing -d ticketing_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      NODE_ENV: test
+      HOST: localhost
+      PORT: 3333
+      APP_KEY: test-app-key-that-is-at-least-16-chars
+      LOG_LEVEL: warn
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USER: ticketing
+      DB_PASSWORD: ticketing
+      DB_DATABASE: ticketing_test
+      SESSION_DRIVER: memory
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: node ace migration:run
+      - run: npm test
