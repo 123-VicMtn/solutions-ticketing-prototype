@@ -12,6 +12,11 @@ defineProps<{
     unitsCount: number
   }>
 }>()
+
+function confirmDelete(e: Event, message: string) {
+  if (!globalThis.confirm(message)) return
+  ;(e.target as HTMLFormElement).closest('form')!.submit()
+}
 </script>
 
 <template>
@@ -73,7 +78,7 @@ defineProps<{
                 :params="{ id: building.id }"
                 method="delete"
                 class="ml-4 inline"
-                @submit.prevent="(e: Event) => { if (confirm('Supprimer cet immeuble et tous ses lots ?')) (e.target as HTMLFormElement).submit() }"
+                @submit.prevent="(e: Event) => confirmDelete(e, 'Supprimer cet immeuble et tous ses lots ?')"
               >
                 <button type="submit" class="cursor-pointer font-medium text-red-600 hover:text-red-800">
                   Supprimer
