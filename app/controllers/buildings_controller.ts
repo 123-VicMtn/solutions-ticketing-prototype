@@ -7,7 +7,11 @@ export default class BuildingsController {
     const buildings = await Building.query().withCount('units').orderBy('name')
     return inertia.render('admin/buildings/index', {
       buildings: buildings.map((b) => ({
-        ...b.serialize(),
+        id: b.id,
+        name: b.name,
+        address: b.address,
+        city: b.city,
+        postalCode: b.postalCode,
         unitsCount: Number(b.$extras.units_count),
       })),
     })
