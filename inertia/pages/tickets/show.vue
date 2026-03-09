@@ -72,11 +72,11 @@ function submitComment(ticketId: number) {
       <form class="flex items-center gap-3" @submit.prevent="submitStatus(ticket.id)">
         <select v-model="statusValue" name="status" class="rounded-md border border-gray-300 px-3 py-2 text-sm">
           <option value="">Choisir</option>
-          <option value="open">open</option>
-          <option value="assigned">assigned</option>
-          <option value="in_progress">in_progress</option>
-          <option value="resolved">resolved</option>
-          <option value="closed">closed</option>
+          <option value="ouvert">ouvert</option>
+          <option value="assigné">assigné</option>
+          <option value="en cours">en cours</option>
+          <option value="résolu">résolu</option>
+          <option value="fermé">fermé</option>
         </select>
         <button type="submit" class="rounded-md bg-gray-900 px-4 py-2 text-sm text-white">Mettre à jour</button>
       </form>
@@ -96,11 +96,13 @@ function submitComment(ticketId: number) {
 
       <form class="mt-4 space-y-3" @submit.prevent="submitComment(ticket.id)">
         <textarea v-model="comment" rows="3" class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm" placeholder="Ajouter un commentaire..." />
+        <div class="flex items-center gap-3">
         <label v-if="isAdmin" class="inline-flex items-center gap-2 text-sm text-gray-700">
           <input v-model="isInternal" type="checkbox" />
           Commentaire interne (visible gérance uniquement)
         </label>
         <button type="submit" class="rounded-md bg-gray-900 px-4 py-2 text-sm text-white">Publier</button>
+        </div>
       </form>
     </div>
 
