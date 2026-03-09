@@ -20,13 +20,21 @@ export default class Ticket extends BaseModel {
   declare reference: string | null
 
   @column()
-  declare category: 'plumbing' | 'electricity' | 'heating' | 'general' | 'other'
+  declare category:
+    | 'Technique & Maintenance'
+    | 'Entretien & Nettoyage'
+    | 'Administratifs & Contrats'
+    | 'Finance & Facturation'
+    | 'Relations & Conflits'
+    | 'Gestion des accès'
+    | 'Déménagement'
+    | 'Urgences'
 
   @column()
-  declare priority: 'low' | 'medium' | 'high' | 'urgent'
+  declare priority: 'basse' | 'moyenne' | 'élevée' | 'urgente'
 
   @column()
-  declare status: 'open' | 'assigned' | 'in_progress' | 'resolved' | 'closed'
+  declare status: 'ouvert' | 'assigné' | 'en_cours' | 'résolu' | 'fermé'
 
   @column()
   declare title: string
