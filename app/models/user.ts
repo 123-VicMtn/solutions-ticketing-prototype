@@ -1,15 +1,63 @@
-import { UserSchema } from '#database/schema'
+import { DateTime } from 'luxon'
 import hash from '@adonisjs/core/services/hash'
 import { compose } from '@adonisjs/core/helpers'
+import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
+import type { HasMany } from '@adonisjs/lucid/types/relations'
+import UserUnit from '#models/user_unit'
 
-export default class User extends compose(UserSchema, withAuthFinder(hash)) {
+const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
+  uids: ['email'],
+  passwordColumnName: 'password',
+})
+
+export default class User extends compose(BaseModel, AuthFinder) {
+  @column({ isPrimary: true })
+  declare id: number
+
+  @column()
+  declare role: 'admin' | 'tenant' | 'owner'
+
+  @column()
+  declare firstName: string | null
+
+  @column()
+  declare lastName: string | null
+
+  @column()
+  declare email: string
+
+  @column()
+  declare phone: string | null
+
+  @column({ serializeAs: null })
+  declare password: string
+
+  @column()
+  declare notificationPreference: 'email' | 'sms'
+
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+
+  @hasMany(() => UserUnit)
+  declare userUnits: HasMany<typeof UserUnit>
+
+  get fullName() {
+    if (this.firstName && this.lastName) return `${this.firstName} ${this.lastName}`
+    if (this.firstName) return this.firstName
+    return null
+  }
+
   get initials() {
-    const [first, last] = this.fullName ? this.fullName.split(' ') : this.email.split('@')
-    if (first && last) {
-      return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase()
+    if (this.firstName && this.lastName) {
+      return `${this.firstName.charAt(0)}${this.lastName.charAt(0)}`.toUpperCase()
     }
-
-    return `${first.slice(0, 2)}`.toUpperCase()
+    if (this.firstName) {
+      return this.firstName.slice(0, 2).toUpperCase()
+    }
+    return this.email.slice(0, 2).toUpperCase()
   }
 }
