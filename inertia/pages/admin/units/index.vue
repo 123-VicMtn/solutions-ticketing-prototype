@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3'
-import { Link, Form } from '@adonisjs/inertia/vue'
+import { Link } from '@adonisjs/inertia/vue'
 
 const props = defineProps<{
   units: Array<{
@@ -21,9 +21,9 @@ const unitTypeLabels: Record<string, string> = {
   storage: 'Cave',
 }
 
-function confirmDelete(e: Event, message: string) {
-  if (!globalThis.confirm(message)) return
-  ;(e.target as HTMLFormElement).closest('form')!.submit()
+function deleteUnit(id: number) {
+  if (!globalThis.confirm('Supprimer ce lot ?')) return
+  router.delete(`/admin/units/${id}`)
 }
 
 function filterByBuilding(event: Event) {
@@ -105,17 +105,13 @@ function filterByBuilding(event: Event) {
               >
                 Modifier
               </Link>
-              <Form
-                route="admin.units.destroy"
-                :params="{ id: unit.id }"
-                method="delete"
-                class="ml-4 inline"
-                @submit.prevent="(e: Event) => confirmDelete(e, 'Supprimer ce lot ?')"
+              <button
+                type="button"
+                class="ml-4 cursor-pointer font-medium text-red-600 hover:text-red-800"
+                @click="deleteUnit(unit.id)"
               >
-                <button type="submit" class="cursor-pointer font-medium text-red-600 hover:text-red-800">
-                  Supprimer
-                </button>
-              </Form>
+                Supprimer
+              </button>
             </td>
           </tr>
         </tbody>

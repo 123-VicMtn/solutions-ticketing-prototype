@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3'
-import { Link, Form } from '@adonisjs/inertia/vue'
+import { Head, router } from '@inertiajs/vue3'
+import { Link } from '@adonisjs/inertia/vue'
 
 defineProps<{
   buildings: Array<{
@@ -13,9 +13,9 @@ defineProps<{
   }>
 }>()
 
-function confirmDelete(e: Event, message: string) {
-  if (!globalThis.confirm(message)) return
-  ;(e.target as HTMLFormElement).closest('form')!.submit()
+function deleteBuilding(id: number) {
+  if (!globalThis.confirm('Supprimer cet immeuble et tous ses lots ?')) return
+  router.delete(`/admin/buildings/${id}`)
 }
 </script>
 
@@ -73,17 +73,13 @@ function confirmDelete(e: Event, message: string) {
               >
                 Modifier
               </Link>
-              <Form
-                route="admin.buildings.destroy"
-                :params="{ id: building.id }"
-                method="delete"
-                class="ml-4 inline"
-                @submit.prevent="(e: Event) => confirmDelete(e, 'Supprimer cet immeuble et tous ses lots ?')"
+              <button
+                type="button"
+                class="ml-4 cursor-pointer font-medium text-red-600 hover:text-red-800"
+                @click="deleteBuilding(building.id)"
               >
-                <button type="submit" class="cursor-pointer font-medium text-red-600 hover:text-red-800">
-                  Supprimer
-                </button>
-              </Form>
+                Supprimer
+              </button>
             </td>
           </tr>
         </tbody>
