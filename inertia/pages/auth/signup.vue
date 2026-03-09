@@ -16,18 +16,33 @@ import { Form, Link } from '@adonisjs/inertia/vue'
       </div>
 
       <Form route="new_account.store" #default="{ processing, errors }" class="space-y-5">
-        <div>
-          <label for="fullName" class="mb-1.5 block text-sm font-medium text-gray-700">
-            Nom complet
-          </label>
-          <input
-            type="text"
-            name="fullName"
-            id="fullName"
-            class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none"
-            :class="{ 'border-red-500': errors.fullName }"
-          />
-          <p v-if="errors.fullName" class="mt-1 text-sm text-red-600">{{ errors.fullName }}</p>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label for="firstName" class="mb-1.5 block text-sm font-medium text-gray-700">
+              Prénom
+            </label>
+            <input
+              type="text"
+              name="firstName"
+              id="firstName"
+              class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none"
+              :class="{ 'border-red-500': errors.firstName }"
+            />
+            <p v-if="errors.firstName" class="mt-1 text-sm text-red-600">{{ errors.firstName }}</p>
+          </div>
+          <div>
+            <label for="lastName" class="mb-1.5 block text-sm font-medium text-gray-700">
+              Nom
+            </label>
+            <input
+              type="text"
+              name="lastName"
+              id="lastName"
+              class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none"
+              :class="{ 'border-red-500': errors.lastName }"
+            />
+            <p v-if="errors.lastName" class="mt-1 text-sm text-red-600">{{ errors.lastName }}</p>
+          </div>
         </div>
 
         <div>
