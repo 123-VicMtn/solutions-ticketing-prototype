@@ -18,7 +18,7 @@ export default class BuildingsController {
   }
 
   async create({ inertia }: HttpContext) {
-    return inertia.render('admin/buildings/create')
+    return inertia.render('admin/buildings/create', {})
   }
 
   async store({ request, response, session }: HttpContext) {
