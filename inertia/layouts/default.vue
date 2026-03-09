@@ -34,7 +34,7 @@ const isAdmin = () => page.props.user?.role === 'admin'
 
           <nav v-if="page.props.user && isAdmin()" class="flex items-center gap-5">
             <Link
-              route="admin.tickets.index"
+              route="tickets.index"
               class="text-sm font-medium text-gray-500 hover:text-gray-900"
             >
               Tickets
@@ -57,7 +57,7 @@ const isAdmin = () => page.props.user?.role === 'admin'
         <nav class="flex items-center gap-4">
           <template v-if="page.props.user">
             <Link
-              href="/tickets"
+              route="tickets.index"
               class="text-sm font-medium text-gray-500 hover:text-gray-900"
             >
               Tickets
