@@ -1,66 +1,94 @@
 <script setup lang="ts">
-import { Form } from '@adonisjs/inertia/vue'
+import { Head } from '@inertiajs/vue3'
+import { Form, Link } from '@adonisjs/inertia/vue'
 </script>
 
 <template>
-  <div class="form-container">
-    <div>
-      <h1>Signup</h1>
-      <p>Enter your details below to create your account</p>
-    </div>
+  <Head title="Créer un compte" />
 
-    <div>
-      <Form route="new_account.store" #default="{ processing, errors }">
+  <div class="flex min-h-[calc(100vh-12rem)] items-center justify-center">
+    <div class="w-full max-w-sm">
+      <div class="mb-8">
+        <h1 class="text-2xl font-bold tracking-tight text-gray-900">Créer un compte</h1>
+        <p class="mt-1 text-sm text-gray-500">
+          Remplissez le formulaire pour accéder à la plateforme
+        </p>
+      </div>
+
+      <Form route="new_account.store" #default="{ processing, errors }" class="space-y-5">
         <div>
-          <label for="fullName">Full name</label>
+          <label for="fullName" class="mb-1.5 block text-sm font-medium text-gray-700">
+            Nom complet
+          </label>
           <input
             type="text"
             name="fullName"
             id="fullName"
-            :data-invalid="errors.fullName ? 'true' : undefined"
+            class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none"
+            :class="{ 'border-red-500': errors.fullName }"
           />
-          <div v-if="errors.fullName">{{ errors.fullName }}</div>
+          <p v-if="errors.fullName" class="mt-1 text-sm text-red-600">{{ errors.fullName }}</p>
         </div>
 
         <div>
-          <label for="email">Email</label>
+          <label for="email" class="mb-1.5 block text-sm font-medium text-gray-700">Email</label>
           <input
             type="email"
             name="email"
             id="email"
             autocomplete="email"
-            :data-invalid="errors.email ? 'true' : undefined"
+            class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none"
+            :class="{ 'border-red-500': errors.email }"
           />
-          <div v-if="errors.email">{{ errors.email }}</div>
+          <p v-if="errors.email" class="mt-1 text-sm text-red-600">{{ errors.email }}</p>
         </div>
 
         <div>
-          <label for="password">Password</label>
+          <label for="password" class="mb-1.5 block text-sm font-medium text-gray-700">
+            Mot de passe
+          </label>
           <input
             type="password"
             name="password"
             id="password"
             autocomplete="new-password"
-            :data-invalid="errors.password ? 'true' : undefined"
+            class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none"
+            :class="{ 'border-red-500': errors.password }"
           />
-          <div v-if="errors.password">{{ errors.password }}</div>
+          <p v-if="errors.password" class="mt-1 text-sm text-red-600">{{ errors.password }}</p>
         </div>
 
         <div>
-          <label for="passwordConfirmation">Confirm password</label>
+          <label for="passwordConfirmation" class="mb-1.5 block text-sm font-medium text-gray-700">
+            Confirmer le mot de passe
+          </label>
           <input
             type="password"
             name="passwordConfirmation"
             id="passwordConfirmation"
             autocomplete="new-password"
-            :data-invalid="errors.passwordConfirmation ? 'true' : undefined"
+            class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none"
+            :class="{ 'border-red-500': errors.passwordConfirmation }"
           />
-          <div v-if="errors.passwordConfirmation">{{ errors.passwordConfirmation }}</div>
+          <p v-if="errors.passwordConfirmation" class="mt-1 text-sm text-red-600">
+            {{ errors.passwordConfirmation }}
+          </p>
         </div>
 
-        <div>
-          <button type="submit" class="button" :disabled="processing">Sign up</button>
-        </div>
+        <button
+          type="submit"
+          :disabled="processing"
+          class="w-full cursor-pointer rounded-md bg-gray-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+        >
+          Créer mon compte
+        </button>
+
+        <p class="text-center text-sm text-gray-500">
+          Déjà un compte ?
+          <Link route="session.create" class="font-medium text-gray-900 hover:underline">
+            Se connecter
+          </Link>
+        </p>
       </Form>
     </div>
   </div>
