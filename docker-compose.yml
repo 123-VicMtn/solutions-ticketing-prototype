@@ -17,7 +17,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: sh -c "npm install && node ace migration:run && node ace serve --hmr"
+    command: sh -c "npm install && node ace serve --hmr"
 
   postgres:
     image: postgres:17-alpine
