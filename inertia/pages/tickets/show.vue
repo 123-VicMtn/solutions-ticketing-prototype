@@ -12,7 +12,7 @@ const props = defineProps<{
     title: string
     description: string
     unit: { label: string; building: { name: string } }
-    user: { fullName: string | null; email: string }
+    user: { id: number; fullName: string | null; email: string; phone: string; role: string; notificationPreference: string }
   }
   comments: Array<{
     id: number
@@ -67,19 +67,37 @@ function submitComment(ticketId: number) {
       <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.description }}</p>
     </div>
 
-    <div v-if="isAdmin" class="rounded-lg border border-gray-200 bg-white p-6">
-      <div class="mb-3 text-xs uppercase tracking-wide text-gray-500">Statut</div>
-      <form class="flex items-center gap-3" @submit.prevent="submitStatus(ticket.id)">
-        <select v-model="statusValue" name="status" class="rounded-md border border-gray-300 px-3 py-2 text-sm">
-          <option value="">Choisir</option>
-          <option value="ouvert">ouvert</option>
-          <option value="assigné">assigné</option>
-          <option value="en cours">en cours</option>
-          <option value="résolu">résolu</option>
-          <option value="fermé">fermé</option>
-        </select>
-        <button type="submit" class="rounded-md bg-gray-900 px-4 py-2 text-sm text-white">Mettre à jour</button>
-      </form>
+    <div class="grid grid-flow-col grid-cols-3 w-full gap-4">
+      <div class="rounded-lg border border-gray-200 bg-white p-6 col-span-2">
+        <div class="mb-3 text-xs uppercase tracking-wide text-gray-500">Locataire</div>
+        <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.user.fullName }}</p>
+        <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.user.email }}</p>
+        <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.user.phone }}</p>
+        <p class="whitespace-pre-wrap text-sm text-gray-800">
+          {{ ticket.user.notificationPreference }}
+        </p>
+      </div>
+
+      <div v-if="isAdmin" class="rounded-lg border border-gray-200 bg-white p-6">
+        <div class="mb-3 text-xs uppercase tracking-wide text-gray-500">Statut</div>
+        <form class="flex items-center gap-3" @submit.prevent="submitStatus(ticket.id)">
+          <select
+            v-model="statusValue"
+            name="status"
+            class="rounded-md border border-gray-300 px-3 py-2 text-sm"
+          >
+            <option value="">Choisir</option>
+            <option value="ouvert">ouvert</option>
+            <option value="assigné">assigné</option>
+            <option value="en cours">en cours</option>
+            <option value="résolu">résolu</option>
+            <option value="fermé">fermé</option>
+          </select>
+          <button type="submit" class="rounded-md bg-gray-900 px-4 py-2 text-sm text-white">
+            Mettre à jour
+          </button>
+        </form>
+      </div>
     </div>
 
     <div class="rounded-lg border border-gray-200 bg-white p-6">
