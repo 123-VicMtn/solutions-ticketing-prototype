@@ -28,29 +28,32 @@ const isAdmin = () => page.props.user?.role === 'admin'
     <header class="border-b border-gray-200 bg-white">
       <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         <div class="flex items-center gap-8">
-          <Link route="home" class="text-xl font-bold tracking-tight text-gray-900">
-            Ticketing
+          <Link route="home" class="text-2xl font-bold tracking-tight text-gray-900">
+            123-Solutions
           </Link>
 
-          <nav v-if="page.props.user && isAdmin()" class="flex items-center gap-5">
+          <nav class="flex items-center gap-5">
             <Link
               route="tickets.index"
-              class="text-sm font-medium text-gray-500 hover:text-gray-900"
+              class="text-md font-medium text-gray-500 hover:text-gray-900"
             >
               Tickets
             </Link>
-            <Link
+
+            <div v-if="isAdmin()" class="flex items-center gap-5">
+              <Link
               route="admin.buildings.index"
-              class="text-sm font-medium text-gray-500 hover:text-gray-900"
+              class="text-md font-medium text-gray-500 hover:text-gray-900"
             >
               Immeubles
             </Link>
             <Link
               route="admin.units.index"
-              class="text-sm font-medium text-gray-500 hover:text-gray-900"
+              class="text-md font-medium text-gray-500 hover:text-gray-900"
             >
               Lots
             </Link>
+          </div>
           </nav>
         </div>
 
