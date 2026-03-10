@@ -93,7 +93,28 @@ async function submitTicket(event: Event) {
 
       <div>
         <label for="attachments" class="mb-1.5 block text-sm font-medium text-gray-700">Photos (optionnel)</label>
-        <input name="attachments" id="attachments" type="file" multiple accept="image/*" class="block w-full text-sm" />
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-gray-500">Formats acceptés: JPG, PNG, GIF</span>
+          <span class="text-xs text-gray-500">Taille maximale: 10MB</span>
+        </div>
+        <div class="relative flex justify-center items-center w-full">
+          <input
+            name="attachments"
+            id="attachments"
+            type="file"
+            multiple
+            accept="image/*"
+            class="opacity-0 absolute inset-0 w-full h-full cursor-pointer z-10"
+          />
+          <div
+            class="flex flex-col justify-center items-center w-full border border-gray-300 rounded py-12 px-3 bg-white text-gray-500 pointer-events-none"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" src="resources/assets/svg/photo.svg">
+
+            </svg>
+            <span class="text-sm">Cliquez pour ajouter des photos</span>
+          </div>
+        </div>
       </div>
 
       <div class="flex justify-end">
