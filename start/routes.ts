@@ -42,6 +42,10 @@ router
     router.put('units/:id', [controllers.Units, 'update']).as('units.update')
     router.delete('units/:id', [controllers.Units, 'destroy']).as('units.destroy')
 
+    router.get('users/:id', [controllers.Users, 'show']).as('users.show')
+    router.get('users/:id/edit', [controllers.Users, 'edit']).as('users.edit')
+    router.put('users/:id', [controllers.Users, 'update']).as('users.update')
+
     router.put('tickets/:id/status', [controllers.Tickets, 'updateStatus']).as('tickets.status.update')
   })
   .prefix('admin')
