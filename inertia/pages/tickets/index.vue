@@ -89,6 +89,7 @@ function applyFilters(form: HTMLFormElement) {
             <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Réf</th>
             <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Titre</th>
             <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Lot</th>
+            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Locataire</th>
             <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Priorité</th>
             <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Statut</th>
             <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Action</th>
@@ -104,6 +105,7 @@ function applyFilters(form: HTMLFormElement) {
             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
               {{ ticket.unit.building.name }} / {{ ticket.unit.label }}
             </td>
+            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ ticket.user.fullName }}</td>
             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ ticket.priority }}</td>
             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ ticket.status }}</td>
             <td class="whitespace-nowrap px-6 py-4 text-right text-sm">
