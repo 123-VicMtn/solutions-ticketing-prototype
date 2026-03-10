@@ -76,15 +76,8 @@ const isAdmin = () => page.props.user?.role === 'admin'
           <template v-else>
             <Link
               route="session.create"
-              class="text-sm font-medium text-gray-500 hover:text-gray-900"
-            >
-              Connexion
-            </Link>
-            <Link
-              route="new_account.create"
-              class="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
-            >
-              Créer un compte
+              class="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
+              Se connecter
             </Link>
           </template>
         </nav>
