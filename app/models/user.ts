@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 import hash from '@adonisjs/core/services/hash'
 import { compose } from '@adonisjs/core/helpers'
-import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
+import { BaseModel, column, computed, hasMany } from '@adonisjs/lucid/orm'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
 import UserUnit from '#models/user_unit'
@@ -57,12 +57,14 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @hasMany(() => TicketAttachment)
   declare ticketAttachments: HasMany<typeof TicketAttachment>
 
+  @computed()
   get fullName() {
     if (this.firstName && this.lastName) return `${this.firstName} ${this.lastName}`
     if (this.firstName) return this.firstName
     return null
   }
 
+  @computed()
   get initials() {
     if (this.firstName && this.lastName) {
       return `${this.firstName.charAt(0)}${this.lastName.charAt(0)}`.toUpperCase()
