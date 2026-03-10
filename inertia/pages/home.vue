@@ -8,7 +8,6 @@ const page = usePage<Data.SharedProps>()
 
 <template>
   <Head title="Accueil" />
- <!-- TODO: Personaliser la page d'accueil -->
   <div class="py-12">
     <div class="max-w-3xl">
       <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
@@ -25,12 +24,6 @@ const page = usePage<Data.SharedProps>()
           class="rounded-md bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-800"
         >
           Se connecter
-        </Link>
-        <Link
-          route="new_account.create"
-          class="rounded-md border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          Créer un compte
         </Link>
       </div>
     </div>
