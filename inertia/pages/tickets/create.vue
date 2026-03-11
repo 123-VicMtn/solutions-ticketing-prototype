@@ -71,10 +71,10 @@ async function submitTicket(event: Event) {
         <div>
           <label for="priority" class="mb-1.5 block text-sm font-medium text-gray-700">Priorité</label>
           <select name="priority" id="priority" class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
-            <option value="low">Basse</option>
-            <option value="medium">Moyenne</option>
-            <option value="high">Haute</option>
-            <option value="urgent">Urgente</option>
+            <option value="basse">Basse</option>
+            <option value="moyenne">Moyenne</option>
+            <option value="élevée">Élevée</option>
+            <option value="urgente">Urgente</option>
           </select>
         </div>
       </div>
