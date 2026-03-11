@@ -12,7 +12,14 @@ const props = defineProps<{
     title: string
     description: string
     unit: { label: string; building: { name: string } }
-    user: { id: number; fullName: string | null; email: string; phone: string; role: string; notificationPreference: string }
+    user: {
+      id: number
+      fullName: string | null
+      email: string
+      phone: string
+      role: 'admin' | 'tenant' | 'owner'
+      notificationPreference: 'email' | 'sms'
+    }
   }
   comments: Array<{
     id: number
@@ -27,6 +34,7 @@ const props = defineProps<{
     mimeType: string
     sizeBytes: number
     filePath: string
+    createdAt: string
   }>
   isAdmin: boolean
 }>()
