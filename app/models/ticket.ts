@@ -62,4 +62,35 @@ export default class Ticket extends BaseModel {
 
   @hasMany(() => TicketAttachment)
   declare attachments: HasMany<typeof TicketAttachment>
+
+  validateTicketWorkflow(): (ticket: Ticket) => boolean {
+    return (ticket: Ticket) => {
+      if (ticket.status === 'résolu' && !ticket.resolvedAt) {
+        throw new Error('Un ticket résolu doit avoir une date de résolution (resolvedAt) définie.')
+      }
+      if (ticket.status !== 'résolu' && ticket.status !== 'fermé' && ticket.resolvedAt) {
+        throw new Error(
+          'La date de résolution ne peut être définie que pour des tickets résolus ou fermés.'
+        )
+      }
+      const validTransitions: Record<string, string[]> = {
+        'ouvert': ['assigné', 'fermé'],
+        'assigné': ['en cours', 'fermé'],
+        'en cours': ['résolu', 'fermé'],
+        'résolu': ['fermé'],
+        'fermé': [],
+      }
+      const previousStatus = ticket.$dirty.status ? ticket.$original.status : undefined
+      if (
+        previousStatus &&
+        !validTransitions[previousStatus]?.includes(ticket.status) &&
+        previousStatus !== ticket.status
+      ) {
+        throw new Error(
+          `Transition d'état non autorisée: impossible de passer de "${previousStatus}" à "${ticket.status}".`
+        )
+      }
+      return true
+    }
+  }
 }
