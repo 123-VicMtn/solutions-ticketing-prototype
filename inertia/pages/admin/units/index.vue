@@ -9,6 +9,10 @@ const props = defineProps<{
     floor: number
     type: string
     building: { id: number; name: string }
+    userUnits: Array<{
+      id: number
+      user: { id: number; fullName: string; email: string; phone: string; role: string }
+    }>
   }>
   buildings: Array<{ id: number; name: string }>
   filters: { buildingId: number | null }
@@ -84,6 +88,7 @@ function filterByBuilding(event: Event) {
             <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Immeuble</th>
             <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Étage</th>
             <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Type</th>
+            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Locataire</th>
             <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
           </tr>
         </thead>
@@ -96,6 +101,18 @@ function filterByBuilding(event: Event) {
               <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700">
                 {{ unitTypeLabels[unit.type] || unit.type }}
               </span>
+            </td>
+            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+              <template v-if="unit.userUnits.length > 0 && unit.userUnits[0].user">
+                <Link
+                  route="admin.users.show"
+                  :params="{ id: unit.userUnits[0].user.id }"
+                  class="font-medium text-gray-600 hover:text-gray-900"
+                >
+                  {{ unit.userUnits[0].user.fullName }}
+                </Link>
+              </template>
+              <span v-else class="text-gray-400">-</span>
             </td>
             <td class="whitespace-nowrap px-6 py-4 text-right text-sm">
               <Link
