@@ -14,8 +14,49 @@ export default class UsersController {
   }
 
   async show({ inertia, params }: HttpContext) {
-    const user = await User.findOrFail(params.id)
-    return inertia.render('users/show', { user })
+    const user = await User.query()
+      .where('id', params.id)
+      .preload('userUnits', (q) => q.preload('unit', (r) => r.preload('building')))
+      .preload('tickets', (q) =>
+        q
+          .preload('unit', (r) => r.preload('building'))
+          .preload('comments', (r) => r.preload('user'))
+          .preload('attachments')
+      )
+      .firstOrFail()
+
+    return inertia.render('users/show', {
+      profileUser: {
+        id: user.id,
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email ?? '-',
+        phone: user.phone ?? '-',
+        notificationPreference: user.notificationPreference,
+        createdAt: user.createdAt.toISO() ?? '',
+        updatedAt: user.updatedAt?.toISO() ?? '',
+      },
+      userUnits: user.userUnits.map((userUnit) => ({
+        id: userUnit.id,
+        relation: userUnit.relation,
+        unit: {
+          id: userUnit.unit.id,
+          label: userUnit.unit.label,
+          building: { id: userUnit.unit.building.id, name: userUnit.unit.building.name },
+        },
+      })),
+      tickets: user.tickets.map((ticket) => ({
+        id: ticket.id,
+        reference: ticket.reference,
+        category: ticket.category,
+        priority: ticket.priority,
+        status: ticket.status,
+        title: ticket.title,
+        description: ticket.description,
+        createdAt: ticket.createdAt.toISO() ?? '',
+      })),
+    })
   }
 
   async edit({ inertia, params }: HttpContext) {
