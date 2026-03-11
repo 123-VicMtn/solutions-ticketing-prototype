@@ -54,11 +54,19 @@ const isAdmin = () => page.props.user?.role === 'admin'
               Lots
             </Link>
           </div>
+
           </nav>
         </div>
 
         <nav class="flex items-center gap-4">
           <template v-if="page.props.user">
+            <Link
+              v-if="isAdmin()"
+              route="admin.users.create"
+              class="text-md font-medium text-gray-500 hover:text-gray-900"
+            >
+              Utilisateurs
+            </Link>
             <span
               class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-900 text-xs font-medium text-white"
             >
@@ -76,7 +84,7 @@ const isAdmin = () => page.props.user?.role === 'admin'
           <template v-else>
             <Link
               route="session.create"
-              class="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
+              class="justify-end rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
               Se connecter
             </Link>
           </template>
