@@ -2,14 +2,23 @@ import vine from '@vinejs/vine'
 
 export const createTicketValidator = vine.create({
   unitId: vine.number().positive(),
-  category: vine.enum(['plumbing', 'electricity', 'heating', 'general', 'other']),
-  priority: vine.enum(['low', 'medium', 'high', 'urgent']),
+  category: vine.enum([
+    'Technique & Maintenance',
+    'Entretien & Nettoyage',
+    'Administratifs & Contrats',
+    'Finance & Facturation',
+    'Relations & Conflits',
+    'Gestion des accès',
+    'Déménagement',
+    'Urgences',
+  ]),
+  priority: vine.enum(['basse', 'moyenne', 'élevée', 'urgente']),
   title: vine.string().trim().minLength(5).maxLength(180),
   description: vine.string().trim().minLength(10).maxLength(10000),
 })
 
 export const statusTicketValidator = vine.create({
-  status: vine.enum(['open', 'assigned', 'in_progress', 'resolved', 'closed']),
+  status: vine.enum(['ouvert', 'assigné', 'en cours', 'résolu', 'fermé']),
 })
 
 export const commentTicketValidator = vine.create({
