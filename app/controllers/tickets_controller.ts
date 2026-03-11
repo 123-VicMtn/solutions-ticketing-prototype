@@ -177,7 +177,7 @@ export default class TicketsController {
         mimeType: attachment.mimeType,
         sizeBytes: attachment.sizeBytes,
         filePath: attachment.filePath,
-        createdAt: attachment.createdAt,
+        createdAt: attachment.createdAt.toISO() ?? '',
       })),
       isAdmin: user.role === 'admin',
     })
