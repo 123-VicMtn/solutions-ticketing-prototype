@@ -33,7 +33,7 @@ const isAdmin = () => page.props.user?.role === 'admin'
           </Link>
 
           <nav class="flex items-center gap-5">
-            <Link
+            <Link v-if="page.props.user"
               route="tickets.index"
               class="text-md font-medium text-gray-500 hover:text-gray-900"
             >
