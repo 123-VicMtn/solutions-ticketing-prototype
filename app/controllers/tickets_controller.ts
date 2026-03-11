@@ -98,7 +98,7 @@ export default class TicketsController {
       unitId: payload.unitId,
       category: payload.category,
       priority: payload.priority,
-      status: 'open',
+      status: 'ouvert',
       title: payload.title,
       description: payload.description,
     })
