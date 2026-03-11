@@ -155,7 +155,7 @@ export default class TicketsController {
         user: {
           id: ticket.user.id,
           fullName: ticket.user.fullName,
-          email: ticket.user.email,
+          email: ticket.user.email ?? '-',
           phone: ticket.user.phone ?? '-',
           role: ticket.user.role,
           notificationPreference: ticket.user.notificationPreference,
