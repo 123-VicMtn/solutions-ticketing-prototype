@@ -13,7 +13,7 @@ export default class UnitsController {
       query.where('buildingId', buildingId)
     }
 
-    const units = await query
+    const units = await query.preload('userUnits', (q) => q.preload('user'))
     const buildings = await Building.query().orderBy('name')
 
     return inertia.render('admin/units/index', { units, buildings, filters: { buildingId } })
