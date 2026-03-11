@@ -208,7 +208,7 @@ export default class TicketsController {
     const ticket = await Ticket.findOrFail(params.id)
 
     ticket.status = payload.status
-    ticket.resolvedAt = payload.status === 'resolved' ? DateTime.now() : null
+    ticket.resolvedAt = ticket.status === 'résolu' ? DateTime.now() : null
     await ticket.save()
 
     return response.redirect().toPath(`/tickets/${ticket.id}`)
