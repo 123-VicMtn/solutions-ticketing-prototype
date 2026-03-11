@@ -72,6 +72,6 @@ export default class User extends compose(BaseModel, AuthFinder) {
     if (this.firstName) {
       return this.firstName.slice(0, 2).toUpperCase()
     }
-    return this.email.slice(0, 2).toUpperCase()
+    return this.email?.slice(0, 2).toUpperCase()
   }
 }
