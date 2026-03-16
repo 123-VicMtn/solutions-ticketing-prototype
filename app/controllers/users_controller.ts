@@ -10,7 +10,9 @@ export default class UsersController {
     const payload = await request.validateUsing(createUserValidator)
     const user = await User.create(payload)
     session.flash('success', 'Utilisateur créé avec succès')
-    return response.redirect().toRoute('admin.users.show', { id: user.id })
+    return response
+      .redirect()
+      .toRoute(user.role === 'admin' ? 'admin.users.show' : 'home', { id: user.id })
   }
 
   async show({ inertia, params }: HttpContext) {
