@@ -134,16 +134,20 @@ export class UserUnitSchema extends BaseModel {
 }
 
 export class UserSchema extends BaseModel {
-  static $columns = ['createdAt', 'email', 'firstName', 'id', 'lastName', 'notificationPreference', 'password', 'phone', 'role', 'updatedAt'] as const
+  static $columns = ['createdAt', 'email', 'firstName', 'id', 'inviteToken', 'inviteTokenExpiresAt', 'lastName', 'notificationPreference', 'password', 'phone', 'updatedAt', 'userRole', 'userStatus'] as const
   $columns = UserSchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
   @column()
   declare email: string
   @column()
-  declare firstName: string | null
+  declare firstName: string
   @column({ isPrimary: true })
   declare id: number
+  @column()
+  declare inviteToken: string | null
+  @column.dateTime()
+  declare inviteTokenExpiresAt: DateTime | null
   @column()
   declare lastName: string | null
   @column()
@@ -152,8 +156,10 @@ export class UserSchema extends BaseModel {
   declare password: string
   @column()
   declare phone: string | null
-  @column()
-  declare role: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
+  @column()
+  declare userRole: string
+  @column()
+  declare userStatus: string
 }
