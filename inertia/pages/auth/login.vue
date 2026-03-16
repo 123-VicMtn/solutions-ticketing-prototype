@@ -54,8 +54,8 @@ import { Form, Link } from '@adonisjs/inertia/vue'
 
         <p class="text-center text-sm text-gray-500">
           Pas encore de compte ?
-          <Link route="new_account.create" class="font-medium text-gray-900 hover:underline">
-            Créer un compte
+          <Link route="users.create" class="font-medium text-gray-900 hover:underline">
+            Demander votre accès
           </Link>
         </p>
       </Form>
