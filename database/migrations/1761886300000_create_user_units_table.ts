@@ -26,6 +26,8 @@ export default class extends BaseSchema {
       table.timestamp('updated_at').nullable()
 
       table.unique(['user_id', 'unit_id'])
+
+      table.check(`relation IN ('tenant', 'owner')`)
     })
   }
 
