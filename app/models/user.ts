@@ -14,6 +14,11 @@ const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   passwordColumnName: 'password',
 })
 
+export type UserRole = 'tenant' | 'owner' | 'manager' | 'admin' | 'provider'
+export type UserStatus = 'pending' | 'active' | 'rejected' | 'suspended'
+
+const HIERARCHY: Exclude<UserRole, 'provider'>[] = ['tenant', 'owner', 'manager', 'admin']
+
 export default class User extends compose(BaseModel, AuthFinder) {
   @column({ isPrimary: true })
   declare id: number
@@ -42,6 +47,12 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column()
   declare notificationPreference: 'email' | 'sms'
 
+  @column({ serializeAs: null })
+  declare inviteToken: string | null
+
+  @column.dateTime({ serializeAs: null })
+  declare inviteTokenExpiresAt: DateTime | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
@@ -51,8 +62,11 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @hasMany(() => UserUnit)
   declare userUnits: HasMany<typeof UserUnit>
 
-  @hasMany(() => Ticket)
+  @hasMany(() => Ticket, { foreignKey: 'userId' })
   declare tickets: HasMany<typeof Ticket>
+
+  @hasMany(() => Ticket, { foreignKey: 'assignedTo' })
+  declare assignedTickets: HasMany<typeof Ticket>
 
   @hasMany(() => TicketComment)
   declare ticketComments: HasMany<typeof TicketComment>
@@ -72,9 +86,24 @@ export default class User extends compose(BaseModel, AuthFinder) {
     if (this.firstName && this.lastName) {
       return `${this.firstName.charAt(0)}${this.lastName.charAt(0)}`.toUpperCase()
     }
-    if (this.firstName) {
-      return this.firstName.slice(0, 2).toUpperCase()
-    }
-    return this.email?.slice(0, 2).toUpperCase()
+    if (this.firstName) return this.firstName.slice(0, 2).toUpperCase()
+    return this.email?.slice(0, 2).toUpperCase() ?? null
+  }
+
+  get isProvider() {
+    return this.role === 'provider'
+  }
+
+  get isActive() {
+    return this.status === 'active'
+  }
+
+  get isPending() {
+    return this.status === 'pending'
+  }
+
+  hasAtLeastRole(min: Exclude<UserRole, 'provider'>): boolean {
+    if (this.isProvider) return false
+    return HIERARCHY.indexOf(this.role as any) >= HIERARCHY.indexOf(min)
   }
 }
