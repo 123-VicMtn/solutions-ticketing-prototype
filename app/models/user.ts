@@ -19,7 +19,10 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare id: number
 
   @column()
-  declare role: 'admin' | 'tenant' | 'owner'
+  declare role: UserRole
+
+  @column()
+  declare status: UserStatus
 
   @column()
   declare firstName: string
