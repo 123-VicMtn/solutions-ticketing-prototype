@@ -11,6 +11,8 @@ router
 
     router.get('login', [controllers.Session, 'create'])
     router.post('login', [controllers.Session, 'store'])
+
+    router.get('users/create', [controllers.Users, 'create']).as('users.create')
   })
   .use(middleware.guest())
 
@@ -22,7 +24,9 @@ router
     router.get('tickets/create', [controllers.Tickets, 'create']).as('tickets.create')
     router.post('tickets', [controllers.Tickets, 'store']).as('tickets.store')
     router.get('tickets/:id', [controllers.Tickets, 'show']).as('tickets.show')
-    router.post('tickets/:id/comments', [controllers.Tickets, 'addComment']).as('tickets.comments.store')
+    router
+      .post('tickets/:id/comments', [controllers.Tickets, 'addComment'])
+      .as('tickets.comments.store')
   })
   .use(middleware.auth())
 
@@ -42,13 +46,14 @@ router
     router.put('units/:id', [controllers.Units, 'update']).as('units.update')
     router.delete('units/:id', [controllers.Units, 'destroy']).as('units.destroy')
 
-    router.get('users/create', [controllers.Users, 'create']).as('users.create')
     router.post('users', [controllers.Users, 'store']).as('users.store')
     router.get('users/:id', [controllers.Users, 'show']).as('users.show')
     router.get('users/:id/edit', [controllers.Users, 'edit']).as('users.edit')
     router.put('users/:id', [controllers.Users, 'update']).as('users.update')
 
-    router.put('tickets/:id/status', [controllers.Tickets, 'updateStatus']).as('tickets.status.update')
+    router
+      .put('tickets/:id/status', [controllers.Tickets, 'updateStatus'])
+      .as('tickets.status.update')
   })
   .prefix('admin')
   .as('admin')
