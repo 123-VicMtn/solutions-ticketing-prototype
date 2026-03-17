@@ -30,6 +30,7 @@ router.use([
 ])
 
 export const middleware = router.named({
+  requireActiveUser: () => import('#middleware/require_active_user_middleware'),
   guest: () => import('#middleware/guest_middleware'),
   auth: () => import('#middleware/auth_middleware'),
   requireRole: () => import('#middleware/require_role_middleware'),
