@@ -33,7 +33,8 @@ const isAdmin = () => page.props.user?.role === 'admin'
           </Link>
 
           <nav class="flex items-center gap-5">
-            <Link v-if="page.props.user"
+            <Link
+              v-if="page.props.user"
               route="tickets.index"
               class="text-md font-medium text-gray-500 hover:text-gray-900"
             >
@@ -42,19 +43,18 @@ const isAdmin = () => page.props.user?.role === 'admin'
 
             <div v-if="isAdmin()" class="flex items-center gap-5">
               <Link
-              route="admin.buildings.index"
-              class="text-md font-medium text-gray-500 hover:text-gray-900"
-            >
-              Immeubles
-            </Link>
-            <Link
-              route="admin.units.index"
-              class="text-md font-medium text-gray-500 hover:text-gray-900"
-            >
-              Lots
-            </Link>
-          </div>
-
+                route="admin.buildings.index"
+                class="text-md font-medium text-gray-500 hover:text-gray-900"
+              >
+                Immeubles
+              </Link>
+              <Link
+                route="admin.units.index"
+                class="text-md font-medium text-gray-500 hover:text-gray-900"
+              >
+                Lots
+              </Link>
+            </div>
           </nav>
         </div>
 
@@ -62,7 +62,7 @@ const isAdmin = () => page.props.user?.role === 'admin'
           <template v-if="page.props.user">
             <Link
               v-if="isAdmin()"
-              route="admin.users.create"
+              route="users.create"
               class="text-md font-medium text-gray-500 hover:text-gray-900"
             >
               Utilisateurs
@@ -84,7 +84,8 @@ const isAdmin = () => page.props.user?.role === 'admin'
           <template v-else>
             <Link
               route="session.create"
-              class="justify-end rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
+              class="justify-end rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+            >
               Se connecter
             </Link>
           </template>
