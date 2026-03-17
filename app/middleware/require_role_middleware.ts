@@ -11,7 +11,7 @@ export default class RequireRoleMiddleware {
     }
 
     if (!allowedRoles.includes(user.role)) {
-      return ctx.response.unauthorized({ messsage: 'Insufficient permissions' })
+      return ctx.response.forbidden({ messsage: 'Insufficient permissions' })
     }
 
     return next()
