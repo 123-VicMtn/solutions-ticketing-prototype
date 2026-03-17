@@ -26,6 +26,29 @@ export class BuildingSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class ProviderSchema extends BaseModel {
+  static $columns = ['companyName', 'createdAt', 'geranceId', 'id', 'isActive', 'phone', 'speciality', 'updatedAt', 'userId'] as const
+  $columns = ProviderSchema.$columns
+  @column()
+  declare companyName: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare geranceId: number
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare isActive: boolean
+  @column()
+  declare phone: string | null
+  @column()
+  declare speciality: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number
+}
+
 export class TicketAttachmentSchema extends BaseModel {
   static $columns = ['createdAt', 'filePath', 'id', 'mimeType', 'originalName', 'sizeBytes', 'ticketId', 'updatedAt', 'userId'] as const
   $columns = TicketAttachmentSchema.$columns
@@ -69,8 +92,10 @@ export class TicketCommentSchema extends BaseModel {
 }
 
 export class TicketSchema extends BaseModel {
-  static $columns = ['category', 'createdAt', 'description', 'id', 'priority', 'reference', 'resolvedAt', 'status', 'title', 'unitId', 'updatedAt', 'userId'] as const
+  static $columns = ['assignedTo', 'category', 'createdAt', 'description', 'id', 'priority', 'providerId', 'reference', 'resolvedAt', 'status', 'title', 'unitId', 'updatedAt', 'userId'] as const
   $columns = TicketSchema.$columns
+  @column()
+  declare assignedTo: number | null
   @column()
   declare category: string
   @column.dateTime({ autoCreate: true })
@@ -81,6 +106,8 @@ export class TicketSchema extends BaseModel {
   declare id: number
   @column()
   declare priority: string
+  @column()
+  declare providerId: number | null
   @column()
   declare reference: string | null
   @column.dateTime()
@@ -134,7 +161,7 @@ export class UserUnitSchema extends BaseModel {
 }
 
 export class UserSchema extends BaseModel {
-  static $columns = ['createdAt', 'email', 'firstName', 'id', 'inviteToken', 'inviteTokenExpiresAt', 'lastName', 'notificationPreference', 'password', 'phone', 'updatedAt', 'userRole', 'userStatus'] as const
+  static $columns = ['createdAt', 'email', 'firstName', 'id', 'inviteToken', 'inviteTokenExpiresAt', 'lastName', 'notificationPreference', 'password', 'phone', 'role', 'status', 'updatedAt'] as const
   $columns = UserSchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -156,10 +183,10 @@ export class UserSchema extends BaseModel {
   declare password: string
   @column()
   declare phone: string | null
+  @column()
+  declare role: string
+  @column()
+  declare status: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
-  @column()
-  declare userRole: string
-  @column()
-  declare userStatus: string
 }
