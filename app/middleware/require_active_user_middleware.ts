@@ -6,11 +6,21 @@ export default class RequireActiveUserMiddleware {
     const user = ctx.auth.user
 
     if (!user) {
-      return ctx.response.unauthorized({ message: 'Not authenticated' })
+      return ctx.response.unauthorized({
+        message: 'Veuillez vous connecter pour accéder à cette page',
+      })
     }
 
-    if (user.status !== 'active') {
-      return ctx.response.forbidden({ message: 'User is not active' })
+    if (user.status === 'pending') {
+      return ctx.response.forbidden({
+        message: "Votre compte est en attente d'approbation",
+      })
+    }
+
+    if (user.status === 'suspended') {
+      return ctx.response.forbidden({
+        message: 'Votre compte a été suspendu',
+      })
     }
 
     return next()
