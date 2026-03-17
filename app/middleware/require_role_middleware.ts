@@ -7,11 +7,15 @@ export default class RequireRoleMiddleware {
     const user = ctx.auth.user
 
     if (!user) {
-      return ctx.response.unauthorized({ messsage: 'Not authenticated' })
+      return ctx.response.unauthorized({
+        message: 'Veuillez vous connecter pour accéder à cette page',
+      })
     }
 
     if (!allowedRoles.includes(user.role)) {
-      return ctx.response.forbidden({ messsage: 'Insufficient permissions' })
+      return ctx.response.forbidden({
+        message: "Vous n'avez pas les permissions nécessaires pour accéder à cette page",
+      })
     }
 
     return next()
