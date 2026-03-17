@@ -32,6 +32,14 @@ router
 
 router
   .group(() => {
+    router.get('users/:id', [controllers.Users, 'show']).as('users.show')
+    router.get('users/:id/edit', [controllers.Users, 'edit']).as('users.edit')
+    router.put('users/:id', [controllers.Users, 'update']).as('users.update')
+  })
+  .use(middleware.auth())
+
+router
+  .group(() => {
     router.get('buildings', [controllers.Buildings, 'index']).as('buildings.index')
     router.get('buildings/create', [controllers.Buildings, 'create']).as('buildings.create')
     router.post('buildings', [controllers.Buildings, 'store']).as('buildings.store')
@@ -47,9 +55,6 @@ router
     router.delete('units/:id', [controllers.Units, 'destroy']).as('units.destroy')
 
     router.post('users', [controllers.Users, 'store']).as('users.store')
-    router.get('users/:id', [controllers.Users, 'show']).as('users.show')
-    router.get('users/:id/edit', [controllers.Users, 'edit']).as('users.edit')
-    router.put('users/:id', [controllers.Users, 'update']).as('users.update')
 
     router
       .put('tickets/:id/status', [controllers.Tickets, 'updateStatus'])
@@ -57,4 +62,4 @@ router
   })
   .prefix('admin')
   .as('admin')
-  .use(middleware.auth())
+  .use([middleware.auth(), middleware.requireRole(['admin', 'manager'])])
