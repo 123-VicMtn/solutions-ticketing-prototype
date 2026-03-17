@@ -355,7 +355,7 @@ export default class MainSeeder extends BaseSeeder {
       const status = statuses[index % statuses.length]
       const category = categories[index % categories.length]
       const priority = priorities[index % priorities.length]
-      const title = `${topics[index % topics.length]} - ${tenant.firstName}`
+      const title = `${topics[index % topics.length]}`
       const description = `Signalement créé pour ${title.toLowerCase()} dans l'unité ${tenantLink.unitId}.`
 
       const ticket = await Ticket.create({
