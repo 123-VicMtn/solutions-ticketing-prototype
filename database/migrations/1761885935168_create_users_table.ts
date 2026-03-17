@@ -6,8 +6,8 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id').notNullable()
-      table.string('user_role').notNullable().defaultTo('tenant')
-      table.string('user_status').notNullable().defaultTo('pending')
+      table.string('role').notNullable().defaultTo('tenant')
+      table.string('status').notNullable().defaultTo('pending')
       table.string('first_name').notNullable()
       table.string('last_name').nullable()
       table.string('email').notNullable().unique()
@@ -20,8 +20,8 @@ export default class extends BaseSchema {
       table.timestamp('created_at').notNullable()
       table.timestamp('updated_at').nullable()
 
-      table.check(`user_role IN ('tenant', 'owner', 'manager', 'admin', 'provider')`)
-      table.check(`user_status IN ('pending', 'active', 'rejected', 'suspended')`)
+      table.check(`role IN ('tenant', 'owner', 'manager', 'admin', 'provider')`)
+      table.check(`status IN ('pending', 'active', 'rejected', 'suspended')`)
     })
   }
 
