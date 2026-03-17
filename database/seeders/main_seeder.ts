@@ -1,41 +1,133 @@
+import { DateTime } from 'luxon'
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
 import User from '#models/user'
 import Building from '#models/building'
 import Unit from '#models/unit'
 import UserUnit from '#models/user_unit'
-import Ticket from '#models/ticket'
+import Ticket, { type TicketCategory, type TicketPriority, type TicketStatus } from '#models/ticket'
 import TicketComment from '#models/ticket_comment'
 import TicketAttachment from '#models/ticket_attachment'
 
 export default class MainSeeder extends BaseSeeder {
   async run() {
-    const admin = await User.create({
-      firstName: 'Admin',
-      lastName: 'Gérance',
-      email: 'admin@ticketing.ch',
-      password: 'password123',
-      role: 'admin',
-      phone: '+41 21 123 45 67',
-      notificationPreference: 'email',
-    })
-
-    const admin2 = await User.create({
-      firstName: 'Sophie',
-      lastName: 'Berset',
-      email: 'sophie.berset@ticketing.ch',
-      password: 'password123',
-      role: 'admin',
-      phone: '+41 21 123 45 68',
-      notificationPreference: 'email',
-    })
-
-    const tenants = await User.createMany([
+    const users = await User.createMany([
+      {
+        firstName: 'Gerance',
+        lastName: 'Gerance',
+        email: 'admin@ticketing.ch',
+        password: 'password123',
+        role: 'admin',
+        status: 'active',
+        phone: '+41 21 500 00 01',
+        notificationPreference: 'email',
+      },
+      {
+        firstName: 'Camille',
+        lastName: 'Rossier',
+        email: 'camille.rossier@ticketing.ch',
+        password: 'password123',
+        role: 'admin',
+        status: 'active',
+        phone: '+41 21 500 00 01',
+        notificationPreference: 'email',
+      },
+      {
+        firstName: 'Sophie',
+        lastName: 'Berset',
+        email: 'sophie.berset@ticketing.ch',
+        password: 'password123',
+        role: 'admin',
+        status: 'active',
+        phone: '+41 21 500 00 02',
+        notificationPreference: 'email',
+      },
+      {
+        firstName: 'Nicolas',
+        lastName: 'Molina',
+        email: 'nicolas.molina@ticketing.ch',
+        password: 'password123',
+        role: 'manager',
+        status: 'active',
+        phone: '+41 21 500 00 03',
+        notificationPreference: 'email',
+      },
+      {
+        firstName: 'Isabelle',
+        lastName: 'Perret',
+        email: 'isabelle.perret@ticketing.ch',
+        password: 'password123',
+        role: 'manager',
+        status: 'active',
+        phone: '+41 21 500 00 04',
+        notificationPreference: 'email',
+      },
+      {
+        firstName: 'Luca',
+        lastName: 'Favre',
+        email: 'luca.favre@example.ch',
+        password: 'password123',
+        role: 'owner',
+        status: 'active',
+        phone: '+41 79 200 00 01',
+        notificationPreference: 'email',
+      },
+      {
+        firstName: 'Emma',
+        lastName: 'Monney',
+        email: 'emma.monney@example.ch',
+        password: 'password123',
+        role: 'owner',
+        status: 'active',
+        phone: '+41 79 200 00 02',
+        notificationPreference: 'email',
+      },
+      {
+        firstName: 'David',
+        lastName: 'Python',
+        email: 'david.python@example.ch',
+        password: 'password123',
+        role: 'owner',
+        status: 'active',
+        phone: '+41 79 200 00 03',
+        notificationPreference: 'email',
+      },
+      {
+        firstName: 'Julie',
+        lastName: 'Pittet',
+        email: 'julie.pittet@example.ch',
+        password: 'password123',
+        role: 'owner',
+        status: 'active',
+        phone: '+41 79 200 00 04',
+        notificationPreference: 'email',
+      },
+      {
+        firstName: 'Antoine',
+        lastName: 'Meyer',
+        email: 'antoine.meyer@example.ch',
+        password: 'password123',
+        role: 'owner',
+        status: 'active',
+        phone: '+41 79 200 00 05',
+        notificationPreference: 'email',
+      },
+      {
+        firstName: 'Nora',
+        lastName: 'Glauser',
+        email: 'nora.glauser@example.ch',
+        password: 'password123',
+        role: 'owner',
+        status: 'active',
+        phone: '+41 79 200 00 06',
+        notificationPreference: 'email',
+      },
       {
         firstName: 'Marie',
         lastName: 'Dupont',
         email: 'marie.dupont@example.ch',
         password: 'password123',
         role: 'tenant',
+        status: 'active',
         phone: '+41 79 100 00 01',
         notificationPreference: 'email',
       },
@@ -45,15 +137,17 @@ export default class MainSeeder extends BaseSeeder {
         email: 'jean.martin@example.ch',
         password: 'password123',
         role: 'tenant',
+        status: 'active',
         phone: '+41 79 100 00 02',
         notificationPreference: 'email',
       },
       {
-        firstName: 'Nora',
+        firstName: 'Elisa',
         lastName: 'Rochat',
-        email: 'nora.rochat@example.ch',
+        email: 'elisa.rochat@example.ch',
         password: 'password123',
         role: 'tenant',
+        status: 'active',
         phone: '+41 79 100 00 03',
         notificationPreference: 'email',
       },
@@ -63,47 +157,83 @@ export default class MainSeeder extends BaseSeeder {
         email: 'lucas.perrin@example.ch',
         password: 'password123',
         role: 'tenant',
+        status: 'active',
         phone: '+41 79 100 00 04',
         notificationPreference: 'email',
       },
       {
-        firstName: 'Elisa',
-        lastName: 'Meyer',
-        email: 'elisa.meyer@example.ch',
+        firstName: 'Amina',
+        lastName: 'Saidi',
+        email: 'amina.saidi@example.ch',
         password: 'password123',
         role: 'tenant',
+        status: 'active',
         phone: '+41 79 100 00 05',
         notificationPreference: 'email',
       },
+      {
+        firstName: 'Paul',
+        lastName: 'Keller',
+        email: 'paul.keller@example.ch',
+        password: 'password123',
+        role: 'tenant',
+        status: 'active',
+        phone: '+41 79 100 00 06',
+        notificationPreference: 'email',
+      },
+      {
+        firstName: 'Sara',
+        lastName: 'Mottet',
+        email: 'sara.mottet@example.ch',
+        password: 'password123',
+        role: 'tenant',
+        status: 'active',
+        phone: '+41 79 100 00 07',
+        notificationPreference: 'email',
+      },
+      {
+        firstName: 'Hugo',
+        lastName: 'Bovet',
+        email: 'hugo.bovet@example.ch',
+        password: 'password123',
+        role: 'tenant',
+        status: 'active',
+        phone: '+41 79 100 00 08',
+        notificationPreference: 'email',
+      },
+      {
+        firstName: 'Lea',
+        lastName: 'Jaccard',
+        email: 'lea.jaccard@example.ch',
+        password: 'password123',
+        role: 'tenant',
+        status: 'active',
+        phone: '+41 79 100 00 09',
+        notificationPreference: 'email',
+      },
+      {
+        firstName: 'Tom',
+        lastName: 'Nicolet',
+        email: 'tom.nicolet@example.ch',
+        password: 'password123',
+        role: 'tenant',
+        status: 'active',
+        phone: '+41 79 100 00 10',
+        notificationPreference: 'email',
+      },
     ])
 
-    const owners = await User.createMany([
-      {
-        firstName: 'Pierre',
-        lastName: 'Favre',
-        email: 'pierre.favre@example.ch',
-        password: 'password123',
-        role: 'owner',
-        phone: '+41 79 200 00 01',
-        notificationPreference: 'email',
-      },
-      {
-        firstName: 'Camille',
-        lastName: 'Monney',
-        email: 'camille.monney@example.ch',
-        password: 'password123',
-        role: 'owner',
-        phone: '+41 79 200 00 02',
-        notificationPreference: 'email',
-      },
-    ])
+    const admins = users.filter((user) => user.role === 'admin')
+    const managers = users.filter((user) => user.role === 'manager')
+    const owners = users.filter((user) => user.role === 'owner')
+    const tenants = users.filter((user) => user.role === 'tenant')
 
     const buildings = await Building.createMany([
       {
-        name: 'Résidence des Alpes',
-        address: 'Rue du Lac 12',
+        name: 'Résidence du Parc',
+        address: 'Rue du Parc 12',
         city: 'Lausanne',
-        postalCode: '1000',
+        postalCode: '1004',
       },
       {
         name: 'Immeuble Jura',
@@ -117,196 +247,185 @@ export default class MainSeeder extends BaseSeeder {
         city: 'Fribourg',
         postalCode: '1700',
       },
+      {
+        name: 'Résidence du Rhône',
+        address: 'Rue des Alpes 31',
+        city: 'Sion',
+        postalCode: '1950',
+      },
     ])
 
-    const units = await Unit.createMany([
-      { buildingId: buildings[0].id, label: 'Apt 1A', floor: 1, type: 'apartment' },
-      { buildingId: buildings[0].id, label: 'Apt 2B', floor: 2, type: 'apartment' },
-      { buildingId: buildings[0].id, label: 'Apt 3C', floor: 3, type: 'apartment' },
-      { buildingId: buildings[0].id, label: 'Parking P01', floor: -1, type: 'parking' },
-      { buildingId: buildings[0].id, label: 'Cave C01', floor: -1, type: 'storage' },
-      { buildingId: buildings[1].id, label: 'Apt 1A', floor: 1, type: 'apartment' },
-      { buildingId: buildings[1].id, label: 'Apt 2A', floor: 2, type: 'apartment' },
-      { buildingId: buildings[1].id, label: 'Bureau 3A', floor: 3, type: 'commercial' },
-      { buildingId: buildings[1].id, label: 'Parking P11', floor: -1, type: 'parking' },
-      { buildingId: buildings[2].id, label: 'Apt 1D', floor: 1, type: 'apartment' },
-      { buildingId: buildings[2].id, label: 'Apt 2D', floor: 2, type: 'apartment' },
-      { buildingId: buildings[2].id, label: 'Cave C21', floor: -1, type: 'storage' },
+    const units = await Unit.createMany(
+      buildings.flatMap((building, index) => {
+        const prefix = index + 1
+        return [
+          {
+            buildingId: building.id,
+            label: `Apt ${prefix}01`,
+            floor: 1,
+            type: 'apartment' as const,
+          },
+          {
+            buildingId: building.id,
+            label: `Apt ${prefix}02`,
+            floor: 2,
+            type: 'apartment' as const,
+          },
+          {
+            buildingId: building.id,
+            label: `Apt ${prefix}03`,
+            floor: 3,
+            type: 'apartment' as const,
+          },
+          {
+            buildingId: building.id,
+            label: `Bureau ${prefix}A`,
+            floor: 1,
+            type: 'commercial' as const,
+          },
+          {
+            buildingId: building.id,
+            label: `Parking P${prefix}1`,
+            floor: -1,
+            type: 'parking' as const,
+          },
+          {
+            buildingId: building.id,
+            label: `Cave C${prefix}1`,
+            floor: -1,
+            type: 'storage' as const,
+          },
+        ]
+      })
+    )
+
+    const apartmentUnits = units.filter((unit) => unit.type === 'apartment')
+    const parkingAndStorageUnits = units.filter(
+      (unit) => unit.type === 'parking' || unit.type === 'storage'
+    )
+
+    const userUnitPayload = apartmentUnits.flatMap((unit, index) => [
+      { userId: tenants[index % tenants.length].id, unitId: unit.id, relation: 'tenant' as const },
+      { userId: owners[index % owners.length].id, unitId: unit.id, relation: 'owner' as const },
     ])
 
-    await UserUnit.createMany([
-      { userId: tenants[0].id, unitId: units[0].id, relation: 'tenant' },
-      { userId: tenants[1].id, unitId: units[1].id, relation: 'tenant' },
-      { userId: tenants[2].id, unitId: units[5].id, relation: 'tenant' },
-      { userId: tenants[3].id, unitId: units[6].id, relation: 'tenant' },
-      { userId: tenants[4].id, unitId: units[9].id, relation: 'tenant' },
-      { userId: owners[0].id, unitId: units[0].id, relation: 'owner' },
-      { userId: owners[0].id, unitId: units[1].id, relation: 'owner' },
-      { userId: owners[0].id, unitId: units[5].id, relation: 'owner' },
-      { userId: owners[1].id, unitId: units[6].id, relation: 'owner' },
-      { userId: owners[1].id, unitId: units[9].id, relation: 'owner' },
-      { userId: owners[1].id, unitId: units[10].id, relation: 'owner' },
-    ])
+    for (const [index, unit] of parkingAndStorageUnits.entries()) {
+      userUnitPayload.push({
+        userId: owners[(index + 2) % owners.length].id,
+        unitId: unit.id,
+        relation: 'owner',
+      })
+    }
 
-    const ticketSeed = [
-      {
-        user: tenants[0],
-        unit: units[0],
-        category: 'Technique & Maintenance',
-        priority: 'élevée',
-        status: 'ouvert',
-        title: 'Radiateur salon froid',
-        description: 'Le radiateur du salon reste froid malgré la purge effectuée.',
-      },
-      {
-        user: tenants[1],
-        unit: units[1],
-        category: 'Urgences',
-        priority: 'urgente',
-        status: 'en cours',
-        title: 'Fuite sous évier cuisine',
-        description: 'Fuite continue sous l’évier, sol mouillé depuis ce matin.',
-      },
-      {
-        user: tenants[2],
-        unit: units[5],
-        category: 'Technique & Maintenance',
-        priority: 'moyenne',
-        status: 'assigné',
-        title: 'Prise salon ne fonctionne plus',
-        description: 'Deux prises ne répondent plus même après test du disjoncteur.',
-      },
-      {
-        user: tenants[3],
-        unit: units[6],
-        category: 'Entretien & Nettoyage',
-        priority: 'basse',
-        status: 'résolu',
-        title: 'Ampoule couloir à remplacer',
-        description: 'L’ampoule du couloir d’étage est hors service.',
-      },
-      {
-        user: tenants[4],
-        unit: units[9],
-        category: 'Technique & Maintenance',
-        priority: 'moyenne',
-        status: 'ouvert',
-        title: 'Bruit ventilation',
-        description: 'La ventilation émet un bruit intermittent la nuit.',
-      },
-      {
-        user: tenants[0],
-        unit: units[0],
-        category: 'Technique & Maintenance',
-        priority: 'élevée',
-        status: 'fermé',
-        title: 'Pression douche très faible',
-        description: 'Faible pression d’eau chaude dans la salle de bain.',
-      },
-      {
-        user: tenants[1],
-        unit: units[1],
-        category: 'Technique & Maintenance',
-        priority: 'basse',
-        status: 'ouvert',
-        title: 'Poignée porte entrée desserrée',
-        description: 'La poignée principale est desserrée et bouge beaucoup.',
-      },
-      {
-        user: tenants[2],
-        unit: units[5],
-        category: 'Technique & Maintenance',
-        priority: 'moyenne',
-        status: 'en cours',
-        title: 'Thermostat instable',
-        description: 'Température affichée varie fortement sans changement manuel.',
-      },
-      {
-        user: tenants[3],
-        unit: units[6],
-        category: 'Technique & Maintenance',
-        priority: 'élevée',
-        status: 'assigné',
-        title: 'Disjoncteur saute le soir',
-        description: 'Le disjoncteur principal saute lorsque four et plaques sont utilisés.',
-      },
-      {
-        user: tenants[4],
-        unit: units[9],
-        category: 'Gestion des accès',
-        priority: 'moyenne',
-        status: 'résolu',
-        title: 'Interphone ne sonne pas',
-        description: 'Interphone muet depuis plusieurs jours.',
-      },
-      {
-        user: tenants[0],
-        unit: units[0],
-        category: 'Gestion des accès',
-        priority: 'basse',
-        status: 'ouvert',
-        title: 'Boîte aux lettres bloquée',
-        description: 'La serrure de la boîte aux lettres accroche à l’ouverture.',
-      },
-      {
-        user: tenants[1],
-        unit: units[1],
-        category: 'Technique & Maintenance',
-        priority: 'moyenne',
-        status: 'assigné',
-        title: 'Evacuation lavabo lente',
-        description: 'L’eau s’écoule très lentement dans la salle de bain.',
-      },
+    const userUnits = await UserUnit.createMany(userUnitPayload)
+    const tenantLinks = userUnits.filter((row) => row.relation === 'tenant')
+
+    const categories: TicketCategory[] = [
+      'Technique & Maintenance',
+      'Entretien & Nettoyage',
+      'Administratifs & Contrats',
+      'Finance & Facturation',
+      'Relations & Conflits',
+      'Gestion des accès',
+      'Déménagement',
+      'Urgences',
+    ]
+    const priorities: TicketPriority[] = ['basse', 'moyenne', 'élevée', 'urgente']
+    const statuses: TicketStatus[] = ['ouvert', 'assigné', 'en cours', 'terminé', 'résolu', 'fermé']
+    const topics = [
+      'Radiateur froid',
+      'Interphone muet',
+      'Fuite sous évier',
+      'Facture de chauffage',
+      'Boîte aux lettres bloquée',
+      'Nuisances sonores',
+      'Porte de garage',
+      'Déménagement planifié',
+      'Ampoule couloir',
+      'Infiltration balcon',
     ]
 
-    let ticketIndex = 1
-    for (const seed of ticketSeed) {
+    const totalTickets = 32
+    const tickets: Ticket[] = []
+
+    for (let index = 0; index < totalTickets; index++) {
+      const tenantLink = tenantLinks[index % tenantLinks.length]
+      const tenant = tenants.find((row) => row.id === tenantLink.userId)!
+      const assignee = [...managers, ...admins][index % (managers.length + admins.length)]
+      const status = statuses[index % statuses.length]
+      const category = categories[index % categories.length]
+      const priority = priorities[index % priorities.length]
+      const title = `${topics[index % topics.length]} - ${tenant.firstName}`
+      const description = `Signalement créé pour ${title.toLowerCase()} dans l'unité ${tenantLink.unitId}.`
+
       const ticket = await Ticket.create({
-        userId: seed.user.id,
-        unitId: seed.unit.id,
-        category: seed.category,
-        priority: seed.priority,
-        status: seed.status,
-        title: seed.title,
-        description: seed.description,
-        reference: `TK-2026-${String(ticketIndex).padStart(4, '0')}`,
+        userId: tenant.id,
+        unitId: tenantLink.unitId,
+        assignedTo: status === 'ouvert' ? null : assignee.id,
+        reference: `TK-2026-${String(index + 1).padStart(4, '0')}`,
+        category,
+        priority,
+        status,
+        title,
+        description,
+        resolvedAt:
+          status === 'résolu' || status === 'fermé' ? DateTime.now().minus({ days: 1 }) : null,
       })
 
-      await TicketComment.createMany([
+      tickets.push(ticket)
+    }
+
+    let commentsCount = 0
+    let attachmentsCount = 0
+
+    for (const [index, ticket] of tickets.entries()) {
+      const tenant = tenants.find((row) => row.id === ticket.userId)!
+      const manager = [...managers, ...admins][index % (managers.length + admins.length)]
+
+      const comments = [
         {
           ticketId: ticket.id,
-          userId: seed.user.id,
+          userId: tenant.id,
           content: 'Ticket créé par le locataire avec description initiale.',
           isInternal: false,
         },
         {
           ticketId: ticket.id,
-          userId: admin.id,
-          content: `Analyse initiale effectuée par la gérance (statut: ${seed.status}).`,
+          userId: manager.id,
+          content: `Prise en charge effectuée par la gérance (statut: ${ticket.status}).`,
           isInternal: false,
         },
-        {
+      ]
+
+      if (ticket.status !== 'ouvert') {
+        comments.push({
           ticketId: ticket.id,
-          userId: admin2.id,
-          content: 'Note interne: vérifier historique des interventions précédentes.',
+          userId: manager.id,
+          content: 'Note interne: suivi planifié avec prestataire externe.',
           isInternal: true,
-        },
-      ])
+        })
+      }
+
+      await TicketComment.createMany(comments)
+      commentsCount += comments.length
 
       await TicketAttachment.create({
         ticketId: ticket.id,
-        userId: seed.user.id,
-        filePath: `/uploads/tickets/sample-${ticketIndex}.jpg`,
-        originalName: `photo-ticket-${ticketIndex}.jpg`,
+        userId: tenant.id,
+        filePath: `/uploads/tickets/sample-${index + 1}.jpg`,
+        originalName: `photo-ticket-${index + 1}.jpg`,
         mimeType: 'image/jpeg',
-        sizeBytes: 180_000 + ticketIndex * 1000,
+        sizeBytes: 180_000 + (index + 1) * 1_500,
       })
-
-      ticketIndex++
+      attachmentsCount++
     }
 
-    console.log('Seeded: 2 admins, 5 tenants, 2 owners, 3 buildings, 12 units, 11 user_units')
-    console.log('Seeded: 12 tickets, 36 comments, 12 attachments')
-    console.log(`Admin login: ${admin.email} / password123`)
+    console.log(
+      `Seeded: ${users.length} users, ${buildings.length} buildings, ${units.length} units, ${userUnits.length} user_units`
+    )
+    console.log(
+      `Seeded: ${tickets.length} tickets, ${commentsCount} comments, ${attachmentsCount} attachments (total inserts > 50)`
+    )
+    console.log(`Admin login: ${admins[0].email} / password123`)
   }
 }
