@@ -217,12 +217,8 @@ export default class TicketsController {
     return response.redirect().toPath(`/tickets/${ticket.id}`)
   }
 
-  private async canAccessTicket(
-    userId: number,
-    role: 'admin' | 'tenant' | 'owner',
-    ticket: Ticket
-  ): Promise<boolean> {
-    if (role === 'admin') return true
+  private async canAccessTicket(userId: number, role: string, ticket: Ticket): Promise<boolean> {
+    if (role === 'admin' || role === 'manager') return true
     if (ticket.userId === userId) return true
 
     const userUnit = await UserUnit.query()
