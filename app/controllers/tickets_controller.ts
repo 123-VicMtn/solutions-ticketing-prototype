@@ -55,7 +55,7 @@ export default class TicketsController {
         user: {
           id: ticket.user.id,
           fullName: ticket.user.fullName,
-          email: ticket.user.email,
+          email: ticket.user.email ?? '-',
         },
       })),
       filters,
@@ -168,7 +168,7 @@ export default class TicketsController {
         createdAt: comment.createdAt.toISO() ?? '',
         user: {
           fullName: comment.user.fullName,
-          email: comment.user.email,
+          email: comment.user.email ?? '-',
         },
       })),
       attachments: ticket.attachments.map((attachment) => ({
