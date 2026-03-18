@@ -163,10 +163,12 @@ export default class TicketsController {
       },
       comments: ticket.comments.map((comment) => ({
         id: comment.id,
+        userId: comment.userId,
         content: comment.content,
         isInternal: comment.isInternal,
         createdAt: comment.createdAt.toISO() ?? '',
         user: {
+          id: comment.user.id,
           fullName: comment.user.fullName,
           email: comment.user.email ?? '-',
         },
