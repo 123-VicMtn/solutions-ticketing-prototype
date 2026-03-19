@@ -17,7 +17,7 @@ const props = defineProps<{
       fullName: string | null
       email: string
       phone: string
-      role: 'admin' | 'tenant' | 'owner'
+      role: 'admin' | 'manager' | 'tenant' | 'owner' | 'provider'
       notificationPreference: 'email' | 'sms'
     }
   }
@@ -61,12 +61,15 @@ function submitComment(ticketId: number) {
   <Head :title="ticket.reference ?? 'Ticket'" />
   <div class="space-y-8">
     <div>
-      <Link href="/tickets" class="text-sm text-gray-500 hover:text-gray-900">&larr; Retour aux tickets</Link>
+      <Link href="/tickets" class="text-sm text-gray-500 hover:text-gray-900"
+        >&larr; Retour aux tickets</Link
+      >
       <h1 class="mt-2 text-2xl font-bold tracking-tight text-gray-900">
         {{ ticket.reference }} - {{ ticket.title }}
       </h1>
       <p class="mt-1 text-sm text-gray-500">
-        {{ ticket.unit.building.name }} / {{ ticket.unit.label }} - {{ ticket.category }} - {{ ticket.priority }}
+        {{ ticket.unit.building.name }} / {{ ticket.unit.label }} - {{ ticket.category }} -
+        {{ ticket.priority }}
       </p>
     </div>
 
@@ -86,26 +89,31 @@ function submitComment(ticketId: number) {
         </p>
       </div>
 
-      <div v-if="isAdmin" class="rounded-lg border border-gray-200 bg-white p-6">
-        <div class="mb-3 text-xs uppercase tracking-wide text-gray-500">Statut</div>
-        <form class="flex items-center gap-3" @submit.prevent="submitStatus(ticket.id)">
-          <select
-            v-model="statusValue"
-            name="status"
-            class="rounded-md border border-gray-300 px-3 py-2 text-sm"
-          >
-            <option value="">Choisir</option>
-            <option value="ouvert">ouvert</option>
-            <option value="assigné">assigné</option>
-            <option value="en cours">en cours</option>
-            <option value="résolu">résolu</option>
-            <option value="fermé">fermé</option>
-          </select>
-          <button type="submit" class="rounded-md bg-gray-900 px-4 py-2 text-sm text-white">
-            Mettre à jour
-          </button>
-        </form>
+      <div class="rounded-lg border border-gray-200 bg-white p-6">
+        <div class="mb-3 text-xs uppercase tracking-wide text-gray-500">Provider</div>
+        <p class="whitespace-pre-wrap text-sm text-gray-800">Provider Name</p>
       </div>
+    </div>
+
+    <div v-if="isAdmin" class="rounded-lg border border-gray-200 bg-white p-6">
+      <div class="mb-3 text-xs uppercase tracking-wide text-gray-500">Statut</div>
+      <form class="flex items-center gap-3" @submit.prevent="submitStatus(ticket.id)">
+        <select
+          v-model="statusValue"
+          name="status"
+          class="rounded-md border border-gray-300 px-3 py-2 text-sm"
+        >
+          <option value="">Choisir</option>
+          <option value="ouvert">ouvert</option>
+          <option value="assigné">assigné</option>
+          <option value="en cours">en cours</option>
+          <option value="résolu">résolu</option>
+          <option value="fermé">fermé</option>
+        </select>
+        <button type="submit" class="rounded-md bg-gray-900 px-4 py-2 text-sm text-white">
+          Mettre à jour
+        </button>
+      </form>
     </div>
 
     <div class="rounded-lg border border-gray-200 bg-white p-6">
@@ -114,20 +122,31 @@ function submitComment(ticketId: number) {
         <div v-for="comment in comments" :key="comment.id" class="rounded-md bg-gray-50 p-3">
           <div class="mb-1 text-xs text-gray-500">
             {{ comment.user.fullName ?? comment.user.email }}
-            <span v-if="comment.isInternal" class="ml-2 rounded bg-amber-100 px-2 py-0.5 text-amber-800">interne</span>
+            <span
+              v-if="comment.isInternal"
+              class="ml-2 rounded bg-amber-100 px-2 py-0.5 text-amber-800"
+              >interne</span
+            >
           </div>
           <p class="text-sm text-gray-800">{{ comment.content }}</p>
         </div>
       </div>
 
       <form class="mt-4 space-y-3" @submit.prevent="submitComment(ticket.id)">
-        <textarea v-model="comment" rows="3" class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm" placeholder="Ajouter un commentaire..." />
+        <textarea
+          v-model="comment"
+          rows="3"
+          class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+          placeholder="Ajouter un commentaire..."
+        />
         <div class="flex items-center gap-3">
-        <label v-if="isAdmin" class="inline-flex items-center gap-2 text-sm text-gray-700">
-          <input v-model="isInternal" type="checkbox" />
-          Commentaire interne (visible gérance uniquement)
-        </label>
-        <button type="submit" class="rounded-md bg-gray-900 px-4 py-2 text-sm text-white">Publier</button>
+          <label v-if="isAdmin" class="inline-flex items-center gap-2 text-sm text-gray-700">
+            <input v-model="isInternal" type="checkbox" />
+            Commentaire interne (visible gérance uniquement)
+          </label>
+          <button type="submit" class="rounded-md bg-gray-900 px-4 py-2 text-sm text-white">
+            Publier
+          </button>
         </div>
       </form>
     </div>
@@ -136,8 +155,12 @@ function submitComment(ticketId: number) {
       <div class="mb-3 text-xs uppercase tracking-wide text-gray-500">Pièces jointes</div>
       <ul class="space-y-2">
         <li v-for="attachment in attachments" :key="attachment.id" class="text-sm text-gray-700">
-          <a :href="attachment.filePath" target="_blank" class="text-gray-900 underline">{{ attachment.originalName }}</a>
-          <span class="ml-2 text-xs text-gray-500">({{ Math.ceil(attachment.sizeBytes / 1024) }} KB)</span>
+          <a :href="attachment.filePath" target="_blank" class="text-gray-900 underline">{{
+            attachment.originalName
+          }}</a>
+          <span class="ml-2 text-xs text-gray-500"
+            >({{ Math.ceil(attachment.sizeBytes / 1024) }} KB)</span
+          >
         </li>
       </ul>
     </div>
