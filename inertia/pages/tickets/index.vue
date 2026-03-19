@@ -52,10 +52,7 @@ function applyFilters(form: HTMLFormElement) {
     </div>
 
     <form class="mt-6 flex gap-3" @change="(e) => applyFilters(e.currentTarget as HTMLFormElement)">
-      <select
-        name="status"
-        class="rounded-md border border-gray-300 px-3 py-2 text-sm"
-      >
+      <select name="status" class="rounded-md border border-gray-300 p-2 text-sm">
         <option value="">Tous les statuts</option>
         <option
           v-for="status in statuses"
@@ -66,10 +63,7 @@ function applyFilters(form: HTMLFormElement) {
           {{ status }}
         </option>
       </select>
-      <select
-        name="priority"
-        class="rounded-md border border-gray-300 px-3 py-2 text-sm"
-      >
+      <select name="priority" class="rounded-md border border-gray-300 p-2 text-sm">
         <option value="">Toutes les priorités</option>
         <option
           v-for="priority in priorities"
@@ -86,18 +80,48 @@ function applyFilters(form: HTMLFormElement) {
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Réf</th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Titre</th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Lot</th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Locataire</th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Priorité</th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Statut</th>
-            <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Action</th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+            >
+              Réf
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+            >
+              Titre
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+            >
+              Lot
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+            >
+              Locataire
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+            >
+              Priorité
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+            >
+              Statut
+            </th>
+            <th
+              class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500"
+            >
+              Action
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200">
-          <tr v-for="ticket in props.tickets" :key="ticket.id ">
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ ticket.reference ?? '-' }}</td>
+          <tr v-for="ticket in props.tickets" :key="ticket.id">
+            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+              {{ ticket.reference ?? '-' }}
+            </td>
             <td class="px-6 py-4 text-sm text-gray-900">
               <div class="font-medium">{{ ticket.title }}</div>
               <div class="text-xs text-gray-500">{{ ticket.category }}</div>
@@ -105,11 +129,16 @@ function applyFilters(form: HTMLFormElement) {
             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
               {{ ticket.unit.building.name }} / {{ ticket.unit.label }}
             </td>
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ ticket.user.fullName }}</td>
+            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+              {{ ticket.user.fullName }}
+            </td>
             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ ticket.priority }}</td>
             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ ticket.status }}</td>
             <td class="whitespace-nowrap px-6 py-4 text-right text-sm">
-              <Link :href="`/tickets/${ticket.id}`" class="font-medium text-gray-700 hover:text-gray-900">
+              <Link
+                :href="`/tickets/${ticket.id}`"
+                class="font-medium text-gray-700 hover:text-gray-900"
+              >
                 Ouvrir
               </Link>
             </td>
