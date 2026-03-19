@@ -157,7 +157,7 @@ export default class TicketsController {
           fullName: ticket.user.fullName,
           email: ticket.user.email ?? '-',
           phone: ticket.user.phone ?? '-',
-          role: ticket.user.userUnits[0]?.relation,
+          role: ticket.user.role,
           notificationPreference: ticket.user.notificationPreference,
         },
       },
