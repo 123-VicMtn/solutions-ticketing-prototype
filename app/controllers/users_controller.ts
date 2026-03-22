@@ -10,9 +10,7 @@ export default class UsersController {
     const payload = await request.validateUsing(createUserValidator)
     const user = await User.create(payload)
     session.flash('success', 'Utilisateur créé avec succès')
-    return response
-      .redirect()
-      .toRoute(user.role === 'admin' ? 'admin.users.show' : 'home', { id: user.id })
+    return response.redirect().toRoute('users.show', { id: user.id })
   }
 
   async show({ inertia, params }: HttpContext) {
@@ -72,6 +70,6 @@ export default class UsersController {
     user.merge(payload)
     await user.save()
     session.flash('success', 'Utilisateur modifié avec succès')
-    return response.redirect().toRoute('admin.users.show', { id: user.id })
+    return response.redirect().toRoute('users.show', { id: user.id })
   }
 }
