@@ -27,11 +27,11 @@ router.use([
   () => import('@adonisjs/shield/shield_middleware'),
   () => import('@adonisjs/auth/initialize_auth_middleware'),
   () => import('#middleware/silent_auth_middleware'),
-  () => import('#middleware/require_provider_middleware'),
 ])
 
 export const middleware = router.named({
   requireActiveUser: () => import('#middleware/require_active_user_middleware'),
+  requireProvider: () => import('#middleware/require_provider_middleware'),
   guest: () => import('#middleware/guest_middleware'),
   auth: () => import('#middleware/auth_middleware'),
   requireRole: () => import('#middleware/require_role_middleware'),
