@@ -1,5 +1,7 @@
 import { middleware } from '#start/kernel'
 import { controllers } from '#generated/controllers'
+import AccessRequestsController from '#controllers/access_requests_controller'
+import ManagerAccessController from '#controllers/manager_access_controller'
 import router from '@adonisjs/core/services/router'
 
 router.on('/').renderInertia('home', {}).as('home')
@@ -11,6 +13,15 @@ router
 
     router.get('login', [controllers.Session, 'create'])
     router.post('login', [controllers.Session, 'store'])
+
+    router.get('request-access', [AccessRequestsController, 'create']).as('request_access.create')
+    router.post('request-access', [AccessRequestsController, 'store']).as('request_access.store')
+    router
+      .get('set-password/:token', [AccessRequestsController, 'setPasswordPage'])
+      .as('set_password.create')
+    router
+      .post('set-password/:token', [AccessRequestsController, 'setPassword'])
+      .as('set_password.store')
 
     router.get('users/create', [controllers.Users, 'create']).as('users.create')
   })
@@ -28,7 +39,7 @@ router
       .post('tickets/:id/comments', [controllers.Tickets, 'addComment'])
       .as('tickets.comments.store')
   })
-  .use(middleware.auth())
+  .use([middleware.auth(), middleware.requireActiveUser()])
 
 router
   .group(() => {
@@ -36,7 +47,17 @@ router
     router.get('users/:id/edit', [controllers.Users, 'edit']).as('users.edit')
     router.put('users/:id', [controllers.Users, 'update']).as('users.update')
   })
-  .use(middleware.auth())
+  .use([middleware.auth(), middleware.requireActiveUser(), middleware.requireRole('manager')])
+
+router
+  .group(() => {
+    router.get('access-requests', [ManagerAccessController, 'index']).as('access_requests.index')
+    router.post('access-requests/:id/approve', [ManagerAccessController, 'approve']).as('access_requests.approve')
+    router.post('access-requests/:id/reject', [ManagerAccessController, 'reject']).as('access_requests.reject')
+  })
+  .prefix('manager')
+  .as('manager')
+  .use([middleware.auth(), middleware.requireActiveUser(), middleware.requireRole('manager')])
 
 router
   .group(() => {
@@ -62,4 +83,4 @@ router
   })
   .prefix('admin')
   .as('admin')
-  .use([middleware.auth(), middleware.requireRole(['admin', 'manager'])])
+  .use([middleware.auth(), middleware.requireActiveUser(), middleware.requireRole('manager')])
