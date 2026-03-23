@@ -20,6 +20,11 @@ const props = defineProps<{
       role: 'admin' | 'manager' | 'tenant' | 'owner' | 'provider'
       notificationPreference: 'email' | 'sms'
     }
+    provider: {
+      companyName: string
+      phone: string
+      speciality: string
+    }
   }
   comments: Array<{
     id: number
@@ -58,6 +63,7 @@ function submitComment(ticketId: number) {
 </script>
 
 <template>
+  {{ console.log(ticket) }}
   <Head :title="ticket.reference ?? 'Ticket'" />
   <div class="space-y-8">
     <div>
@@ -90,8 +96,10 @@ function submitComment(ticketId: number) {
       </div>
 
       <div class="rounded-lg border border-gray-200 bg-white p-6">
-        <div class="mb-3 text-xs uppercase tracking-wide text-gray-500">Provider</div>
-        <p class="whitespace-pre-wrap text-sm text-gray-800">Provider Name</p>
+        <div class="mb-3 text-xs uppercase tracking-wide text-gray-500">Prestataire</div>
+        <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.provider.companyName }}</p>
+        <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.provider.speciality }}</p>
+        <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.provider.phone }}</p>
       </div>
     </div>
 
