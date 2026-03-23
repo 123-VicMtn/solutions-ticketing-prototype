@@ -14,8 +14,9 @@ export default class extends BaseSchema {
       table.string('phone').nullable()
       table.string('notification_preference').notNullable().defaultTo('email')
       table.string('password').notNullable()
-      table.string('inviteToken').nullable()
-      table.timestamp('inviteTokenExpiresAt').nullable()
+      // Convention homogène : Lucid mappe camelCase => snake_case en DB
+      table.string('invite_token').nullable()
+      table.timestamp('invite_token_expires_at').nullable()
 
       table.timestamp('created_at').notNullable()
       table.timestamp('updated_at').nullable()
