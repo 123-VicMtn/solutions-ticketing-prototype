@@ -20,7 +20,15 @@ watch(
   { immediate: true }
 )
 
-const isAdmin = () => page.props.user?.role === 'admin'
+watch(
+  () => page.props.flash.success,
+  (success) => {
+    if (success) toast.success(success)
+  },
+  { immediate: true }
+)
+
+const hasAccess = () => page.props.user?.role === 'admin' || page.props.user?.role === 'manager'
 </script>
 
 <template>
@@ -41,7 +49,7 @@ const isAdmin = () => page.props.user?.role === 'admin'
               Tickets
             </Link>
 
-            <div v-if="isAdmin()" class="flex items-center gap-5">
+            <div v-if="hasAccess()" class="flex items-center gap-5">
               <Link
                 route="admin.buildings.index"
                 class="text-md font-medium text-gray-500 hover:text-gray-900"
@@ -61,12 +69,21 @@ const isAdmin = () => page.props.user?.role === 'admin'
         <nav class="flex items-center gap-4">
           <template v-if="page.props.user">
             <Link
-              v-if="isAdmin()"
+              v-if="hasAccess()"
               route="users.create"
               class="text-md font-medium text-gray-500 hover:text-gray-900"
             >
               Utilisateurs
             </Link>
+
+            <Link
+              v-if="hasAccess()"
+              route="manager.access_requests.index"
+              class="text-md font-medium text-gray-500 hover:text-gray-900"
+            >
+              Demandes d'accès
+            </Link>
+
             <span
               class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-900 text-xs font-medium text-white"
             >
