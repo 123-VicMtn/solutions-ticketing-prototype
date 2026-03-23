@@ -1,3 +1,4 @@
+import OnboardingNotifications from '#services/onboarding_notifications'
 import Unit from '#models/unit'
 import User from '#models/user'
 import UserUnit from '#models/user_unit'
@@ -27,7 +28,7 @@ export default class ManagerAccessController {
         fullName: user.fullName,
         email: user.email,
         phone: user.phone,
-        role: user.role,
+        role: user.role as 'tenant' | 'owner',
         createdAt: user.createdAt.toISO() ?? '',
       })),
       units: units.map((unit) => ({
@@ -69,13 +70,14 @@ export default class ManagerAccessController {
     user.inviteTokenExpiresAt = expiresAt
     await user.save()
 
-    // TODO: Send approval email with set-password link.
+    await OnboardingNotifications.sendAccessApproved(user, token)
+
     session.flash('success', 'Demande approuvée, invitation générée')
     return response.redirect().toPath('/manager/access-requests')
   }
 
   async reject({ request, response, params, session }: HttpContext) {
-    await request.validateUsing(rejectAccessRequestValidator)
+    const { reason } = await request.validateUsing(rejectAccessRequestValidator)
     const user = await User.findOrFail(params.id)
 
     if (
@@ -91,7 +93,8 @@ export default class ManagerAccessController {
     user.inviteTokenExpiresAt = null
     await user.save()
 
-    // TODO: Send rejection email.
+    await OnboardingNotifications.sendAccessRejected(user, reason)
+
     session.flash('success', 'Demande rejetée')
     return response.redirect().toPath('/manager/access-requests')
   }
