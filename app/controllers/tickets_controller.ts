@@ -148,8 +148,17 @@ export default class TicketsController {
       .firstOrFail()
 
     const user = auth.user!
-    const canAccess = await this.canAccessTicket(user.id, user.role, ticket)
-    if (!canAccess) return response.abort('Not allowed', 403)
+    if (!(await this.canAccessTicket(user.id, user.role, ticket))) {
+      return response.abort('Non autorisé', 403)
+    }
+
+    const canSeeInternal = user.hasAtLeastRole('manager')
+    const visibleComments = canSeeInternal
+      ? ticket.comments
+      : ticket.comments.filter((c) => !c.isInternal)
+
+    const canEditFields = ticket.userId === user.id || user.hasAtLeastRole('manager')
+    const canChangeStatus = user.hasAtLeastRole('manager') || user.role === 'provider'
 
     return inertia.render('tickets/show', {
       ticket: {
