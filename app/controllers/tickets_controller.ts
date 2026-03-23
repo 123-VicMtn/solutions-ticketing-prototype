@@ -227,6 +227,41 @@ export default class TicketsController {
     })
   }
 
+  async edit({ inertia, params, auth, response }: HttpContext) {
+    const user = auth.user!
+    const ticket = await Ticket.query()
+      .where('id', params.id)
+      .preload('unit', (q) => q.preload('building'))
+      .firstOrFail()
+
+    if (!(await this.canAccessTicket(user.id, user.role, ticket))) {
+      return response.abort('Non autorisé', 403)
+    }
+
+    const isCreator = ticket.userId === user.id
+    const isManagerOrAbove = user.hasAtLeastRole('manager')
+
+    if (!isCreator && !isManagerOrAbove) {
+      return response.abort('Non autorisé', 403)
+    }
+
+    return inertia.render('tickets/edit', {
+      ticket: {
+        id: ticket.id,
+        reference: ticket.reference,
+        title: ticket.title,
+        description: ticket.description,
+        priority: ticket.priority,
+        category: ticket.category,
+        unit: {
+          label: ticket.unit.label,
+          building: { name: ticket.unit.building.name },
+        },
+      },
+      canModifyPriority: isManagerOrAbove,
+    })
+  }
+
   async update({ request, response, params, auth, session }: HttpContext) {
     const user = auth.user!
     const ticket = await Ticket.findOrFail(params.id)
