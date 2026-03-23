@@ -26,8 +26,31 @@ export default class TicketsController {
       .preload('user')
       .orderBy('id', 'desc')
 
-    if (user.role !== 'admin') {
-      query.where('userId', user.id)
+    switch (user.role) {
+      case 'admin':
+      case 'manager':
+        break
+
+      case 'provider':
+        query.where('assignedTo', user.id)
+        break
+
+      case 'owner': {
+        const userUnitRows = await UserUnit.query().where('userId', user.id).select('unitId')
+        const unitIds = userUnitRows.map((row) => row.unitId)
+
+        query.where((q) => {
+          q.where('userId', user.id)
+          if (unitIds.length > 0) {
+            q.orWhereIn('unitId', unitIds)
+          }
+        })
+        break
+      }
+
+      default:
+        query.where('userId', user.id)
+        break
     }
 
     if (filters.status) query.where('status', filters.status)
