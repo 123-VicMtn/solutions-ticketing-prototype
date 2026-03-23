@@ -29,7 +29,7 @@ export default class SessionController {
     }
 
     await auth.use('web').login(user)
-    response.redirect().toRoute('home')
+    response.redirect().toRoute('tickets.index')
   }
 
   async destroy({ auth, response }: HttpContext) {
