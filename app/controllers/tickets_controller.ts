@@ -113,7 +113,7 @@ export default class TicketsController {
     })
   }
 
-  async store({ request, response, auth }: HttpContext) {
+  async store({ request, response, auth, session }: HttpContext) {
     const user = auth.user!
     const payload = await request.validateUsing(createTicketValidator)
 
@@ -121,7 +121,7 @@ export default class TicketsController {
       userId: user.id,
       unitId: payload.unitId,
       category: payload.category,
-      priority: payload.priority ?? null,
+      priority: payload.priority ?? 'moyenne',
       status: 'ouvert',
       title: payload.title,
       description: payload.description,
