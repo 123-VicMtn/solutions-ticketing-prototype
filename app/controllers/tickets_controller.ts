@@ -82,7 +82,6 @@ export default class TicketsController {
         },
       })),
       filters,
-      isAdmin: user.role === 'admin',
     })
   }
 
