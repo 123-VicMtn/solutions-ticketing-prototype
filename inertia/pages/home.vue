@@ -18,12 +18,18 @@ const page = usePage<Data.SharedProps>()
         Pannes, réparations, questions — tout est centralisé.
       </p>
 
-      <div v-if="!page.props.user" class="mt-8 flex gap-4">
+      <div v-if="!page.props.user" class="mt-8 flex flex-wrap gap-4">
         <Link
           route="session.create"
           class="rounded-md bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-800"
         >
           Se connecter
+        </Link>
+        <Link
+          route="request_access.create"
+          class="rounded-md border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-50"
+        >
+          Demander un accès
         </Link>
       </div>
     </div>
