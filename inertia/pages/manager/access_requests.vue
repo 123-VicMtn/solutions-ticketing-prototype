@@ -74,15 +74,14 @@ function reject(requestId: number) {
             </p>
             <p class="text-xs text-gray-500">Role demande: {{ request.role }}</p>
           </div>
-          <span class="rounded bg-gray-100 px-2 py-1 text-xs text-gray-700"
-            >ID #{{ request.id }}</span
-          >
         </div>
 
         <div class="mt-4 space-y-3">
           <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
             <div class="min-w-0 flex-1">
-              <label class="mb-1 block text-sm font-medium text-gray-700">Logement a assigner</label>
+              <label class="mb-1 block text-sm font-medium text-gray-700"
+                >Logement à assigner</label
+              >
               <select
                 v-model.number="unitByRequest[request.id]"
                 class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
@@ -105,7 +104,10 @@ function reject(requestId: number) {
           </div>
 
           <div>
-            <label class="mb-1 block text-xs font-medium text-gray-600" :for="`reject-${request.id}`">
+            <label
+              class="mb-1 block text-xs font-medium text-gray-600"
+              :for="`reject-${request.id}`"
+            >
               Motif du rejet (optionnel, envoyé par email)
             </label>
             <textarea
@@ -113,7 +115,7 @@ function reject(requestId: number) {
               v-model="rejectReasonByRequest[request.id]"
               rows="2"
               class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-              placeholder="Ex. pièces incomplètes…"
+              placeholder="Ex. Informations éronnées..."
             />
           </div>
 
