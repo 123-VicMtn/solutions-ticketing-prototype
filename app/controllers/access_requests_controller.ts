@@ -1,3 +1,4 @@
+import OnboardingNotifications from '#services/onboarding_notifications'
 import User from '#models/user'
 import { requestAccessValidator, setPasswordValidator } from '#validators/access_request'
 import type { HttpContext } from '@adonisjs/core/http'
@@ -12,7 +13,7 @@ export default class AccessRequestsController {
   async store({ request, response, session }: HttpContext) {
     const payload = await request.validateUsing(requestAccessValidator)
 
-    await User.create({
+    const applicant = await User.create({
       firstName: payload.firstName,
       lastName: payload.lastName,
       email: payload.email,
@@ -25,6 +26,8 @@ export default class AccessRequestsController {
       inviteToken: null,
       inviteTokenExpiresAt: null,
     })
+
+    await OnboardingNotifications.notifyManagersNewAccessRequest(applicant)
 
     session.flash(
       'success',
