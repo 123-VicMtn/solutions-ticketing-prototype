@@ -130,21 +130,9 @@ export default class TicketsController {
     ticket.reference = `TK-${DateTime.now().year}-${String(ticket.id).padStart(4, '0')}`
     await ticket.save()
 
-    const attachments = request.files('attachments')
-    for (const attachment of attachments) {
-      if (!attachment.isValid) continue
-      const filename = `${randomUUID()}.${attachment.extname ?? 'bin'}`
-      await attachment.move(app.makePath('public/uploads/tickets'), { name: filename })
-      await TicketAttachment.create({
-        ticketId: ticket.id,
-        userId: user.id,
-        filePath: `/uploads/tickets/${filename}`,
-        originalName: attachment.clientName,
-        mimeType: attachment.type ?? 'application/octet-stream',
-        sizeBytes: attachment.size,
-      })
-    }
+    await this.processAttachments(request, ticket.id, user.id)
 
+    session.flash('success', 'Ticket créé avec succès')
     return response.redirect().toPath(`/tickets/${ticket.id}`)
   }
 
@@ -256,5 +244,31 @@ export default class TicketsController {
       .where('unitId', ticket.unitId)
       .first()
     return Boolean(userUnit)
+  }
+
+  private async processAttachments(
+    request: HttpContext['request'],
+    ticketId: number,
+    userId: number
+  ): Promise<number> {
+    const attachments = request.files('attachments')
+    let count = 0
+
+    for (const attachment of attachments) {
+      if (!attachment.isValid) continue
+      const filename = `${randomUUID()}.${attachment.extname ?? 'bin'}`
+      await attachment.move(app.makePath('public/uploads/tickets'), { name: filename })
+      await TicketAttachment.create({
+        ticketId,
+        userId,
+        filePath: `/uploads/tickets/${filename}`,
+        originalName: attachment.clientName,
+        mimeType: attachment.type ?? 'application/octet-stream',
+        sizeBytes: attachment.size,
+      })
+      count++
+    }
+
+    return count
   }
 }
