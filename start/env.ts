@@ -20,6 +20,19 @@ export default await Env.create(new URL('../', import.meta.url), {
 
   // App
   APP_KEY: Env.schema.secret(),
+  APP_URL: Env.schema.string(),
+
+  // Mail — SMTP (prod : relais hébergeur, O365, Google Workspace, SendGrid SMTP, etc.)
+  MAIL_MAILER: Env.schema.enum(['smtp', 'log'] as const),
+  MAIL_FROM_ADDRESS: Env.schema.string(),
+  MAIL_FROM_NAME: Env.schema.string(),
+  /** Vide en local avec Mailpit ; requis en prod si le relais exige une auth */
+  SMTP_HOST: Env.schema.string.optional(),
+  SMTP_PORT: Env.schema.number.optional(),
+  SMTP_USERNAME: Env.schema.string.optional(),
+  SMTP_PASSWORD: Env.schema.string.optional(),
+  /** true ou port 465 : connexion TLS directe (souvent hébergeurs « SSL ») */
+  SMTP_SECURE: Env.schema.boolean.optional(),
 
   // Database
   DB_HOST: Env.schema.string({ format: 'host' }),
