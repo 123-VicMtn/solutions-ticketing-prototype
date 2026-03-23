@@ -142,8 +142,9 @@ export default class TicketsController {
       .preload('unit', (q) => q.preload('building'))
       .preload('user')
       .preload('provider')
-      .preload('comments', (query) => query.preload('user').orderBy('createdAt', 'asc'))
-      .preload('attachments', (query) => query.preload('user').orderBy('createdAt', 'desc'))
+      .preload('assignee')
+      .preload('comments', (q) => q.preload('user').orderBy('createdAt', 'asc'))
+      .preload('attachments', (q) => q.preload('user').orderBy('createdAt', 'desc'))
       .firstOrFail()
 
     const user = auth.user!
@@ -161,9 +162,7 @@ export default class TicketsController {
         description: ticket.description,
         unit: {
           label: ticket.unit.label,
-          building: {
-            name: ticket.unit.building.name,
-          },
+          building: { name: ticket.unit.building.name },
         },
         user: {
           id: ticket.user.id,
@@ -173,11 +172,19 @@ export default class TicketsController {
           role: ticket.user.role,
           notificationPreference: ticket.user.notificationPreference,
         },
-        provider: {
-          companyName: ticket.provider?.companyName ?? 'Pas encore assigné',
-          phone: ticket.provider?.phone ?? '',
-          speciality: ticket.provider?.speciality ?? '',
-        },
+        provider: ticket.provider
+          ? {
+              companyName: ticket.provider.companyName,
+              phone: ticket.provider.phone ?? '',
+              speciality: ticket.provider.speciality,
+            }
+          : null,
+        assignee: ticket.assignee
+          ? {
+              id: ticket.assignee.id,
+              fullName: ticket.assignee.fullName,
+            }
+          : null,
       },
       comments: ticket.comments.map((comment) => ({
         id: comment.id,
