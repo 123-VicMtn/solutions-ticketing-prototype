@@ -77,6 +77,7 @@ export default class TicketsController {
     }
 
     return inertia.render('tickets/create', {
+      user: auth.user,
       units: units.map((unit) => ({
         id: unit.id,
         label: unit.label,
@@ -97,7 +98,7 @@ export default class TicketsController {
       userId: user.id,
       unitId: payload.unitId,
       category: payload.category,
-      priority: payload.priority,
+      priority: payload.priority ?? null,
       status: 'ouvert',
       title: payload.title,
       description: payload.description,
