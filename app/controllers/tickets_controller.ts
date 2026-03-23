@@ -195,7 +195,7 @@ export default class TicketsController {
             }
           : null,
       },
-      comments: ticket.comments.map((comment) => ({
+      comments: visibleComments.map((comment) => ({
         id: comment.id,
         userId: comment.userId,
         content: comment.content,
