@@ -4,6 +4,7 @@ import User from '#models/user'
 import Building from '#models/building'
 import Unit from '#models/unit'
 import UserUnit from '#models/user_unit'
+import Provider from '#models/provider'
 import Ticket, { type TicketCategory, type TicketPriority, type TicketStatus } from '#models/ticket'
 import TicketComment from '#models/ticket_comment'
 import TicketAttachment from '#models/ticket_attachment'
@@ -221,12 +222,84 @@ export default class MainSeeder extends BaseSeeder {
         phone: '+41 79 100 00 10',
         notificationPreference: 'email',
       },
+      {
+        firstName: 'Chloé',
+        lastName: 'Marti',
+        email: 'chloe.marti.pending@example.ch',
+        password: 'password123',
+        role: 'tenant',
+        status: 'pending',
+        phone: '+41 79 110 00 01',
+        notificationPreference: 'email',
+      },
+      {
+        firstName: 'Yanis',
+        lastName: 'Bourgeois',
+        email: 'yanis.bourgeois.pending@example.ch',
+        password: 'password123',
+        role: 'tenant',
+        status: 'pending',
+        phone: '+41 79 110 00 02',
+        notificationPreference: 'email',
+      },
+      {
+        firstName: 'Zoé',
+        lastName: 'Gonzalez',
+        email: 'zoe.gonzalez.rejected@example.ch',
+        password: 'password123',
+        role: 'tenant',
+        status: 'rejected',
+        phone: '+41 79 120 00 01',
+        notificationPreference: 'email',
+      },
+      {
+        firstName: 'Sébastien',
+        lastName: 'Bauer',
+        email: 'sebastien.bauer@example.ch',
+        password: 'password123',
+        role: 'provider',
+        status: 'active',
+        phone: '+41 79 300 00 01',
+        notificationPreference: 'email',
+      },
+      {
+        firstName: 'Marianne',
+        lastName: 'Perrier',
+        email: 'marianne.perrier@example.ch',
+        password: 'password123',
+        role: 'provider',
+        status: 'active',
+        phone: '+41 79 300 00 02',
+        notificationPreference: 'email',
+      },
+      {
+        firstName: 'Romain',
+        lastName: 'Dubois',
+        email: 'romain.dubois@example.ch',
+        password: 'password123',
+        role: 'provider',
+        status: 'active',
+        phone: '+41 79 300 00 03',
+        notificationPreference: 'email',
+      },
+      {
+        firstName: 'Aline',
+        lastName: 'Schneider',
+        email: 'aline.schneider@example.ch',
+        password: 'password123',
+        role: 'provider',
+        status: 'active',
+        phone: '+41 79 300 00 04',
+        notificationPreference: 'email',
+      },
     ])
 
     const admins = users.filter((user) => user.role === 'admin')
     const managers = users.filter((user) => user.role === 'manager')
-    const owners = users.filter((user) => user.role === 'owner')
-    const tenants = users.filter((user) => user.role === 'tenant')
+    const owners = users.filter((user) => user.role === 'owner' && user.status === 'active')
+    const tenants = users.filter((user) => user.role === 'tenant' && user.status === 'active')
+    const providerUsers = users.filter((user) => user.role === 'provider')
+    const gerances = [...managers, ...admins]
 
     const buildings = await Building.createMany([
       {
@@ -320,6 +393,25 @@ export default class MainSeeder extends BaseSeeder {
     const userUnits = await UserUnit.createMany(userUnitPayload)
     const tenantLinks = userUnits.filter((row) => row.relation === 'tenant')
 
+    const providers = await Provider.createMany(
+      providerUsers.map((providerUser, index) => {
+        const gerance = gerances[index % gerances.length]
+        return {
+          userId: providerUser.id,
+          geranceId: gerance.id,
+          companyName: ['TechSoleil', 'NettoPro', 'ServiceJura', 'AccesPlus'][index]!,
+          speciality: [
+            'Technique & Maintenance',
+            'Entretien & Nettoyage',
+            'Gestion des accès',
+            'Administratifs & Contrats',
+          ][index]!,
+          phone: `+41 21 400 0${index + 1} 00`,
+          isActive: true,
+        }
+      })
+    )
+
     const categories: TicketCategory[] = [
       'Technique & Maintenance',
       'Entretien & Nettoyage',
@@ -351,17 +443,25 @@ export default class MainSeeder extends BaseSeeder {
     for (let index = 0; index < totalTickets; index++) {
       const tenantLink = tenantLinks[index % tenantLinks.length]
       const tenant = tenants.find((row) => row.id === tenantLink.userId)!
-      const assignee = [...managers, ...admins][index % (managers.length + admins.length)]
       const status = statuses[index % statuses.length]
       const category = categories[index % categories.length]
       const priority = priorities[index % priorities.length]
       const title = `${topics[index % topics.length]}`
       const description = `Signalement créé pour ${title.toLowerCase()} dans l'unité ${tenantLink.unitId}.`
 
+      const managementUsers = [...managers, ...admins]
+      const defaultAssignee = managementUsers[index % managementUsers.length]
+
+      const provider =
+        status === 'en cours' || status === 'terminé' ? providers[index % providers.length] : null
+      const assignedTo = status === 'ouvert' ? null : (provider?.geranceId ?? defaultAssignee.id)
+      const providerId = provider?.id ?? null
+
       const ticket = await Ticket.create({
         userId: tenant.id,
         unitId: tenantLink.unitId,
-        assignedTo: status === 'ouvert' ? null : assignee.id,
+        assignedTo,
+        providerId,
         reference: `TK-2026-${String(index + 1).padStart(4, '0')}`,
         category,
         priority,
@@ -380,7 +480,11 @@ export default class MainSeeder extends BaseSeeder {
 
     for (const [index, ticket] of tickets.entries()) {
       const tenant = tenants.find((row) => row.id === ticket.userId)!
-      const manager = [...managers, ...admins][index % (managers.length + admins.length)]
+      const managementUsers = [...managers, ...admins]
+      const manager =
+        ticket.assignedTo !== null
+          ? (managementUsers.find((user) => user.id === ticket.assignedTo) ?? managementUsers[0]!)
+          : managementUsers[index % managementUsers.length]
 
       const comments = [
         {
@@ -427,5 +531,7 @@ export default class MainSeeder extends BaseSeeder {
       `Seeded: ${tickets.length} tickets, ${commentsCount} comments, ${attachmentsCount} attachments (total inserts > 50)`
     )
     console.log(`Admin login: ${admins[0].email} / password123`)
+    console.log(`Manager login: ${managers[0].email} / password123`)
+    console.log(`Provider login: ${providerUsers[0].email} / password123`)
   }
 }
