@@ -88,7 +88,7 @@ export default class TicketsController {
   async create({ inertia, auth }: HttpContext) {
     const user = auth.user!
     let units: Unit[] = []
-    const canModifyPriority = user.role === 'admin' || user.role === 'manager'
+    const canModifyPriority = user.hasAtLeastRole('manager')
 
     if (canModifyPriority) {
       units = await Unit.query().preload('building').orderBy('building_id').orderBy('label')
