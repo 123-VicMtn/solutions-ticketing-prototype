@@ -33,9 +33,16 @@ router
     router.get('tickets/create', [controllers.Tickets, 'create']).as('tickets.create')
     router.post('tickets', [controllers.Tickets, 'store']).as('tickets.store')
     router.get('tickets/:id', [controllers.Tickets, 'show']).as('tickets.show')
+    router.put('tickets/:id', [controllers.Tickets, 'update']).as('tickets.update')
+    router
+      .put('tickets/:id/status', [controllers.Tickets, 'updateStatus'])
+      .as('tickets.status.update')
     router
       .post('tickets/:id/comments', [controllers.Tickets, 'addComment'])
       .as('tickets.comments.store')
+    router
+      .post('tickets/:id/attachments', [controllers.Tickets, 'addAttachments'])
+      .as('tickets.attachments.store')
   })
   .use([middleware.auth(), middleware.requireActiveUser()])
 
@@ -79,10 +86,6 @@ router
     router.delete('units/:id', [controllers.Units, 'destroy']).as('units.destroy')
 
     router.post('users', [controllers.Users, 'store']).as('users.store')
-
-    router
-      .put('tickets/:id/status', [controllers.Tickets, 'updateStatus'])
-      .as('tickets.status.update')
   })
   .prefix('admin')
   .as('admin')
