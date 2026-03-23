@@ -12,7 +12,7 @@ export const createTicketValidator = vine.create({
     'Déménagement',
     'Urgences',
   ]),
-  priority: vine.enum(['basse', 'moyenne', 'élevée', 'urgente']),
+  priority: vine.enum(['basse', 'moyenne', 'élevée', 'urgente']).optional(),
   title: vine.string().trim().minLength(5).maxLength(180),
   description: vine.string().trim().minLength(10).maxLength(10000),
 })
