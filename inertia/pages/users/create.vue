@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Link, useForm } from '@inertiajs/vue3'
+import { useForm } from '@inertiajs/vue3'
 
 const notificationPreferences = [
   { label: 'Email', value: 'email' },
