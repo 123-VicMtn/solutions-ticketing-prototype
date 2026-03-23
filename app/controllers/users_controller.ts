@@ -61,7 +61,14 @@ export default class UsersController {
 
   async edit({ inertia, params }: HttpContext) {
     const user = await User.findOrFail(params.id)
-    return inertia.render('users/edit', { user })
+    return inertia.render('users/edit', {
+      user: {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+      },
+    })
   }
 
   async update({ request, response, params, session }: HttpContext) {
