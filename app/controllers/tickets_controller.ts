@@ -139,7 +139,7 @@ export default class TicketsController {
   async show({ inertia, params, auth, response }: HttpContext) {
     const ticket = await Ticket.query()
       .where('id', params.id)
-      .preload('unit', (query) => query.preload('building'))
+      .preload('unit', (q) => q.preload('building'))
       .preload('user')
       .preload('provider')
       .preload('comments', (query) => query.preload('user').orderBy('createdAt', 'asc'))
