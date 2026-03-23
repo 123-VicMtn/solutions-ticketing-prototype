@@ -8,11 +8,11 @@ router.on('/').renderInertia('home', {}).as('home')
 
 router
   .group(() => {
-    router.get('signup', [controllers.NewAccount, 'create'])
-    router.post('signup', [controllers.NewAccount, 'store'])
+    router.get('signup', [controllers.NewAccount, 'create']).as('new_account.create')
+    router.post('signup', [controllers.NewAccount, 'store']).as('new_account.store')
 
-    router.get('login', [controllers.Session, 'create'])
-    router.post('login', [controllers.Session, 'store'])
+    router.get('login', [controllers.Session, 'create']).as('session.create')
+    router.post('login', [controllers.Session, 'store']).as('session.store')
 
     router.get('request-access', [AccessRequestsController, 'create']).as('request_access.create')
     router.post('request-access', [AccessRequestsController, 'store']).as('request_access.store')
@@ -27,7 +27,7 @@ router
 
 router
   .group(() => {
-    router.post('logout', [controllers.Session, 'destroy'])
+    router.post('logout', [controllers.Session, 'destroy']).as('session.destroy')
 
     router.get('tickets', [controllers.Tickets, 'index']).as('tickets.index')
     router.get('tickets/create', [controllers.Tickets, 'create']).as('tickets.create')
