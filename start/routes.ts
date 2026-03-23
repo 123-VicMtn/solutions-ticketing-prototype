@@ -33,6 +33,7 @@ router
     router.get('tickets/create', [controllers.Tickets, 'create']).as('tickets.create')
     router.post('tickets', [controllers.Tickets, 'store']).as('tickets.store')
     router.get('tickets/:id', [controllers.Tickets, 'show']).as('tickets.show')
+    router.get('tickets/:id/edit', [controllers.Tickets, 'edit']).as('tickets.edit')
     router.put('tickets/:id', [controllers.Tickets, 'update']).as('tickets.update')
     router
       .put('tickets/:id/status', [controllers.Tickets, 'updateStatus'])
