@@ -129,8 +129,8 @@ export default class TicketsController {
       .where('id', params.id)
       .preload('unit', (query) => query.preload('building'))
       .preload('user')
-      .preload('comments', (query) => query.preload('user').orderBy('created_at', 'asc'))
-      .preload('attachments', (query) => query.preload('user').orderBy('created_at', 'desc'))
+      .preload('comments', (query) => query.preload('user').orderBy('createdAt', 'asc'))
+      .preload('attachments', (query) => query.preload('user').orderBy('createdAt', 'desc'))
       .firstOrFail()
 
     const user = auth.user!

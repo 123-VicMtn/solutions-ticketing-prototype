@@ -17,7 +17,7 @@ export default class ManagerAccessController {
       .whereIn('role', ['tenant', 'owner'])
       .where('status', 'pending')
       .whereNull('inviteToken')
-      .orderBy('created_at', 'desc')
+      .orderBy('createdAt', 'desc')
 
     const units = await Unit.query().preload('building').orderBy('building_id').orderBy('label')
 
