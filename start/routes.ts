@@ -44,6 +44,7 @@ router
     router
       .post('tickets/:id/attachments', [controllers.Tickets, 'addAttachments'])
       .as('tickets.attachments.store')
+    router.post('tickets/:id/assign', [controllers.Tickets, 'assign']).as('tickets.assign')
   })
   .use([middleware.auth(), middleware.requireActiveUser()])
 
