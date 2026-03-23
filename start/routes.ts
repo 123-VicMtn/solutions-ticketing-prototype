@@ -1,7 +1,7 @@
 import { middleware } from '#start/kernel'
 import { controllers } from '#generated/controllers'
-import AccessRequestsController from '#controllers/access_requests_controller'
-import ManagerAccessController from '#controllers/manager_access_controller'
+const AccessRequestsController = () => import('#controllers/access_requests_controller')
+const ManagerAccessController = () => import('#controllers/manager_access_controller')
 import router from '@adonisjs/core/services/router'
 
 router.on('/').renderInertia('home', {}).as('home')
@@ -52,8 +52,12 @@ router
 router
   .group(() => {
     router.get('access-requests', [ManagerAccessController, 'index']).as('access_requests.index')
-    router.post('access-requests/:id/approve', [ManagerAccessController, 'approve']).as('access_requests.approve')
-    router.post('access-requests/:id/reject', [ManagerAccessController, 'reject']).as('access_requests.reject')
+    router
+      .post('access-requests/:id/approve', [ManagerAccessController, 'approve'])
+      .as('access_requests.approve')
+    router
+      .post('access-requests/:id/reject', [ManagerAccessController, 'reject'])
+      .as('access_requests.reject')
   })
   .prefix('manager')
   .as('manager')
