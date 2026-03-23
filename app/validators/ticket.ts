@@ -17,8 +17,14 @@ export const createTicketValidator = vine.create({
   description: vine.string().trim().minLength(10).maxLength(10000),
 })
 
+export const updateTicketValidator = vine.create({
+  title: vine.string().trim().minLength(5).maxLength(180).optional(),
+  description: vine.string().trim().minLength(10).maxLength(10000).optional(),
+  priority: vine.enum(['basse', 'moyenne', 'élevée', 'urgente']).optional(),
+})
+
 export const statusTicketValidator = vine.create({
-  status: vine.enum(['ouvert', 'assigné', 'en cours', 'résolu', 'fermé']),
+  status: vine.enum(['ouvert', 'assigné', 'en cours', 'terminé', 'résolu', 'fermé']),
 })
 
 export const commentTicketValidator = vine.create({
