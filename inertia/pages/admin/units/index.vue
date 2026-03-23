@@ -105,7 +105,7 @@ function filterByBuilding(event: Event) {
             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
               <template v-if="unit.userUnits.length > 0 && unit.userUnits[0].user">
                 <Link
-                  route="admin.users.show"
+                  route="users.show"
                   :params="{ id: unit.userUnits[0].user.id }"
                   class="font-medium text-gray-600 hover:text-gray-900"
                 >
