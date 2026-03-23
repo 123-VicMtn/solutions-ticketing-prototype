@@ -84,7 +84,7 @@ export default class Ticket extends BaseModel {
   @belongsTo(() => Unit)
   declare unit: BelongsTo<typeof Unit>
 
-  @belongsTo(() => Provider)
+  @belongsTo(() => Provider, { foreignKey: 'providerId' })
   declare provider: BelongsTo<typeof Provider>
 
   @hasMany(() => TicketComment)
