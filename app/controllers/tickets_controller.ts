@@ -1,5 +1,5 @@
 import app from '@adonisjs/core/services/app'
-import Ticket from '#models/ticket'
+import Ticket, { PROVIDER_ALLOWED_TRANSITIONS } from '#models/ticket'
 import Unit from '#models/unit'
 import UserUnit from '#models/user_unit'
 import TicketComment from '#models/ticket_comment'
@@ -8,8 +8,10 @@ import {
   commentTicketValidator,
   createTicketValidator,
   statusTicketValidator,
+  updateTicketValidator,
 } from '#validators/ticket'
 import type { HttpContext } from '@adonisjs/core/http'
+import type { UserRole } from '#models/user'
 import { DateTime } from 'luxon'
 import { randomUUID } from 'node:crypto'
 
@@ -136,6 +138,10 @@ export default class TicketsController {
     return response.redirect().toPath(`/tickets/${ticket.id}`)
   }
 
+  /**
+   * Détail du ticket.
+   * Les commentaires internes sont masqués pour tenant et provider.
+   */
   async show({ inertia, params, auth, response }: HttpContext) {
     const ticket = await Ticket.query()
       .where('id', params.id)
@@ -215,44 +221,108 @@ export default class TicketsController {
         filePath: attachment.filePath,
         createdAt: attachment.createdAt.toISO() ?? '',
       })),
-      isAdmin: user.role === 'admin',
+      canSeeInternal,
+      canEditFields,
+      canChangeStatus,
     })
   }
 
-  async addComment({ request, response, params, auth }: HttpContext) {
+  async update({ request, response, params, auth, session }: HttpContext) {
+    const user = auth.user!
+    const ticket = await Ticket.findOrFail(params.id)
+
+    if (!(await this.canAccessTicket(user.id, user.role, ticket))) {
+      return response.abort('Non autorisé', 403)
+    }
+
+    const isCreator = ticket.userId === user.id
+    const isManagerOrAbove = user.hasAtLeastRole('manager')
+
+    if (!isCreator && !isManagerOrAbove) {
+      return response.abort('Non autorisé', 403)
+    }
+
+    const payload = await request.validateUsing(updateTicketValidator)
+
+    if (payload.title) ticket.title = payload.title
+    if (payload.description) ticket.description = payload.description
+    if (payload.priority && isManagerOrAbove) ticket.priority = payload.priority
+
+    await ticket.save()
+
+    session.flash('success', 'Ticket mis à jour')
+    return response.redirect().toPath(`/tickets/${ticket.id}`)
+  }
+
+  async updateStatus({ request, response, params, auth, session }: HttpContext) {
+    const user = auth.user!
+    const payload = await request.validateUsing(statusTicketValidator)
+    const ticket = await Ticket.findOrFail(params.id)
+
+    if (!(await this.canAccessTicket(user.id, user.role, ticket))) {
+      return response.abort('Non autorisé', 403)
+    }
+
+    if (user.role === 'provider') {
+      if (ticket.assignedTo !== user.id) {
+        return response.abort('Non autorisé', 403)
+      }
+      if (!PROVIDER_ALLOWED_TRANSITIONS.includes(payload.status)) {
+        session.flash('error', 'Transition non autorisée pour un prestataire')
+        return response.redirect().toPath(`/tickets/${ticket.id}`)
+      }
+    } else if (!user.hasAtLeastRole('manager')) {
+      return response.abort('Non autorisé', 403)
+    }
+
+    ticket.status = payload.status
+    await ticket.save()
+
+    session.flash('success', 'Statut mis à jour')
+    return response.redirect().toPath(`/tickets/${ticket.id}`)
+  }
+
+  async addComment({ request, response, params, auth, session }: HttpContext) {
     const user = auth.user!
     const payload = await request.validateUsing(commentTicketValidator)
     const ticket = await Ticket.findOrFail(params.id)
 
-    const canAccess = await this.canAccessTicket(user.id, user.role, ticket)
-    if (!canAccess) return response.abort('Not allowed', 403)
+    if (!(await this.canAccessTicket(user.id, user.role, ticket))) {
+      return response.abort('Non autorisé', 403)
+    }
 
     await TicketComment.create({
       ticketId: ticket.id,
       userId: user.id,
       content: payload.content,
-      isInternal: user.role === 'admin' ? Boolean(payload.isInternal) : false,
+      isInternal: user.hasAtLeastRole('manager') ? Boolean(payload.isInternal) : false,
     })
 
+    session.flash('success', 'Commentaire ajouté')
     return response.redirect().toPath(`/tickets/${ticket.id}`)
   }
 
-  async updateStatus({ request, response, params, auth }: HttpContext) {
+  async addAttachments({ request, response, params, auth, session }: HttpContext) {
     const user = auth.user!
-    if (user.role !== 'admin') return response.abort('Not allowed', 403)
-
-    const payload = await request.validateUsing(statusTicketValidator)
     const ticket = await Ticket.findOrFail(params.id)
 
-    ticket.status = payload.status
-    ticket.resolvedAt = ticket.status === 'résolu' ? DateTime.now() : null
-    await ticket.save()
+    if (!(await this.canAccessTicket(user.id, user.role, ticket))) {
+      return response.abort('Non autorisé', 403)
+    }
+
+    const count = await this.processAttachments(request, ticket.id, user.id)
+    if (count === 0) {
+      session.flash('error', 'Aucun fichier valide envoyé')
+    } else {
+      session.flash('success', `${count} fichier(s) ajouté(s)`)
+    }
 
     return response.redirect().toPath(`/tickets/${ticket.id}`)
   }
 
-  private async canAccessTicket(userId: number, role: string, ticket: Ticket): Promise<boolean> {
+  private async canAccessTicket(userId: number, role: UserRole, ticket: Ticket): Promise<boolean> {
     if (role === 'admin' || role === 'manager') return true
+    if (role === 'provider') return ticket.assignedTo === userId
     if (ticket.userId === userId) return true
 
     const userUnit = await UserUnit.query()
