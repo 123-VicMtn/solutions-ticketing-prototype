@@ -129,6 +129,7 @@ export default class TicketsController {
       .where('id', params.id)
       .preload('unit', (query) => query.preload('building'))
       .preload('user')
+      .preload('provider')
       .preload('comments', (query) => query.preload('user').orderBy('createdAt', 'asc'))
       .preload('attachments', (query) => query.preload('user').orderBy('createdAt', 'desc'))
       .firstOrFail()
@@ -159,6 +160,11 @@ export default class TicketsController {
           phone: ticket.user.phone ?? '-',
           role: ticket.user.role,
           notificationPreference: ticket.user.notificationPreference,
+        },
+        provider: {
+          companyName: ticket.provider?.companyName ?? 'Pas encore assigné',
+          phone: ticket.provider?.phone ?? '',
+          speciality: ticket.provider?.speciality ?? '',
         },
       },
       comments: ticket.comments.map((comment) => ({
