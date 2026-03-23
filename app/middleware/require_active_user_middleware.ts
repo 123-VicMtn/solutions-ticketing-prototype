@@ -23,6 +23,12 @@ export default class RequireActiveUserMiddleware {
       })
     }
 
+    if (user.status === 'rejected') {
+      return ctx.response.forbidden({
+        message: "Votre demande d'accès a été rejetée",
+      })
+    }
+
     return next()
   }
 }
