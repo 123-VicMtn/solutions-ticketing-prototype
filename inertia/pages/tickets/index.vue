@@ -14,7 +14,6 @@ const props = defineProps<{
     user: { id: number; fullName: string | null; email: string }
   }>
   filters: { status?: string; priority?: string }
-  isAdmin: boolean
 }>()
 
 const statuses = ['ouvert', 'assigné', 'en cours', 'résolu', 'fermé']
