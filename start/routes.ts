@@ -22,8 +22,6 @@ router
     router
       .post('set-password/:token', [AccessRequestsController, 'setPassword'])
       .as('set_password.store')
-
-    router.get('users/create', [controllers.Users, 'create']).as('users.create')
   })
   .use(middleware.guest())
 
@@ -43,6 +41,7 @@ router
 
 router
   .group(() => {
+    router.get('users/create', [controllers.Users, 'create']).as('users.create')
     router.get('users/:id', [controllers.Users, 'show']).as('users.show')
     router.get('users/:id/edit', [controllers.Users, 'edit']).as('users.edit')
     router.put('users/:id', [controllers.Users, 'update']).as('users.update')
