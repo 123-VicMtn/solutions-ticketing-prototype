@@ -88,7 +88,7 @@ const notificationLabel = computed(() =>
           :key="userUnit.id"
           class="rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-800"
         >
-          <Link :href="`/units/${userUnit.id}`">
+          <Link route="admin.units.edit" :params="{ id: userUnit.unit.id }">
             {{ userUnit.unit.building.name }} / {{ userUnit.unit.label }}
             <span class="ml-2 text-xs text-gray-500">({{ props.profileUser.role }})</span>
           </Link>
