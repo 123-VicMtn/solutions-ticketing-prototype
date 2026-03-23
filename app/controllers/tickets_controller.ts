@@ -76,8 +76,10 @@ export default class TicketsController {
       units = userUnits.map((item) => item.unit)
     }
 
+    const canModifyPriority = user.role === 'admin' || user.role === 'manager'
+
     return inertia.render('tickets/create', {
-      user: auth.user,
+      canModifyPriority,
       units: units.map((unit) => ({
         id: unit.id,
         label: unit.label,

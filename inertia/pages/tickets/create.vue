@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
+
 const props = defineProps<{
+  canModifyPriority: boolean
   units: Array<{
     id: number
     label: string
@@ -12,11 +14,7 @@ const props = defineProps<{
 
 const errors = ref<Record<string, string>>({})
 const processing = ref(false)
-
-const canAccessPriority = computed(() => {
-  const role = (props as any)?.user?.role
-  return role === 'admin' || role === 'manager'
-})
+const priorityDefault = 'moyenne'
 
 async function submitTicket(event: Event) {
   const form = event.target as HTMLFormElement
@@ -66,7 +64,7 @@ async function submitTicket(event: Event) {
         <p v-if="errors.unitId" class="mt-1 text-sm text-red-600">{{ errors.unitId }}</p>
       </div>
 
-      <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-2 gap-4">
         <div>
           <label for="category" class="mb-1.5 block text-sm font-medium text-gray-700"
             >Catégorie</label
@@ -86,7 +84,7 @@ async function submitTicket(event: Event) {
             <option value="Urgences">Urgences</option>
           </select>
         </div>
-        <div v-if="canAccessPriority">
+        <div v-if="canModifyPriority">
           <label for="priority" class="mb-1.5 block text-sm font-medium text-gray-700"
             >Priorité</label
           >
@@ -101,6 +99,13 @@ async function submitTicket(event: Event) {
             <option value="urgente">Urgente</option>
           </select>
         </div>
+        <input
+          v-else
+          type="hidden"
+          name="priority"
+          id="priority"
+          :value="priorityDefault"
+        />
       </div>
 
       <div>
