@@ -21,9 +21,9 @@ const statuses = ['ouvert', 'assigné', 'en cours', 'résolu', 'fermé']
 const priorities = ['basse', 'moyenne', 'élevée', 'urgente']
 
 function applyFilters(form: HTMLFormElement) {
-  const fd = new FormData(form)
-  const status = String(fd.get('status') || '')
-  const priority = String(fd.get('priority') || '')
+  const formData = new FormData(form)
+  const status = String(formData.get('status') || '')
+  const priority = String(formData.get('priority') || '')
   router.get(
     '/tickets',
     {
