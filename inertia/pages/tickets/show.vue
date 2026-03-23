@@ -75,13 +75,24 @@ function submitComment(ticketId: number) {
       <Link href="/tickets" class="text-sm text-gray-500 hover:text-gray-900"
         >&larr; Retour aux tickets</Link
       >
-      <h1 class="mt-2 text-2xl font-bold tracking-tight text-gray-900">
-        {{ ticket.reference }} - {{ ticket.title }}
-      </h1>
-      <p class="mt-1 text-sm text-gray-500">
-        {{ ticket.unit.building.name }} / {{ ticket.unit.label }} - {{ ticket.category }} -
-        {{ ticket.priority }}
-      </p>
+      <div class="mt-2 flex items-start justify-between">
+        <div>
+          <h1 class="text-2xl font-bold tracking-tight text-gray-900">
+            {{ ticket.reference }} - {{ ticket.title }}
+          </h1>
+          <p class="mt-1 text-sm text-gray-500">
+            {{ ticket.unit.building.name }} / {{ ticket.unit.label }} - {{ ticket.category }} -
+            {{ ticket.priority }}
+          </p>
+        </div>
+        <Link
+          v-if="canEditFields"
+          :href="`/tickets/${ticket.id}/edit`"
+          class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          Modifier
+        </Link>
+      </div>
     </div>
 
     <div class="rounded-lg border border-gray-200 bg-white p-6">
