@@ -95,7 +95,7 @@ export default class TicketsController {
     } else {
       const userUnits = await UserUnit.query()
         .where('userId', user.id)
-        .preload('unit', (query) => query.preload('building'))
+        .preload('unit', (q) => q.preload('building'))
       units = userUnits.map((item) => item.unit)
     }
 
