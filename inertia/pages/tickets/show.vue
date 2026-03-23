@@ -66,6 +66,21 @@ function submitComment(ticketId: number) {
     isInternal: isInternal.value,
   })
 }
+
+const uploadingFiles = ref(false)
+
+function submitAttachments(ticketId: number, event: Event) {
+  const form = event.target as HTMLFormElement
+  const data = new FormData(form)
+  uploadingFiles.value = true
+  router.post(`/tickets/${ticketId}/attachments`, data, {
+    forceFormData: true,
+    onFinish: () => {
+      uploadingFiles.value = false
+      form.reset()
+    },
+  })
+}
 </script>
 
 <template>
@@ -188,7 +203,8 @@ function submitComment(ticketId: number) {
 
     <div class="rounded-lg border border-gray-200 bg-white p-6">
       <div class="mb-3 text-xs uppercase tracking-wide text-gray-500">Pièces jointes</div>
-      <ul class="space-y-2">
+
+      <ul v-if="attachments.length" class="space-y-2">
         <li v-for="attachment in attachments" :key="attachment.id" class="text-sm text-gray-700">
           <a :href="attachment.filePath" target="_blank" class="text-gray-900 underline">{{
             attachment.originalName
@@ -198,6 +214,27 @@ function submitComment(ticketId: number) {
           >
         </li>
       </ul>
+      <p v-else class="text-sm italic text-gray-400">Aucune pièce jointe</p>
+
+      <form
+        class="mt-4 flex items-center gap-3"
+        @submit.prevent="submitAttachments(ticket.id, $event)"
+      >
+        <input
+          name="attachments"
+          type="file"
+          multiple
+          accept="image/*,.pdf"
+          class="block w-full text-sm text-gray-500 file:mr-3 file:rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200"
+        />
+        <button
+          type="submit"
+          :disabled="uploadingFiles"
+          class="shrink-0 rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+        >
+          Envoyer
+        </button>
+      </form>
     </div>
   </div>
 </template>
