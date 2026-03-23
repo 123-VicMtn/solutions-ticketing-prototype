@@ -2,6 +2,7 @@ import app from '@adonisjs/core/services/app'
 import Ticket, { PROVIDER_ALLOWED_TRANSITIONS } from '#models/ticket'
 import Unit from '#models/unit'
 import UserUnit from '#models/user_unit'
+import Provider from '#models/provider'
 import TicketComment from '#models/ticket_comment'
 import TicketAttachment from '#models/ticket_attachment'
 import {
@@ -138,10 +139,6 @@ export default class TicketsController {
     return response.redirect().toPath(`/tickets/${ticket.id}`)
   }
 
-  /**
-   * Détail du ticket.
-   * Les commentaires internes sont masqués pour tenant et provider.
-   */
   async show({ inertia, params, auth, response }: HttpContext) {
     const ticket = await Ticket.query()
       .where('id', params.id)
@@ -165,6 +162,15 @@ export default class TicketsController {
 
     const canEditFields = ticket.userId === user.id || user.hasAtLeastRole('manager')
     const canChangeStatus = user.hasAtLeastRole('manager') || user.role === 'provider'
+    const canAssign = user.hasAtLeastRole('manager')
+
+    const providers = canAssign
+      ? (await Provider.query().where('isActive', true).orderBy('companyName')).map((p) => ({
+          id: p.id,
+          companyName: p.companyName,
+          speciality: p.speciality,
+        }))
+      : []
 
     return inertia.render('tickets/show', {
       ticket: {
@@ -224,6 +230,8 @@ export default class TicketsController {
       canSeeInternal,
       canEditFields,
       canChangeStatus,
+      canAssign,
+      providers,
     })
   }
 
@@ -314,6 +322,29 @@ export default class TicketsController {
     await ticket.save()
 
     session.flash('success', 'Statut mis à jour')
+    return response.redirect().toPath(`/tickets/${ticket.id}`)
+  }
+
+  async assign({ request, response, params, auth, session }: HttpContext) {
+    const user = auth.user!
+    if (!user.hasAtLeastRole('manager')) {
+      return response.abort('Non autorisé', 403)
+    }
+
+    const ticket = await Ticket.findOrFail(params.id)
+    const providerId = request.input('providerId')
+    const provider = await Provider.findOrFail(providerId)
+
+    ticket.providerId = provider.id
+    ticket.assignedTo = provider.userId
+
+    if (ticket.status === 'ouvert') {
+      ticket.status = 'assigné'
+    }
+
+    await ticket.save()
+
+    session.flash('success', `Ticket assigné à ${provider.companyName}`)
     return response.redirect().toPath(`/tickets/${ticket.id}`)
   }
 
