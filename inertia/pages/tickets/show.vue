@@ -48,15 +48,23 @@ const props = defineProps<{
   canSeeInternal: boolean
   canEditFields: boolean
   canChangeStatus: boolean
+  canAssign: boolean
+  providers: Array<{ id: number; companyName: string; speciality: string }>
 }>()
 
 const statusValue = ref(props.ticket.status)
 const comment = ref('')
 const isInternal = ref(false)
+const selectedProviderId = ref('')
 
 function submitStatus(ticketId: number) {
   if (!statusValue.value) return
   router.put(`/tickets/${ticketId}/status`, { status: statusValue.value })
+}
+
+function submitAssign(ticketId: number) {
+  if (!selectedProviderId.value) return
+  router.post(`/tickets/${ticketId}/assign`, { providerId: selectedProviderId.value })
 }
 
 function submitComment(ticketId: number) {
@@ -137,7 +145,31 @@ function submitAttachments(ticketId: number, event: Event) {
           </p>
           <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.provider.phone }}</p>
         </template>
-        <p v-else class="text-sm text-gray-400 italic">Pas encore assigné</p>
+        <p v-else-if="!canAssign" class="text-sm text-gray-400 italic">Pas encore assigné</p>
+
+        <form
+          v-if="canAssign"
+          class="mt-3 flex items-center gap-2"
+          :class="{ 'border-t border-gray-100 pt-3': ticket.provider }"
+          @submit.prevent="submitAssign(ticket.id)"
+        >
+          <select
+            v-model="selectedProviderId"
+            class="block w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm"
+          >
+            <option value="">{{ ticket.provider ? 'Réassigner…' : 'Sélectionner…' }}</option>
+            <option v-for="provider in providers" :key="provider.id" :value="provider.id">
+              {{ provider.companyName }} — {{ provider.speciality }}
+            </option>
+          </select>
+          <button
+            type="submit"
+            :disabled="!selectedProviderId"
+            class="shrink-0 rounded-md bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+          >
+            {{ ticket.provider ? 'Réassigner' : 'Assigner' }}
+          </button>
+        </form>
       </div>
     </div>
 
