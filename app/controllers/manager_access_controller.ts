@@ -15,7 +15,7 @@ export default class ManagerAccessController {
     const pendingRequests = await User.query()
       .whereIn('role', ['tenant', 'owner'])
       .where('status', 'pending')
-      .whereNull('invite_token')
+      .whereNull('inviteToken')
       .orderBy('created_at', 'desc')
 
     const units = await Unit.query().preload('building').orderBy('building_id').orderBy('label')
