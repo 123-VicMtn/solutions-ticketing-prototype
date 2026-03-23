@@ -24,7 +24,11 @@ const props = defineProps<{
       companyName: string
       phone: string
       speciality: string
-    }
+    } | null
+    assignee: {
+      id: number
+      fullName: string | null
+    } | null
   }
   comments: Array<{
     id: number
@@ -41,7 +45,9 @@ const props = defineProps<{
     filePath: string
     createdAt: string
   }>
-  isAdmin: boolean
+  canSeeInternal: boolean
+  canEditFields: boolean
+  canChangeStatus: boolean
 }>()
 
 const statusValue = ref(props.ticket.status)
@@ -50,7 +56,7 @@ const isInternal = ref(false)
 
 function submitStatus(ticketId: number) {
   if (!statusValue.value) return
-  router.put(`/admin/tickets/${ticketId}/status`, { status: statusValue.value })
+  router.put(`/tickets/${ticketId}/status`, { status: statusValue.value })
 }
 
 function submitComment(ticketId: number) {
@@ -63,7 +69,6 @@ function submitComment(ticketId: number) {
 </script>
 
 <template>
-  {{ console.log(ticket) }}
   <Head :title="ticket.reference ?? 'Ticket'" />
   <div class="space-y-8">
     <div>
@@ -84,9 +89,9 @@ function submitComment(ticketId: number) {
       <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.description }}</p>
     </div>
 
-    <div class="grid grid-flow-col grid-cols-3 w-full gap-4">
-      <div class="rounded-lg border border-gray-200 bg-white p-6 col-span-2">
-        <div class="mb-3 text-xs uppercase tracking-wide text-gray-500">Locataire</div>
+    <div class="grid w-full grid-flow-col grid-cols-3 gap-4">
+      <div class="col-span-2 rounded-lg border border-gray-200 bg-white p-6">
+        <div class="mb-3 text-xs uppercase tracking-wide text-gray-500">Demandeur</div>
         <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.user.fullName }}</p>
         <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.user.email }}</p>
         <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.user.phone }}</p>
@@ -97,13 +102,20 @@ function submitComment(ticketId: number) {
 
       <div class="rounded-lg border border-gray-200 bg-white p-6">
         <div class="mb-3 text-xs uppercase tracking-wide text-gray-500">Prestataire</div>
-        <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.provider.companyName }}</p>
-        <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.provider.speciality }}</p>
-        <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.provider.phone }}</p>
+        <template v-if="ticket.provider">
+          <p class="whitespace-pre-wrap text-sm text-gray-800">
+            {{ ticket.provider.companyName }}
+          </p>
+          <p class="whitespace-pre-wrap text-sm text-gray-800">
+            {{ ticket.provider.speciality }}
+          </p>
+          <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.provider.phone }}</p>
+        </template>
+        <p v-else class="text-sm text-gray-400 italic">Pas encore assigné</p>
       </div>
     </div>
 
-    <div v-if="isAdmin" class="rounded-lg border border-gray-200 bg-white p-6">
+    <div v-if="canChangeStatus" class="rounded-lg border border-gray-200 bg-white p-6">
       <div class="mb-3 text-xs uppercase tracking-wide text-gray-500">Statut</div>
       <form class="flex items-center gap-3" @submit.prevent="submitStatus(ticket.id)">
         <select
@@ -115,6 +127,7 @@ function submitComment(ticketId: number) {
           <option value="ouvert">ouvert</option>
           <option value="assigné">assigné</option>
           <option value="en cours">en cours</option>
+          <option value="terminé">terminé</option>
           <option value="résolu">résolu</option>
           <option value="fermé">fermé</option>
         </select>
@@ -127,16 +140,16 @@ function submitComment(ticketId: number) {
     <div class="rounded-lg border border-gray-200 bg-white p-6">
       <div class="mb-3 text-xs uppercase tracking-wide text-gray-500">Commentaires</div>
       <div class="space-y-3">
-        <div v-for="comment in comments" :key="comment.id" class="rounded-md bg-gray-50 p-3">
+        <div v-for="c in comments" :key="c.id" class="rounded-md bg-gray-50 p-3">
           <div class="mb-1 text-xs text-gray-500">
-            {{ comment.user.fullName ?? comment.user.email }}
+            {{ c.user.fullName ?? c.user.email }}
             <span
-              v-if="comment.isInternal"
+              v-if="c.isInternal"
               class="ml-2 rounded bg-amber-100 px-2 py-0.5 text-amber-800"
               >interne</span
             >
           </div>
-          <p class="text-sm text-gray-800">{{ comment.content }}</p>
+          <p class="text-sm text-gray-800">{{ c.content }}</p>
         </div>
       </div>
 
@@ -148,7 +161,10 @@ function submitComment(ticketId: number) {
           placeholder="Ajouter un commentaire..."
         />
         <div class="flex items-center gap-3">
-          <label v-if="isAdmin" class="inline-flex items-center gap-2 text-sm text-gray-700">
+          <label
+            v-if="canSeeInternal"
+            class="inline-flex items-center gap-2 text-sm text-gray-700"
+          >
             <input v-model="isInternal" type="checkbox" />
             Commentaire interne (visible gérance uniquement)
           </label>
