@@ -4,8 +4,11 @@ import { usePage } from '@inertiajs/vue3'
 import { toast, Toaster } from 'vue-sonner'
 import type { Data } from '@generated/data'
 import { Link, Form } from '@adonisjs/inertia/vue'
+import { useAuth } from '~/composables/use_auth'
+import RoleGate from '~/components/RoleGate.vue'
 
 const page = usePage<Data.SharedProps>()
+const { user, isAuthenticated, can } = useAuth()
 
 watch(
   () => page.url,
@@ -27,8 +30,6 @@ watch(
   },
   { immediate: true }
 )
-
-const hasAccess = () => page.props.user?.role === 'admin' || page.props.user?.role === 'manager'
 </script>
 
 <template>
@@ -42,14 +43,14 @@ const hasAccess = () => page.props.user?.role === 'admin' || page.props.user?.ro
 
           <nav class="flex items-center gap-5">
             <Link
-              v-if="page.props.user"
+              v-if="isAuthenticated"
               route="tickets.index"
               class="text-md font-medium text-gray-500 hover:text-gray-900"
             >
               Tickets
             </Link>
 
-            <div v-if="hasAccess()" class="flex items-center gap-5">
+            <RoleGate min="manager">
               <Link
                 route="admin.buildings.index"
                 class="text-md font-medium text-gray-500 hover:text-gray-900"
@@ -62,32 +63,31 @@ const hasAccess = () => page.props.user?.role === 'admin' || page.props.user?.ro
               >
                 Lots
               </Link>
-            </div>
+            </RoleGate>
           </nav>
         </div>
 
         <nav class="flex items-center gap-4">
-          <template v-if="page.props.user">
-            <Link
-              v-if="hasAccess()"
-              route="users.create"
-              class="text-md font-medium text-gray-500 hover:text-gray-900"
-            >
-              Utilisateurs
-            </Link>
-
-            <Link
-              v-if="hasAccess()"
-              route="manager.access_requests.index"
-              class="text-md font-medium text-gray-500 hover:text-gray-900"
-            >
-              Demandes d'accès
-            </Link>
+          <template v-if="isAuthenticated">
+            <RoleGate min="manager">
+              <Link
+                route="users.create"
+                class="text-md font-medium text-gray-500 hover:text-gray-900"
+              >
+                Utilisateurs
+              </Link>
+              <Link
+                route="manager.access_requests.index"
+                class="text-md font-medium text-gray-500 hover:text-gray-900"
+              >
+                Demandes d'accès
+              </Link>
+            </RoleGate>
 
             <span
               class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-900 text-xs font-medium text-white"
             >
-              {{ page.props.user.initials }}
+              {{ user?.initials }}
             </span>
             <Form route="session.destroy">
               <button
