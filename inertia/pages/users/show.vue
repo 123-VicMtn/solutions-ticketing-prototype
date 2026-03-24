@@ -3,6 +3,14 @@ import { Head } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import { Link } from '@adonisjs/inertia/vue'
 
+const ROLE_LABELS: Record<string, string> = {
+  admin: 'Administrateur',
+  manager: 'Gestionnaire',
+  owner: 'Propriétaire',
+  tenant: 'Locataire',
+  provider: 'Prestataire',
+}
+
 const props = defineProps<{
   profileUser: {
     id: number
@@ -32,13 +40,7 @@ const props = defineProps<{
   }>
 }>()
 
-if (props.profileUser.role === 'admin') {
-  props.profileUser.role = 'Administrateur'
-} else if (props.profileUser.role === 'owner') {
-  props.profileUser.role = 'Propriétaire'
-} else {
-  props.profileUser.role = 'Locataire'
-}
+const roleLabel = computed(() => ROLE_LABELS[props.profileUser.role] ?? props.profileUser.role)
 
 const notificationLabel = computed(() =>
   props.profileUser.notificationPreference === 'email' ? 'Email' : 'SMS'
@@ -75,7 +77,7 @@ const notificationLabel = computed(() =>
         </div>
         <div>
           <dt class="text-xs uppercase tracking-wide text-gray-500">Position</dt>
-          <dd class="mt-1 text-sm text-gray-900">{{ profileUser.role }}</dd>
+          <dd class="mt-1 text-sm text-gray-900">{{ roleLabel }}</dd>
         </div>
       </dl>
     </div>
@@ -90,7 +92,7 @@ const notificationLabel = computed(() =>
         >
           <Link route="admin.units.edit" :params="{ id: userUnit.unit.id }">
             {{ userUnit.unit.building.name }} / {{ userUnit.unit.label }}
-            <span class="ml-2 text-xs text-gray-500">({{ props.profileUser.role }})</span>
+            <span class="ml-2 text-xs text-gray-500">({{ roleLabel }})</span>
           </Link>
         </li>
       </ul>
