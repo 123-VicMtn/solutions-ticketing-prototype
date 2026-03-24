@@ -21,6 +21,12 @@ const props = defineProps<{
 
 const statuses = ['ouvert', 'assigné', 'en cours', 'résolu', 'fermé']
 const priorities = ['basse', 'moyenne', 'élevée', 'urgente']
+const priorityColors = {
+  basse: 'bg-green-100 text-green-800',
+  moyenne: 'bg-yellow-100 text-yellow-800',
+  élevée: 'bg-orange-100 text-orange-800',
+  urgente: 'bg-red-100 text-red-800',
+}
 
 function applyFilters(form: HTMLFormElement) {
   const formData = new FormData(form)
@@ -135,7 +141,14 @@ function applyFilters(form: HTMLFormElement) {
             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
               {{ ticket.user.fullName }}
             </td>
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ ticket.priority }}</td>
+            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+              <span
+                class="rounded-full px-2.5 py-0.5 text-xs font-medium"
+                :class="priorityColors[ticket.priority as keyof typeof priorityColors]"
+              >
+                {{ ticket.priority }}
+              </span>
+            </td>
             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ ticket.status }}</td>
             <td class="whitespace-nowrap px-6 py-4 text-right text-sm">
               <Link
