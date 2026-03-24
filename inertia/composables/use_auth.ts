@@ -2,7 +2,7 @@ import { computed } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 import type { Data } from '@generated/data'
 
-type UserRole = 'tenant' | 'owner' | 'manager' | 'admin' | 'provider'
+export type UserRole = 'tenant' | 'owner' | 'manager' | 'admin' | 'provider'
 
 const HIERARCHY: Exclude<UserRole, 'provider'>[] = ['tenant', 'owner', 'manager', 'admin']
 
