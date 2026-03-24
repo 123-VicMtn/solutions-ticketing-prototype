@@ -26,6 +26,7 @@ import { Form } from '@adonisjs/inertia/vue'
               class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
               :class="{ 'border-red-500': errors.firstName }"
             />
+            <p v-if="errors.firstName" class="mt-1 text-sm text-red-600">{{ errors.firstName }}</p>
           </div>
           <div>
             <label for="lastName" class="mb-1.5 block text-sm font-medium text-gray-700">Nom</label>
