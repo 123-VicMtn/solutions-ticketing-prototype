@@ -46,13 +46,15 @@ useFlash()
 
         <nav class="flex items-center gap-4">
           <template v-if="isAuthenticated">
-            <RoleGate min="manager">
+            <RoleGate min="admin">
               <Link
-                route="users.create"
+                route="users.index"
                 class="text-md font-medium text-gray-500 hover:text-gray-900"
               >
                 Utilisateurs
               </Link>
+            </RoleGate>
+            <RoleGate min="manager">
               <Link
                 route="manager.access_requests.index"
                 class="text-md font-medium text-gray-500 hover:text-gray-900"
