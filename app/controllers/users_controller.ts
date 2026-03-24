@@ -3,6 +3,29 @@ import { createUserValidator, updateUserValidator } from '#validators/user'
 import type { HttpContext } from '@adonisjs/core/http'
 
 export default class UsersController {
+  async index({ inertia }: HttpContext) {
+    const users = await User.query()
+      .preload('userUnits', (q) => q.preload('unit', (r) => r.preload('building')))
+      .preload('tickets')
+      .then((users) =>
+        users.map((user) => ({
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email ?? '',
+          userUnits: user.userUnits.map((userUnit) => ({
+            id: userUnit.id,
+            unit: {
+              id: userUnit.unit.id,
+              label: userUnit.unit.label,
+            },
+          })),
+        }))
+      )
+    return inertia.render('users/index', {
+      users,
+    })
+  }
   async create({ inertia }: HttpContext) {
     return inertia.render('users/create', {})
   }
