@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
+import { useAuth } from '~/composables/use_auth'
+
+const { isProvider } = useAuth()
 
 const props = defineProps<{
   tickets: Array<{
@@ -43,6 +46,7 @@ function applyFilters(form: HTMLFormElement) {
         <p class="mt-1 text-sm text-gray-500">Suivez les demandes d'intervention</p>
       </div>
       <Link
+        v-if="!isProvider"
         href="/tickets/create"
         class="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
       >
