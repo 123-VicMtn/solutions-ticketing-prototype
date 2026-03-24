@@ -51,6 +51,7 @@ router
 router
   .group(() => {
     router.get('users/create', [controllers.Users, 'create']).as('users.create')
+    router.get('users', [controllers.Users, 'index']).as('users.index')
     router.get('users/:id', [controllers.Users, 'show']).as('users.show')
     router.get('users/:id/edit', [controllers.Users, 'edit']).as('users.edit')
     router.put('users/:id', [controllers.Users, 'update']).as('users.update')
