@@ -164,13 +164,15 @@ export default class TicketsController {
     const canChangeStatus = user.hasAtLeastRole('manager') || user.role === 'provider'
     const canAssign = user.hasAtLeastRole('manager')
 
-    const providers = canAssign
-      ? (await Provider.query().where('isActive', true).orderBy('companyName')).map((p) => ({
-          id: p.id,
-          companyName: p.companyName,
-          speciality: p.speciality,
-        }))
+    const providerRows = canAssign
+      ? await Provider.query().where('isActive', true).orderBy('companyName')
       : []
+
+    const providers = providerRows.map((p) => ({
+      id: p.id,
+      companyName: p.companyName,
+      speciality: p.speciality,
+    }))
 
     return inertia.render('tickets/show', {
       ticket: {
