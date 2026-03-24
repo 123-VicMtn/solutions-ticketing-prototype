@@ -4,6 +4,7 @@ import { Link, Form } from '@adonisjs/inertia/vue'
 import { useAuth } from '~/composables/use_auth'
 import { useFlash } from '~/composables/use_flash'
 import RoleGate from '~/components/RoleGate.vue'
+import Footer from '~/components/Footer.vue'
 
 const { user, isAuthenticated } = useAuth()
 useFlash()
@@ -95,4 +96,5 @@ useFlash()
 
     <Toaster position="top-center" rich-colors />
   </div>
+  <Footer />
 </template>
