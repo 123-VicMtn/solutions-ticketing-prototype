@@ -12,7 +12,42 @@
 */
 
 import { DateTime } from 'luxon'
+import vine, { SimpleMessagesProvider } from '@vinejs/vine'
 import { VineDate } from '@vinejs/vine'
+
+vine.messagesProvider = new SimpleMessagesProvider(
+  {
+    'required': 'Le champ {{ field }} est requis',
+    'string': 'Le champ {{ field }} doit être une chaîne de caractères',
+    'email': "L'adresse email n'est pas valide",
+    'minLength': 'Le champ {{ field }} doit contenir au moins {{ min }} caractères',
+    'maxLength': 'Le champ {{ field }} ne doit pas dépasser {{ max }} caractères',
+    'confirmed': 'La confirmation ne correspond pas',
+    'enum': 'La valeur sélectionnée pour {{ field }} est invalide',
+    'number': 'Le champ {{ field }} doit être un nombre',
+    'positive': 'Le champ {{ field }} doit être un nombre positif',
+    'database.unique': 'Cette valeur est déjà utilisée',
+    'database.exists': "Cette valeur n'existe pas",
+
+    'email.email': "L'adresse email n'est pas valide",
+    'email.database.unique': 'Cette adresse email est déjà utilisée',
+    'password.minLength': 'Le mot de passe doit contenir au moins {{ min }} caractères',
+    'password.maxLength': 'Le mot de passe ne doit pas dépasser {{ max }} caractères',
+    'password.confirmed': 'La confirmation du mot de passe ne correspond pas',
+  },
+  {
+    firstName: 'prénom',
+    lastName: 'nom',
+    email: 'email',
+    phone: 'téléphone',
+    role: 'rôle',
+    notificationPreference: 'préférence de notification',
+    password: 'mot de passe',
+    passwordConfirmation: 'confirmation du mot de passe',
+    unitId: 'unité',
+    reason: 'raison',
+  }
+)
 
 declare module '@vinejs/vine/types' {
   interface VineGlobalTransforms {
