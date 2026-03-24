@@ -10,7 +10,9 @@ import {
   createTicketValidator,
   statusTicketValidator,
   updateTicketValidator,
+  assignTicketValidator,
 } from '#validators/ticket'
+import TicketNotifications from '#services/ticket_notification_service'
 import type { HttpContext } from '@adonisjs/core/http'
 import type { UserRole } from '#models/user'
 import { DateTime } from 'luxon'
@@ -329,13 +331,20 @@ export default class TicketsController {
 
   async assign({ request, response, params, auth, session }: HttpContext) {
     const user = auth.user!
+
     if (!user.hasAtLeastRole('manager')) {
       return response.abort('Non autorisé', 403)
     }
 
+    const payload = await request.validateUsing(assignTicketValidator)
+    const provider = await Provider.findOrFail(payload.providerId)
+
+    if (!provider.isActive) {
+      session.flash('error', "Ce prestataire n'est pas actif")
+      return response.redirect().toPath(`/tickets/${params.id}`)
+    }
+
     const ticket = await Ticket.findOrFail(params.id)
-    const providerId = request.input('providerId')
-    const provider = await Provider.findOrFail(providerId)
 
     ticket.providerId = provider.id
     ticket.assignedTo = provider.userId
@@ -345,6 +354,8 @@ export default class TicketsController {
     }
 
     await ticket.save()
+
+    await TicketNotifications.notifyProviderAssigned(ticket, provider)
 
     session.flash('success', `Ticket assigné à ${provider.companyName}`)
     return response.redirect().toPath(`/tickets/${ticket.id}`)
