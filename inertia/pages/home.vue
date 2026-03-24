@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { Head, usePage } from '@inertiajs/vue3'
+import { Head } from '@inertiajs/vue3'
 import { Link } from '@adonisjs/inertia/vue'
-import type { Data } from '@generated/data'
+import { useAuth } from '~/composables/use_auth'
 
-const page = usePage<Data.SharedProps>()
+const { isAuthenticated } = useAuth()
 </script>
 
 <template>
@@ -18,7 +18,7 @@ const page = usePage<Data.SharedProps>()
         Pannes, réparations, questions — tout est centralisé.
       </p>
 
-      <div v-if="!page.props.user" class="mt-8 flex flex-wrap gap-4">
+      <div v-if="!isAuthenticated" class="mt-8 flex flex-wrap gap-4">
         <Link
           route="session.create"
           class="rounded-md bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-800"
