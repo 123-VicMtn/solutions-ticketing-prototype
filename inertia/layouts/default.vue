@@ -1,35 +1,12 @@
 <script setup lang="ts">
-import { watch } from 'vue'
-import { usePage } from '@inertiajs/vue3'
-import { toast, Toaster } from 'vue-sonner'
-import type { Data } from '@generated/data'
+import { Toaster } from 'vue-sonner'
 import { Link, Form } from '@adonisjs/inertia/vue'
 import { useAuth } from '~/composables/use_auth'
+import { useFlash } from '~/composables/use_flash'
 import RoleGate from '~/components/RoleGate.vue'
 
-const page = usePage<Data.SharedProps>()
-const { user, isAuthenticated, can } = useAuth()
-
-watch(
-  () => page.url,
-  () => toast.dismiss()
-)
-
-watch(
-  () => page.props.flash.error,
-  (error) => {
-    if (error) toast.error(error)
-  },
-  { immediate: true }
-)
-
-watch(
-  () => page.props.flash.success,
-  (success) => {
-    if (success) toast.success(success)
-  },
-  { immediate: true }
-)
+const { user, isAuthenticated } = useAuth()
+useFlash()
 </script>
 
 <template>
