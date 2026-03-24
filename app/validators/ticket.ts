@@ -31,3 +31,7 @@ export const commentTicketValidator = vine.create({
   content: vine.string().trim().minLength(1).maxLength(4000),
   isInternal: vine.boolean().optional(),
 })
+
+export const assignTicketValidator = vine.create({
+  providerId: vine.number().positive().exists({ table: 'providers', column: 'id' }),
+})
