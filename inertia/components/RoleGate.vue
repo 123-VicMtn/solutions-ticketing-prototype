@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useAuth } from '~/composables/use_auth'
-
-type UserRole = 'tenant' | 'owner' | 'manager' | 'admin' | 'provider'
+import { useAuth, type UserRole } from '~/composables/use_auth'
 
 const props = defineProps<{
   min?: Exclude<UserRole, 'provider'>
