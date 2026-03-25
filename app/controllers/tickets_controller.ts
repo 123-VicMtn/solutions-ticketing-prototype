@@ -176,10 +176,15 @@ export default class TicketsController {
     // Autorise uniquement les transitions correspondant au workflow, et restreint
     // celles autorisées au rôle "provider".
     const workflowNextStatuses = VALID_TRANSITIONS[ticket.status] ?? []
+    const hasAssignedProvider = Boolean(ticket.providerId && ticket.assignedTo)
+
     const allowedStatusTransitions = canChangeStatus
       ? user.role === 'provider'
         ? workflowNextStatuses.filter((s) => PROVIDER_ALLOWED_TRANSITIONS.includes(s))
-        : workflowNextStatuses
+        : workflowNextStatuses.filter((s) => {
+            if (s === 'assigné' && !hasAssignedProvider) return false
+            return true
+          })
       : []
 
     const providerRows = canAssign
@@ -337,6 +342,17 @@ export default class TicketsController {
       }
     } else if (!user.hasAtLeastRole('manager')) {
       return response.abort('Non autorisé', 403)
+    }
+
+    if (payload.status === 'assigné') {
+      const hasAssignedProvider = Boolean(ticket.providerId && ticket.assignedTo)
+      if (!hasAssignedProvider) {
+        session.flash(
+          'error',
+          'Impossible de passer à "assigné" : aucun prestataire n\'est assigné.'
+        )
+        return response.redirect().toPath(`/tickets/${ticket.id}`)
+      }
     }
 
     ticket.status = payload.status
