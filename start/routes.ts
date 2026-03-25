@@ -29,6 +29,8 @@ router
   .group(() => {
     router.post('logout', [controllers.Session, 'destroy']).as('session.destroy')
 
+    router.get('dashboard', [controllers.Dashboard, 'index']).as('dashboard.index')
+
     router.get('tickets', [controllers.Tickets, 'index']).as('tickets.index')
     router.get('tickets/create', [controllers.Tickets, 'create']).as('tickets.create')
     router.post('tickets', [controllers.Tickets, 'store']).as('tickets.store')
