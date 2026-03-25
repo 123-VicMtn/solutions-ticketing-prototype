@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowRightIcon } from '@heroicons/vue/24/outline'
+import { ArrowRightIcon, EyeIcon } from '@heroicons/vue/24/outline'
 import { router } from '@inertiajs/vue3'
 
 const { recentTickets } = defineProps<{
@@ -47,6 +47,11 @@ const { recentTickets } = defineProps<{
           >
             Créé le
           </th>
+          <th
+            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+          >
+            Actions
+          </th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
@@ -70,7 +75,11 @@ const { recentTickets } = defineProps<{
           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
             {{ ticket.createdAt ? new Date(ticket.createdAt).toLocaleDateString() : '-' }}
           </td>
+          <td class="px-6 py-4 whitespace-nowrap text-right">
+            <EyeIcon class="w-4 h-4 text-gray-500" />
+          </td>
         </tr>
+
         <tr v-if="!recentTickets || recentTickets.length === 0">
           <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">
             Aucun ticket récent trouvé.
