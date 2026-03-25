@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ArrowRightIcon } from '@heroicons/vue/24/outline'
+import { router } from '@inertiajs/vue3'
 
 const { recentTickets } = defineProps<{
   recentTickets: Array<{
@@ -52,8 +53,7 @@ const { recentTickets } = defineProps<{
         <tr
           v-for="ticket in recentTickets"
           :key="ticket.id"
-          is="Link"
-          :href="`/tickets/${ticket.id}`"
+          @click="router.visit(`/tickets/${ticket.id}`)"
           class="hover:bg-gray-50 cursor-pointer transition"
         >
           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
