@@ -21,7 +21,7 @@ export type TicketCategory =
 
 export type TicketPriority = 'basse' | 'moyenne' | 'élevée' | 'urgente'
 
-const VALID_TRANSITIONS: Record<TicketStatus, TicketStatus[]> = {
+export const VALID_TRANSITIONS: Record<TicketStatus, TicketStatus[]> = {
   'ouvert': ['assigné', 'fermé'],
   'assigné': ['en cours', 'fermé'],
   'en cours': ['terminé', 'fermé'],
