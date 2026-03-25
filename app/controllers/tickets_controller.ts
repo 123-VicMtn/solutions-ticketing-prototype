@@ -92,6 +92,9 @@ export default class TicketsController {
 
   async create({ inertia, auth }: HttpContext) {
     const user = auth.user!
+    if (!this.canCreateTickets(user.role)) {
+      return inertia.render('errors/forbidden', {})
+    }
     let units: Unit[] = []
     const canModifyPriority = user.hasAtLeastRole('manager')
 
@@ -120,6 +123,10 @@ export default class TicketsController {
 
   async store({ request, response, auth, session }: HttpContext) {
     const user = auth.user!
+    if (!this.canCreateTickets(user.role)) {
+      return response.abort('Non autorisé', 403)
+    }
+
     const payload = await request.validateUsing(createTicketValidator)
 
     const ticket = await Ticket.create({
@@ -435,5 +442,9 @@ export default class TicketsController {
     }
 
     return count
+  }
+
+  private canCreateTickets(role: UserRole): boolean {
+    return role !== 'provider'
   }
 }
