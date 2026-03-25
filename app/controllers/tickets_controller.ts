@@ -1,5 +1,5 @@
 import app from '@adonisjs/core/services/app'
-import Ticket, { PROVIDER_ALLOWED_TRANSITIONS } from '#models/ticket'
+import Ticket, { PROVIDER_ALLOWED_TRANSITIONS, VALID_TRANSITIONS } from '#models/ticket'
 import Unit from '#models/unit'
 import UserUnit from '#models/user_unit'
 import Provider from '#models/provider'
@@ -173,6 +173,15 @@ export default class TicketsController {
     const canChangeStatus = user.hasAtLeastRole('manager') || user.role === 'provider'
     const canAssign = user.hasAtLeastRole('manager')
 
+    // Autorise uniquement les transitions correspondant au workflow, et restreint
+    // celles autorisées au rôle "provider".
+    const workflowNextStatuses = VALID_TRANSITIONS[ticket.status] ?? []
+    const allowedStatusTransitions = canChangeStatus
+      ? user.role === 'provider'
+        ? workflowNextStatuses.filter((s) => PROVIDER_ALLOWED_TRANSITIONS.includes(s))
+        : workflowNextStatuses
+      : []
+
     const providerRows = canAssign
       ? await Provider.query().where('isActive', true).orderBy('companyName')
       : []
@@ -241,6 +250,7 @@ export default class TicketsController {
       canSeeInternal,
       canEditFields,
       canChangeStatus,
+      allowedStatusTransitions,
       canAssign,
       providers,
     })
