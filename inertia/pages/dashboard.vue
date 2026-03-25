@@ -17,7 +17,7 @@ const recentTickets = page.props.recentTickets as Array<{
 
 <template>
   <Head title="Tableau de bord" />
-  <div class="px-4 py-12 max-w-7xl mx-auto">
+  <div class="px-4 max-w-7xl mx-auto">
     <h1 class="text-3xl font-bold text-gray-900 mb-4">Tableau de bord</h1>
     <SummaryWidget :counts-by-status="countsByStatus" />
     <LatestTicketsWidgets :recent-tickets="recentTickets" />
