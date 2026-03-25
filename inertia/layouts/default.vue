@@ -22,6 +22,14 @@ useFlash()
           <nav class="flex items-center gap-5">
             <Link
               v-if="isAuthenticated"
+              route="dashboard.index"
+              class="text-md font-medium text-gray-500 hover:text-gray-900"
+            >
+              Tableau de bord
+            </Link>
+
+            <Link
+              v-if="isAuthenticated"
               route="tickets.index"
               class="text-md font-medium text-gray-500 hover:text-gray-900"
             >
