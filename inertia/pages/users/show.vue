@@ -90,10 +90,10 @@ const notificationLabel = computed(() =>
           :key="userUnit.id"
           class="rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-800"
         >
-          <Link route="admin.units.edit" :params="{ id: userUnit.unit.id }">
-            {{ userUnit.unit.building.name }} / {{ userUnit.unit.label }}
-            <span class="ml-2 text-xs text-gray-500">({{ roleLabel }})</span>
-          </Link>
+          <div class="flex items-center justify-between transition">
+            <div>{{ userUnit.unit.building.name }} / {{ userUnit.unit.label }}</div>
+            <div class="ml-2 text-xs text-gray-500">({{ roleLabel }})</div>
+          </div>
         </li>
       </ul>
     </div>
@@ -102,15 +102,23 @@ const notificationLabel = computed(() =>
     <div class="rounded-lg border border-gray-200 bg-white p-6">
       <div class="mb-3 text-xs uppercase tracking-wide text-gray-500">Tickets existants</div>
       <ul class="space-y-2">
-        <li v-for="ticket in tickets" :key="ticket.id" class="rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-800">
+        <li
+          v-for="ticket in tickets"
+          :key="ticket.id"
+          class="rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-800"
+        >
           <Link
-          :href="`/tickets/${ticket.id}`"
-          class="font-medium text-gray-700 hover:text-gray-900"
-          >{{ ticket.title }}</Link>
+            :href="`/tickets/${ticket.id}`"
+            class="font-medium text-gray-700 hover:text-gray-900"
+            >{{ ticket.title }}</Link
+          >
           <span class="ml-2 text-xs text-gray-500">({{ ticket.category }})</span>
           <span class="ml-2 text-xs text-gray-500">({{ ticket.priority }})</span>
           <span class="ml-2 text-xs text-gray-500">({{ ticket.status }})</span>
           <span class="ml-2 text-xs text-gray-500">({{ ticket.createdAt }})</span>
+        </li>
+        <li v-if="tickets.length === 0">
+          <div class="text-sm text-gray-400">Aucun ticket pour le moment</div>
         </li>
       </ul>
     </div>
