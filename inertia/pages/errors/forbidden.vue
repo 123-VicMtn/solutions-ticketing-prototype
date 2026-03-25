@@ -1,18 +1,26 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3'
 import { Link } from '@adonisjs/inertia/vue'
-import { onBeforeUnmount, onMounted } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 
 let redirectTimer: number | undefined
+let countdownTimer: number | undefined
+
+const secondsLeft = ref(10)
 
 onMounted(() => {
   redirectTimer = window.setTimeout(() => {
     window.location.assign('/')
   }, 10_000)
+
+  countdownTimer = window.setInterval(() => {
+    secondsLeft.value = Math.max(0, secondsLeft.value - 1)
+  }, 1000)
 })
 
 onBeforeUnmount(() => {
   if (redirectTimer !== undefined) window.clearTimeout(redirectTimer)
+  if (countdownTimer !== undefined) window.clearInterval(countdownTimer)
 })
 </script>
 
@@ -24,6 +32,9 @@ onBeforeUnmount(() => {
     <h1 class="mt-2 text-3xl font-bold tracking-tight text-gray-900">Accès refusé</h1>
     <p class="mt-2 text-sm text-gray-500">
       Vous n'avez pas les permissions nécessaires pour accéder à cette page.
+    </p>
+    <p class="mt-2 text-sm text-gray-500">
+      Redirection vers l'accueil dans {{ secondsLeft }} seconde{{ secondsLeft > 1 ? 's' : '' }}.
     </p>
     <Link
       route="home"
