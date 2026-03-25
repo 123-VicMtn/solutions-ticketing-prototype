@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ArrowRightIcon } from '@heroicons/vue/24/outline'
+
 const { countsByStatus, recentTickets } = defineProps<{
   countsByStatus: { status: string; count: number }[]
   recentTickets: Array<{
@@ -31,9 +33,12 @@ const { countsByStatus, recentTickets } = defineProps<{
   <div class="bg-white shadow rounded-lg overflow-x-auto mb-8">
     <div class="px-6 py-4 border-b flex items-center justify-between">
       <h2 class="text-lg font-semibold text-gray-900">Derniers tickets</h2>
-      <a href="/tickets" class="text-sm text-blue-600 hover:underline font-medium"
-        >Voir tous les tickets</a
-      >
+      <a
+        href="/tickets"
+        class="text-sm bg-gray-200 rounded-full px-4 py-2 text-gray-700 hover:text-gray-900 font-semibold flex items-center gap-2"
+        >Voir tous les tickets
+        <ArrowRightIcon class="w-4 h-4" />
+      </a>
     </div>
     <table class="min-w-full divide-y divide-gray-200">
       <thead class="bg-gray-50">
