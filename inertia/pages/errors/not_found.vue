@@ -1,6 +1,19 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3'
 import { Link } from '@adonisjs/inertia/vue'
+import { onBeforeUnmount, onMounted } from 'vue'
+
+let redirectTimer: number | undefined
+
+onMounted(() => {
+  redirectTimer = window.setTimeout(() => {
+    window.location.assign('/')
+  }, 10_000)
+})
+
+onBeforeUnmount(() => {
+  if (redirectTimer !== undefined) window.clearTimeout(redirectTimer)
+})
 </script>
 
 <template>
