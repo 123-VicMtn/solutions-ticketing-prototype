@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ArrowRightIcon } from '@heroicons/vue/24/outline'
-import { Link } from '@inertiajs/vue3'
 
 const { recentTickets } = defineProps<{
   recentTickets: Array<{
