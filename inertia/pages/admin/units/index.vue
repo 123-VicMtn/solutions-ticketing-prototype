@@ -114,22 +114,7 @@ function filterByBuilding(event: Event) {
               </template>
               <span v-else class="text-gray-400">-</span>
             </td>
-            <td class="whitespace-nowrap px-6 py-4 text-right text-sm">
-              <Link
-                route="admin.units.edit"
-                :params="{ id: unit.id }"
-                class="font-medium text-gray-600 hover:text-gray-900"
-              >
-                Modifier
-              </Link>
-              <button
-                type="button"
-                class="ml-4 cursor-pointer font-medium text-red-600 hover:text-red-800"
-                @click="deleteUnit(unit.id)"
-              >
-                Supprimer
-              </button>
-            </td>
+            <td class="whitespace-nowrap px-6 py-4 text-right text-sm"></td>
           </tr>
         </tbody>
       </table>
