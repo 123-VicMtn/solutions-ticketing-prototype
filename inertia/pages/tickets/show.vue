@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
-import { ref } from 'vue'
+import { ChevronDownIcon } from '@heroicons/vue/24/outline'
+import { computed, ref } from 'vue'
 
 const props = defineProps<{
   ticket: {
@@ -48,9 +49,25 @@ const props = defineProps<{
   canSeeInternal: boolean
   canEditFields: boolean
   canChangeStatus: boolean
+  allowedStatusTransitions: string[]
   canAssign: boolean
   providers: Array<{ id: number; companyName: string; speciality: string }>
 }>()
+
+const workflowStatuses = ['ouvert', 'assigné', 'en cours', 'terminé', 'résolu', 'fermé'] as const
+
+const STATUS_LABELS: Record<string, string> = {
+  ouvert: 'Ouvert',
+  assigné: 'Assigné',
+  'en cours': 'En cours',
+  terminé: 'Terminé',
+  résolu: 'Résolu',
+  fermé: 'Fermé',
+}
+
+function statusLabel(status: string): string {
+  return STATUS_LABELS[status] ?? status
+}
 
 const statusValue = ref(props.ticket.status)
 const comment = ref('')
@@ -88,6 +105,41 @@ function submitAttachments(ticketId: number, event: Event) {
       form.reset()
     },
   })
+}
+
+const isSelectionChanged = computed(() => statusValue.value !== props.ticket.status)
+const isAllowedStatus = (status: string) => props.allowedStatusTransitions.includes(status)
+const isSubmitDisabled = computed(() => {
+  if (!props.canChangeStatus) return true
+  if (!isSelectionChanged.value) return true
+  return !isAllowedStatus(statusValue.value)
+})
+
+const currentIndex = computed(() => {
+  const idx = workflowStatuses.indexOf(props.ticket.status as any)
+  return idx === -1 ? 0 : idx
+})
+
+function stepDotClass(status: string) {
+  const isCurrent = status === props.ticket.status
+  const isSelected = status === statusValue.value
+  const isNextAllowed = isAllowedStatus(status) && !isCurrent
+
+  if (isCurrent) return 'bg-gray-900 border-gray-900'
+  if (isSelected) return 'bg-green-900 border-green-900'
+  if (isNextAllowed) return 'bg-green-100 border-green-200'
+  return 'bg-white border-gray-200'
+}
+
+function stepLabelClass(status: string) {
+  if (status === props.ticket.status) return 'text-gray-900 font-semibold'
+  if (status === statusValue.value) return 'text-green-900 font-semibold'
+  if (isAllowedStatus(status)) return 'text-green-800 font-medium'
+  return 'text-gray-500'
+}
+
+function resetStatusSelection() {
+  statusValue.value = props.ticket.status
 }
 </script>
 
@@ -175,23 +227,95 @@ function submitAttachments(ticketId: number, event: Event) {
 
     <div v-if="canChangeStatus" class="rounded-lg border border-gray-200 bg-white p-6">
       <div class="mb-3 text-xs uppercase tracking-wide text-gray-500">Statut</div>
-      <form class="flex items-center gap-3" @submit.prevent="submitStatus(ticket.id)">
-        <select
-          v-model="statusValue"
-          name="status"
-          class="rounded-md border border-gray-300 px-3 py-2 text-sm"
-        >
-          <option value="">Choisir</option>
-          <option value="ouvert">ouvert</option>
-          <option value="assigné">assigné</option>
-          <option value="en cours">en cours</option>
-          <option value="terminé">terminé</option>
-          <option value="résolu">résolu</option>
-          <option value="fermé">fermé</option>
-        </select>
-        <button type="submit" class="rounded-md bg-gray-900 px-4 py-2 text-sm text-white">
-          Mettre à jour
-        </button>
+
+      <form class="space-y-4" @submit.prevent="submitStatus(ticket.id)">
+        <div class="rounded-md bg-gray-50 p-4">
+          <div class="mt-4 flex items-center gap-2">
+            <template v-for="(status, idx) in workflowStatuses" :key="status">
+              <button
+                v-if="isAllowedStatus(status) || status === ticket.status"
+                type="button"
+                class="flex flex-col items-center"
+                :class="status === ticket.status ? 'cursor-default' : 'cursor-pointer'"
+                :disabled="status === ticket.status"
+                @click="statusValue = status"
+              >
+                <span
+                  v-if="status === ticket.status"
+                  class="mb-1 flex items-center justify-center"
+                >
+                  <ChevronDownIcon class="h-4 w-4 text-gray-900" />
+                </span>
+                <span class="flex h-4 w-4 items-center justify-center rounded-full border" :class="stepDotClass(status)">
+                  <span v-if="status === ticket.status" class="h-1.5 w-1.5 rounded-full bg-white"></span>
+                </span>
+                <span class="mt-1 text-[11px] text-center leading-tight" :class="stepLabelClass(status)">
+                  {{ statusLabel(status) }}
+                </span>
+              </button>
+
+              <div v-else class="flex flex-col items-center">
+                <span class="flex h-4 w-4 items-center justify-center rounded-full border" :class="stepDotClass(status)">
+                  <span class="h-1.5 w-1.5 rounded-full bg-transparent"></span>
+                </span>
+                <span class="mt-1 text-[11px] text-center leading-tight" :class="stepLabelClass(status)">
+                  {{ statusLabel(status) }}
+                </span>
+              </div>
+
+              <div
+                v-if="idx < workflowStatuses.length - 1"
+                class="h-0.5 flex-1"
+                :class="idx < currentIndex ? 'bg-gray-900' : 'bg-gray-200'"
+              ></div>
+            </template>
+          </div>
+
+          <div v-if="allowedStatusTransitions.length" class="mt-5">
+            <div class="mb-2 text-xs uppercase tracking-wide text-gray-500">
+              Prochaines étapes possibles
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button
+                v-for="nextStatus in allowedStatusTransitions"
+                :key="nextStatus"
+                type="button"
+                class="rounded-md border px-3 py-1.5 text-sm font-medium transition-colors"
+                :class="
+                  statusValue === nextStatus
+                    ? 'border-gray-900 bg-gray-900 text-white'
+                    : 'border-green-200 bg-white text-green-800 hover:bg-green-50'
+                "
+                @click="statusValue = nextStatus"
+              >
+                {{ statusLabel(nextStatus) }}
+              </button>
+            </div>
+          </div>
+
+          <p v-if="allowedStatusTransitions.length === 0" class="mt-3 text-sm italic text-gray-500">
+            Aucune transition autorisée depuis {{ statusLabel(ticket.status) }}.
+          </p>
+        </div>
+
+        <div class="flex items-center justify-between gap-3">
+          <button
+            type="submit"
+            :disabled="isSubmitDisabled"
+            class="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+          >
+            Mettre à jour
+          </button>
+
+          <button
+            v-if="isSelectionChanged"
+            type="button"
+            @click="resetStatusSelection"
+            class="rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Annuler
+          </button>
+        </div>
       </form>
     </div>
 
