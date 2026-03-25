@@ -52,6 +52,9 @@ export default class DashboardController {
       }
     })
 
+    // Prototype: on masque volontairement le statut "fermé" dans le dashboard.
+    const countsByStatusFiltered = countsByStatus.filter((row) => row.status !== 'fermé')
+
     const recentRows = await applyScope(
       Ticket.query()
         .preload('unit', (q) => q.preload('building'))
@@ -70,7 +73,7 @@ export default class DashboardController {
       },
     }))
 
-    return inertia.render('dashboard', { countsByStatus, recentTickets })
+    return inertia.render('dashboard', { countsByStatus: countsByStatusFiltered, recentTickets })
   }
 
   /**
