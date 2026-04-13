@@ -22,14 +22,13 @@ const { isAuthenticated, user } = useAuth()
     <div class="drawer-side">
       <label for="my-drawer-3" aria-label="close sidebar" class="drawer-overlay"></label>
 
-      <aside class="bg-base-200 min-h-full w-80 p-4">
+      <aside class="bg-base-200 min-h-full w-auto p-4">
         <div class="mb-3 px-2">
           <div class="text-sm font-semibold">Navigation</div>
         </div>
 
         <ul class="menu menu-md rounded-box">
           <li class="menu-title"><span>Général</span></li>
-          <li><Link route="home">Accueil</Link></li>
 
           <template v-if="isAuthenticated">
             <li><Link route="dashboard.index">Tableau de bord</Link></li>
