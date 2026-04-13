@@ -1,1 +1,7 @@
-@import 'tailwindcss';
+@import "tailwindcss";
+@plugin "daisyui";
+
+/* Ensure Tailwind scans Inertia Vue + Edge templates (v4 CSS-first). */
+@source "../**/*.{vue,js,ts}";
+@source "../../inertia/**/*.{vue,js,ts}";
+@source "../../resources/views/**/*.edge";
