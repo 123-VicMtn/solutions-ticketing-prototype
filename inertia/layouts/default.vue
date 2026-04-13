@@ -4,7 +4,7 @@ import Navbar from '~/components/Navbar.vue'
 import { useFlash } from '~/composables/use_flash'
 import { useAuth } from '~/composables/use_auth'
 import Footer from '~/components/Footer.vue'
-import SideBar from '~/components/SideBar.vue'
+import Sidebar from '~/layouts/SideBar.vue'
 
 useFlash()
 const { user, isAuthenticated } = useAuth()
@@ -12,7 +12,7 @@ const { user, isAuthenticated } = useAuth()
 
 <template>
   <div class="min-h-screen flex flex-col">
-    <SideBar v-if="isAuthenticated" class="flex-1">
+    <Sidebar v-if="isAuthenticated" class="flex-1">
       <div class="min-h-full flex flex-col">
         <Navbar />
         <main class="mx-auto w-full max-w-7xl flex-1 px-6 py-8">
@@ -22,7 +22,7 @@ const { user, isAuthenticated } = useAuth()
         </main>
         <Toaster position="top-center" rich-colors />
       </div>
-    </SideBar>
+    </Sidebar>
 
     <div v-else class="flex-1 flex flex-col">
       <main class="mx-auto w-full max-w-7xl flex-1 px-6 py-8">
