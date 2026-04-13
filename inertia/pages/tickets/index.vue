@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3'
+import { Head, router } from '@inertiajs/vue3'
+import { Link } from '@adonisjs/inertia/vue'
 import { useAuth } from '~/composables/use_auth'
 import ZebraTable from '~/components/common/zebraTable.vue'
 
@@ -64,7 +65,7 @@ function applyFilters(form: HTMLFormElement) {
       </div>
       <Link
         v-if="!isProvider"
-        href="/tickets/create"
+        route="tickets.create"
         class="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
       >
         Nouveau ticket
@@ -130,7 +131,8 @@ function applyFilters(form: HTMLFormElement) {
 
         <template #cell:action="{ row: ticket }">
           <Link
-            :href="`/tickets/${ticket.id}`"
+            route="tickets.show"
+            :params="{ id: ticket.id }"
             class="font-medium text-gray-700 hover:text-gray-900"
           >
             <svg
