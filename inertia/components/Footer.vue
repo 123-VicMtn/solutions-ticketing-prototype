@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 const props = defineProps({
   appName: {
@@ -30,12 +30,38 @@ const props = defineProps({
 })
 
 const currentYear = computed(() => new Date().getFullYear())
+
+const STORAGE_KEY = 'theme'
+const theme = ref('light')
+const isDark = computed({
+  get: () => theme.value === 'dark',
+  set: (value) => {
+    theme.value = value ? 'dark' : 'light'
+  },
+})
+
+function applyTheme(nextTheme) {
+  theme.value = nextTheme
+  document.documentElement.dataset.theme = nextTheme
+  localStorage.setItem(STORAGE_KEY, nextTheme)
+}
+
+onMounted(() => {
+  const saved = localStorage.getItem(STORAGE_KEY)
+  if (saved === 'light' || saved === 'dark') {
+    applyTheme(saved)
+    return
+  }
+
+  const prefersDark = window.matchMedia?.('(prefers-color-scheme: light)')?.matches ?? false
+  applyTheme(prefersDark ? 'dark' : 'light')
+})
 </script>
 <template>
-  <footer class="border-t border-zinc-800/60 bg-zinc-950">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between flex-wrap gap-4">
+  <footer class="border-t border-base-300 bg-base-200">
+    <div class="max-w-7xl mx-auto px-6 py-2 flex items-center justify-between flex-wrap gap-4">
       <div class="flex items-center gap-3">
-        <span class="font-mono text-xs font-medium text-zinc-400 tracking-widest uppercase">
+        <span class="font-mono text-xs font-medium text-base-content/70 tracking-widest uppercase">
           {{ appName }}
         </span>
       </div>
@@ -44,15 +70,27 @@ const currentYear = computed(() => new Date().getFullYear())
         <template v-for="(link, index) in links" :key="link.label">
           <a
             :href="link.href"
-            class="text-xs text-zinc-400 hover:text-zinc-200 transition-colors duration-200"
+            class="text-xs text-base-content/70 hover:text-base-content transition-colors duration-200"
           >
             {{ link.label }}
           </a>
-          <span v-if="index < links.length - 1" class="w-px h-3 bg-zinc-800"></span>
+          <span v-if="index < links.length - 1" class="w-px h-3 bg-base-300"></span>
         </template>
       </nav>
 
-      <span class="text-xs text-zinc-400 font-light"> {{ currentYear }}</span>
+      <div class="flex items-center gap-4">
+        <label class="flex items-center gap-2 text-xs text-base-content/70 select-none">
+          <span>Clair</span>
+          <input
+            v-model="isDark"
+            type="checkbox"
+            class="toggle toggle-sm"
+            aria-label="Toggle dark mode"
+            @change="applyTheme(isDark ? 'dark' : 'light')"
+          />
+          <span>Sombre</span>
+        </label>
+      </div>
     </div>
   </footer>
 </template>
