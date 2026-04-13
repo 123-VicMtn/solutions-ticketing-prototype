@@ -58,7 +58,7 @@ onMounted(() => {
 })
 </script>
 <template>
-  <footer class="border-t border-base-300 bg-base-200">
+  <footer class="relative z-20 w-full border-t border-base-300 bg-base-200">
     <div class="max-w-7xl mx-auto px-6 py-2 flex items-center justify-between flex-wrap gap-4">
       <div class="flex items-center gap-3">
         <span class="font-mono text-xs font-medium text-base-content/70 tracking-widest uppercase">
