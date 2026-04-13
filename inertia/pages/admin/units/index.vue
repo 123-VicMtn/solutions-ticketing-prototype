@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3'
 import { Link } from '@adonisjs/inertia/vue'
+import ZebraTable from '~/components/common/zebraTable.vue'
 
 const props = defineProps<{
   units: Array<{
@@ -24,6 +25,15 @@ const unitTypeLabels: Record<string, string> = {
   parking: 'Parking',
   storage: 'Cave',
 }
+
+const tableHeaders = [
+  { key: 'label', label: 'Label' },
+  { key: 'building', label: 'Immeuble' },
+  { key: 'floor', label: 'Étage' },
+  { key: 'type', label: 'Type' },
+  { key: 'tenant', label: 'Locataire' },
+  { key: 'actions', label: 'Actions', thClass: 'text-right', tdClass: 'text-right' },
+]
 
 function deleteUnit(id: number) {
   if (!globalThis.confirm('Supprimer ce lot ?')) return
@@ -80,44 +90,43 @@ function filterByBuilding(event: Event) {
       </Link>
     </div>
 
-    <div v-else class="mt-4 overflow-hidden rounded-lg border border-gray-200 bg-white">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Label</th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Immeuble</th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Étage</th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Type</th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Locataire</th>
-            <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200">
-          <tr v-for="unit in units" :key="unit.id">
-            <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">{{ unit.label }}</td>
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ unit.building.name }}</td>
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ unit.floor }}</td>
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-              <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700">
-                {{ unitTypeLabels[unit.type] || unit.type }}
-              </span>
-            </td>
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-              <template v-if="unit.userUnits.length > 0 && unit.userUnits[0].user">
-                <Link
-                  route="users.show"
-                  :params="{ id: unit.userUnits[0].user.id }"
-                  class="font-medium text-gray-600 hover:text-gray-900"
-                >
-                  {{ unit.userUnits[0].user.fullName }}
-                </Link>
-              </template>
-              <span v-else class="text-gray-400">-</span>
-            </td>
-            <td class="whitespace-nowrap px-6 py-4 text-right text-sm"></td>
-          </tr>
-        </tbody>
-      </table>
+    <div v-else class="mt-4">
+      <ZebraTable :headers="tableHeaders" :rows="props.units" :rowKey="(u) => u.id">
+        <template #cell:label="{ row: unit }">
+          <span class="text-sm font-medium text-gray-900">{{ unit.label }}</span>
+        </template>
+
+        <template #cell:building="{ row: unit }">
+          <span class="text-sm text-gray-500">{{ unit.building.name }}</span>
+        </template>
+
+        <template #cell:floor="{ row: unit }">
+          <span class="text-sm text-gray-500">{{ unit.floor }}</span>
+        </template>
+
+        <template #cell:type="{ row: unit }">
+          <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700">
+            {{ unitTypeLabels[unit.type] || unit.type }}
+          </span>
+        </template>
+
+        <template #cell:tenant="{ row: unit }">
+          <template v-if="unit.userUnits.length > 0 && unit.userUnits[0].user">
+            <Link
+              route="users.show"
+              :params="{ id: unit.userUnits[0].user.id }"
+              class="font-medium text-gray-600 hover:text-gray-900"
+            >
+              {{ unit.userUnits[0].user.fullName }}
+            </Link>
+          </template>
+          <span v-else class="text-gray-400">-</span>
+        </template>
+
+        <template #cell:actions>
+          <!-- Intentionally empty (same as current UI) -->
+        </template>
+      </ZebraTable>
     </div>
   </div>
 </template>
