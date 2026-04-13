@@ -56,7 +56,10 @@ const tableHeaders = [
       </Link>
     </div>
 
-    <div v-if="buildings.length === 0" class="mt-8 rounded-lg border border-dashed border-gray-300 p-12 text-center">
+    <div
+      v-if="buildings.length === 0"
+      class="mt-8 rounded-lg border border-dashed border-gray-300 p-12 text-center"
+    >
       <p class="text-sm text-gray-500">Aucun immeuble pour le moment</p>
       <Link
         route="admin.buildings.create"
@@ -90,7 +93,11 @@ const tableHeaders = [
 
         <template #cell:actions="{ row: building }">
           <div class="flex justify-end">
-            <Link route="admin.buildings.edit" :params="{ id: building.id }" class="btn btn-primary btn-sm">
+            <Link
+              route="admin.buildings.edit"
+              :params="{ id: building.id }"
+              class="btn btn-primary btn-sm"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -102,7 +109,12 @@ const tableHeaders = [
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
+                  d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
                 />
               </svg>
             </Link>
@@ -133,7 +145,8 @@ const tableHeaders = [
         <h3 class="text-lg font-bold">Supprimer l’immeuble</h3>
         <p class="py-4 text-sm text-base-content/70" v-if="deletingBuilding">
           Confirmer la suppression de <span class="font-medium">{{ deletingBuilding.name }}</span>
-          <span v-if="deletingBuilding.unitsCount"> ({{ deletingBuilding.unitsCount }} lots)</span> ?
+          <span v-if="deletingBuilding.unitsCount"> ({{ deletingBuilding.unitsCount }} lots)</span>
+          ?
         </p>
         <p class="text-sm text-base-content/70" v-if="deletingBuilding">
           Cette action supprimera aussi les lots associés.
