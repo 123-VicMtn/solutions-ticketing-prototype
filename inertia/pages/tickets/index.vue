@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
 import { useAuth } from '~/composables/use_auth'
+import ZebraTable from '~/components/common/zebraTable.vue'
 
 const { isProvider } = useAuth()
 
@@ -27,6 +28,16 @@ const priorityColors = {
   élevée: 'bg-orange-100 text-orange-800',
   urgente: 'bg-red-100 text-red-800',
 }
+
+const tableHeaders = [
+  { key: 'reference', label: 'Réf' },
+  { key: 'title', label: 'Titre' },
+  { key: 'unit', label: 'Lot' },
+  { key: 'user', label: 'Locataire' },
+  { key: 'priority', label: 'Priorité' },
+  { key: 'status', label: 'Statut' },
+  { key: 'action', label: 'Action', thClass: 'text-right', tdClass: 'text-right' },
+]
 
 function applyFilters(form: HTMLFormElement) {
   const formData = new FormData(form)
@@ -85,82 +96,44 @@ function applyFilters(form: HTMLFormElement) {
       </select>
     </form>
 
-    <div class="mt-6 overflow-hidden rounded-lg border border-gray-200 bg-white">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-            >
-              Réf
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-            >
-              Titre
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-            >
-              Lot
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-            >
-              Locataire
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-            >
-              Priorité
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-            >
-              Statut
-            </th>
-            <th
-              class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500"
-            >
-              Action
-            </th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200">
-          <tr v-for="ticket in props.tickets" :key="ticket.id">
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-              {{ ticket.reference ?? '-' }}
-            </td>
-            <td class="px-6 py-4 text-sm text-gray-900">
-              <div class="font-medium">{{ ticket.title }}</div>
-              <div class="text-xs text-gray-500">{{ ticket.category }}</div>
-            </td>
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-              {{ ticket.unit.building.name }} / {{ ticket.unit.label }}
-            </td>
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-              {{ ticket.user.fullName }}
-            </td>
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-              <span
-                class="rounded-full px-2.5 py-0.5 text-xs font-medium"
-                :class="priorityColors[ticket.priority as keyof typeof priorityColors]"
-              >
-                {{ ticket.priority }}
-              </span>
-            </td>
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ ticket.status }}</td>
-            <td class="whitespace-nowrap px-6 py-4 text-right text-sm">
-              <Link
-                :href="`/tickets/${ticket.id}`"
-                class="font-medium text-gray-700 hover:text-gray-900"
-              >
-                Ouvrir
-              </Link>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="mt-6">
+      <ZebraTable :headers="tableHeaders" :rows="props.tickets" :rowKey="(t) => t.id">
+        <template #cell:reference="{ row: ticket }">
+          {{ ticket.reference ?? '-' }}
+        </template>
+
+        <template #cell:title="{ row: ticket }">
+          <div class="font-medium">{{ ticket.title }}</div>
+          <div class="text-xs text-gray-500">{{ ticket.category }}</div>
+        </template>
+
+        <template #cell:unit="{ row: ticket }">
+          {{ ticket.unit.building.name }} / {{ ticket.unit.label }}
+        </template>
+
+        <template #cell:user="{ row: ticket }">
+          {{ ticket.user.fullName }}
+        </template>
+
+        <template #cell:priority="{ row: ticket }">
+          <span
+            class="rounded-full px-2.5 py-0.5 text-xs font-medium"
+            :class="priorityColors[ticket.priority as keyof typeof priorityColors]"
+          >
+            {{ ticket.priority }}
+          </span>
+        </template>
+
+        <template #cell:status="{ row: ticket }">
+          {{ ticket.status }}
+        </template>
+
+        <template #cell:action="{ row: ticket }">
+          <Link :href="`/tickets/${ticket.id}`" class="font-medium text-gray-700 hover:text-gray-900">
+            Ouvrir
+          </Link>
+        </template>
+      </ZebraTable>
     </div>
   </div>
 </template>
