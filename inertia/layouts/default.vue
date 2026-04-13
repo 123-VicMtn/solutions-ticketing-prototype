@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Toaster } from 'vue-sonner'
-import Navbar from '~/components/Navbar.vue'
+import Navbar from '~/layouts/Navbar.vue'
 import { useFlash } from '~/composables/use_flash'
 import { useAuth } from '~/composables/use_auth'
 import Footer from '~/layouts/Footer.vue'
