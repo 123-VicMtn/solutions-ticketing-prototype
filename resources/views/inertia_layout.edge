@@ -4,9 +4,22 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/png" href="resources/assets/svg/icon.png" />
+
     <title inertia>
       123-Immo
     </title>
+
+    <script>
+      ;(() => {
+        try {
+          const saved = localStorage.getItem('theme')
+          const prefersDark =
+            window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+          const theme = saved === 'light' || saved === 'dark' ? saved : prefersDark ? 'dark' : 'light'
+          document.documentElement.dataset.theme = theme
+        } catch {}
+      })()
+    </script>
 
     @vite(['inertia/app.ts'])
     @inertiaHead()
