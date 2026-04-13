@@ -3,7 +3,7 @@ import { Toaster } from 'vue-sonner'
 import Navbar from '~/components/Navbar.vue'
 import { useFlash } from '~/composables/use_flash'
 import { useAuth } from '~/composables/use_auth'
-import Footer from '~/components/Footer.vue'
+import Footer from '~/layouts/Footer.vue'
 import Sidebar from '~/layouts/SideBar.vue'
 
 useFlash()
