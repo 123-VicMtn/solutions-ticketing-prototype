@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3'
 import { Link } from '@adonisjs/inertia/vue'
+import ZebraTable from '~/components/common/zebraTable.vue'
 
 defineProps<{
   buildings: Array<{
@@ -17,6 +18,15 @@ function deleteBuilding(id: number) {
   if (!globalThis.confirm('Supprimer cet immeuble et tous ses lots ?')) return
   router.delete(`/admin/buildings/${id}`)
 }
+
+const tableHeaders = [
+  { key: 'name', label: 'Nom' },
+  { key: 'address', label: 'Adresse' },
+  { key: 'city', label: 'Ville' },
+  { key: 'postalCode', label: 'NPA' },
+  { key: 'unitsCount', label: 'Lots' },
+  { key: 'actions', label: 'Actions', thClass: 'text-right', tdClass: 'text-right' },
+]
 </script>
 
 <template>
@@ -46,44 +56,45 @@ function deleteBuilding(id: number) {
       </Link>
     </div>
 
-    <div v-else class="mt-6 overflow-hidden rounded-lg border border-gray-200 bg-white">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Nom</th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Adresse</th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Ville</th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">NPA</th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Lots</th>
-            <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200">
-          <tr v-for="building in buildings" :key="building.id">
-            <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">{{ building.name }}</td>
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ building.address }}</td>
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ building.city }}</td>
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ building.postalCode }}</td>
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ building.unitsCount }}</td>
-            <td class="whitespace-nowrap px-6 py-4 text-right text-sm">
-              <Link
-                route="admin.buildings.edit"
-                :params="{ id: building.id }"
-                class="font-medium text-gray-600 hover:text-gray-900"
-              >
-                Modifier
-              </Link>
-              <button
-                type="button"
-                class="ml-4 cursor-pointer font-medium text-red-600 hover:text-red-800"
-                @click="deleteBuilding(building.id)"
-              >
-                Supprimer
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div v-else class="mt-6">
+      <ZebraTable :headers="tableHeaders" :rows="buildings" :rowKey="(b) => b.id">
+        <template #cell:name="{ row: building }">
+          <span class="text-sm font-medium text-gray-900">{{ building.name }}</span>
+        </template>
+
+        <template #cell:address="{ row: building }">
+          <span class="text-sm text-gray-500">{{ building.address }}</span>
+        </template>
+
+        <template #cell:city="{ row: building }">
+          <span class="text-sm text-gray-500">{{ building.city }}</span>
+        </template>
+
+        <template #cell:postalCode="{ row: building }">
+          <span class="text-sm text-gray-500">{{ building.postalCode }}</span>
+        </template>
+
+        <template #cell:unitsCount="{ row: building }">
+          <span class="text-sm text-gray-500">{{ building.unitsCount }}</span>
+        </template>
+
+        <template #cell:actions="{ row: building }">
+          <Link
+            route="admin.buildings.edit"
+            :params="{ id: building.id }"
+            class="font-medium text-gray-600 hover:text-gray-900"
+          >
+            Modifier
+          </Link>
+          <button
+            type="button"
+            class="ml-4 cursor-pointer font-medium text-red-600 hover:text-red-800"
+            @click="deleteBuilding(building.id)"
+          >
+            Supprimer
+          </button>
+        </template>
+      </ZebraTable>
     </div>
   </div>
 </template>
