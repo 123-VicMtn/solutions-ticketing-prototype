@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAuth } from '~/composables/use_auth'
 import { Form } from '@adonisjs/inertia/vue'
+import { Link } from '@adonisjs/inertia/vue'
 const { user } = useAuth()
 </script>
 <template>
@@ -32,7 +33,11 @@ const { user } = useAuth()
           class="menu menu-md dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
         >
           <li>
-            <Link route="users.show" :params="{ id: user?.id }" class="btn btn-ghost btn-block">
+            <Link
+              route="users.show"
+              :params="{ id: user?.id }"
+              class="btn btn-ghost btn-block text-base-content hover:text-base-content"
+            >
               Profil
             </Link>
           </li>
