@@ -2,7 +2,6 @@
 import { ArrowRightIcon } from '@heroicons/vue/24/outline'
 import { Link } from '@adonisjs/inertia/vue'
 import ZebraTable from '~/components/common/zebraTable.vue'
-import { ticketStatusBadgeClass, type TicketStatus } from '~/utils/ticketStatus'
 
 const { recentTickets } = defineProps<{
   recentTickets: Array<{
@@ -55,7 +54,7 @@ const tableHeaders = [
 
         <template #cell:status="{ row: ticket }">
           <span class="text-sm">
-            <span :class="ticketStatusBadgeClass(ticket.status)">{{ ticket.status }}</span>
+            <span class="badge badge-primary badge-outline">{{ ticket.status }}</span>
           </span>
         </template>
 
