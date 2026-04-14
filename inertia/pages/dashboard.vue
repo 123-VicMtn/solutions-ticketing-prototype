@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { Head, usePage } from '@inertiajs/vue3'
-import SummaryWidget from '~/components/SummaryWidget.vue'
-import LatestTicketsWidgets from '~/components/LatestTicketsWidgets.vue'
+import SummaryWidget from '~/components/widgets/SummaryWidget.vue'
+import LatestTicketsWidgets from '~/components/widgets/LatestTicketsWidgets.vue'
+import { isTicketStatus, type TicketStatus } from '~/utils/ticketStatus'
 
 const page = usePage()
 const countsByStatus = page.props.countsByStatus as { status: string; count: number }[]
-const recentTickets = page.props.recentTickets as Array<{
+const recentTicketsRaw = page.props.recentTickets as Array<{
   id: number
   reference: string | null
   title: string
@@ -13,6 +14,19 @@ const recentTickets = page.props.recentTickets as Array<{
   createdAt: string
   unit: { label: string }
 }>
+
+const recentTickets: Array<{
+  id: number
+  reference: string | null
+  title: string
+  status: TicketStatus
+  createdAt: string
+  unit: { label: string }
+}> = recentTicketsRaw
+  .filter(
+    (t): t is Omit<(typeof recentTicketsRaw)[number], 'status'> & { status: TicketStatus } => isTicketStatus(t.status)
+  )
+  .map((t) => ({ ...t, status: t.status }))
 </script>
 
 <template>
