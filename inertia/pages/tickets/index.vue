@@ -33,10 +33,10 @@ const priorityColors = {
 
 const tableHeaders = [
   { key: 'reference', label: 'Réf' },
+  { key: 'priority', label: 'Priorité' },
   { key: 'title', label: 'Titre' },
   { key: 'unit', label: 'Lot' },
   { key: 'user', label: 'Locataire' },
-  { key: 'priority', label: 'Priorité' },
   { key: 'status', label: 'Statut' },
   { key: 'action', label: 'Action', thClass: 'text-right', tdClass: 'text-right' },
 ]
