@@ -3,7 +3,6 @@ import { Head, router } from '@inertiajs/vue3'
 import { Link } from '@adonisjs/inertia/vue'
 import { useAuth } from '~/composables/use_auth'
 import ZebraTable from '~/components/common/zebraTable.vue'
-import { ticketStatusBadgeClass, type TicketStatus } from '~/utils/ticketStatus'
 
 const { isProvider } = useAuth()
 
@@ -13,7 +12,7 @@ const props = defineProps<{
     reference: string | null
     category: string
     priority: string
-    status: TicketStatus
+    status: string
     title: string
     createdAt: string
     unit: { id: number; label: string; building: { id: number; name: string } }
@@ -24,12 +23,6 @@ const props = defineProps<{
 
 const statuses = ['ouvert', 'assigné', 'en cours', 'résolu', 'fermé']
 const priorities = ['basse', 'moyenne', 'élevée', 'urgente']
-const priorityColors = {
-  basse: 'bg-green-100 text-green-800',
-  moyenne: 'bg-yellow-100 text-yellow-800',
-  élevée: 'bg-orange-100 text-orange-800',
-  urgente: 'bg-red-100 text-red-800',
-}
 
 const tableHeaders = [
   { key: 'reference', label: 'Réf' },
@@ -118,17 +111,14 @@ function applyFilters(form: HTMLFormElement) {
         </template>
 
         <template #cell:priority="{ row: ticket }">
-          <span
-            class="rounded-full px-2.5 py-0.5 text-xs font-medium"
-            :class="priorityColors[ticket.priority as keyof typeof priorityColors]"
-          >
-            {{ ticket.priority }}
+          <span class="text-sm">
+            <span class="badge badge-ghost">{{ ticket.priority }}</span>
           </span>
         </template>
 
         <template #cell:status="{ row: ticket }">
           <span class="text-sm">
-            <span :class="ticketStatusBadgeClass(ticket.status)">{{ ticket.status }}</span>
+            <span class="badge badge-primary h-auto">{{ ticket.status }}</span>
           </span>
         </template>
 
