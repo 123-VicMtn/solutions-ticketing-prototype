@@ -1,6 +1,6 @@
 
 <script setup lang="ts">
-import { TICKET_STATUS_ORDER, ticketStatusBadgeClass } from '~/utils/ticketStatus'
+import { TICKET_STATUS_ORDER } from '~/utils/ticketStatus'
 
 const { countsByStatus } = defineProps<{
   countsByStatus: { count: number; status: string }[]
@@ -16,7 +16,7 @@ const sortedCountsByStatus = countsByStatus.slice().sort(
       <div v-for="stat in sortedCountsByStatus" :key="stat.status" class="stats shadow">
         <div class="stat place-items-center">
           <div class="stat-title">
-            <span :class="ticketStatusBadgeClass(stat.status)">{{ stat.status }}</span>
+            <span class="badge badge-primary badge-outline">{{ stat.status }}</span>
           </div>
           <div class="stat-value">{{ stat.count }}</div>
         </div>
