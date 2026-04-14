@@ -5,17 +5,23 @@ import { useFlash } from '~/composables/use_flash'
 import { useAuth } from '~/composables/use_auth'
 import Footer from '~/layouts/Footer.vue'
 import Sidebar from '~/layouts/SideBar.vue'
+import { ref } from 'vue'
 
 useFlash()
 const { user, isAuthenticated } = useAuth()
+const isSidebarCollapsed = ref(false)
 </script>
 
 <template>
   <div class="min-h-screen flex flex-col">
-    <Navbar v-if="isAuthenticated" class="sticky top-0 z-50 w-full" />
+    <Navbar
+      v-if="isAuthenticated"
+      class="sticky top-0 z-50 w-full"
+      @toggle-sidebar="isSidebarCollapsed = !isSidebarCollapsed"
+    />
 
-    <Sidebar v-if="isAuthenticated" class="flex-1">
-      <div class="min-h-full flex flex-col">
+    <Sidebar v-if="isAuthenticated" class="flex-1 min-h-0" :collapsed="isSidebarCollapsed">
+      <div class="h-full min-h-0 flex flex-col">
         <main class="mx-auto w-full max-w-7xl flex-1 px-6 py-8">
           <RoleGate :min="user?.role">
             <slot />
