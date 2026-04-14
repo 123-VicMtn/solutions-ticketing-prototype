@@ -5,16 +5,21 @@ import { Link } from '@adonisjs/inertia/vue'
 import { Bars4Icon, BellIcon, Cog6ToothIcon, UserCircleIcon } from '@heroicons/vue/24/outline'
 
 const { user } = useAuth()
+const emit = defineEmits<{
+  (e: 'toggle-sidebar'): void
+}>()
 </script>
 <template>
   <div class="navbar bg-base-100 border-b border-base-200">
     <div class="navbar-start gap-1">
-      <label
-        for="my-drawer-3"
-        class="btn btn-ghost btn-circle drawer-button"
-        aria-label="Ouvrir / fermer le menu">
+      <button
+        type="button"
+        class="btn btn-ghost btn-circle"
+        aria-label="Réduire / étendre le menu"
+        @click="emit('toggle-sidebar')"
+      >
         <Bars4Icon class="size-6" />
-      </label>
+      </button>
 
       <Link route="dashboard.index" class="btn btn-ghost gap-2 hover:none">
         <span class="inline-flex size-8 items-center justify-center rounded-lg text-primary-content">
