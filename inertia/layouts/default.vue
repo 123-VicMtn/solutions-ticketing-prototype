@@ -12,9 +12,10 @@ const { user, isAuthenticated } = useAuth()
 
 <template>
   <div class="min-h-screen flex flex-col">
+    <Navbar v-if="isAuthenticated" class="sticky top-0 z-50 w-full" />
+
     <Sidebar v-if="isAuthenticated" class="flex-1">
       <div class="min-h-full flex flex-col">
-        <Navbar />
         <main class="mx-auto w-full max-w-7xl flex-1 px-6 py-8">
           <RoleGate :min="user?.role">
             <slot />
