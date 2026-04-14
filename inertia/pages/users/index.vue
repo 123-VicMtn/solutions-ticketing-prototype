@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3'
 import { Link } from '@adonisjs/inertia/vue'
-import { computed } from 'vue'
+import { EyeIcon, PencilSquareIcon } from '@heroicons/vue/24/outline'
+import ZebraTable from '~/components/common/zebraTable.vue'
 
 const props = defineProps<{
   users: Array<{
@@ -25,75 +26,54 @@ const userUnitLabel = (user: { userUnits: Array<{ unit: { label: string } }> }) 
   }
   return user.userUnits[0]?.unit?.label ?? ''
 }
+
+const tableHeaders = [
+  { key: 'firstName', label: 'Prénom' },
+  { key: 'lastName', label: 'Nom' },
+  { key: 'email', label: 'E-mail' },
+  { key: 'lots', label: 'Lots' },
+  { key: 'action', label: 'Actions', thClass: 'text-right', tdClass: 'text-right' },
+]
 </script>
 
 <template>
   <Head title="Utilisateurs" />
 
-  <div class="space-y-6">
+  <div>
     <div>
       <h1 class="text-2xl font-bold tracking-tight text-gray-900">Utilisateurs</h1>
       <p class="mt-1 text-sm text-gray-500">Gérez les utilisateurs de votre plateforme</p>
     </div>
 
-    <div class="rounded-lg border border-gray-200 bg-white p-6">
-      <div class="overflow-x-auto mb-6">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th
-                class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Prénom
-              </th>
-              <th
-                class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Nom
-              </th>
-              <th
-                class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                E-mail
-              </th>
-              <th
-                class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Lots
-              </th>
-              <th class="px-4 py-2"></th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="user in users" :key="user.id">
-              <td class="px-4 py-2 whitespace-nowrap">{{ user.firstName }}</td>
-              <td class="px-4 py-2 whitespace-nowrap">{{ user.lastName }}</td>
-              <td class="px-4 py-2 whitespace-nowrap text-gray-600">{{ user.email }}</td>
-              <td class="px-4 py-2 whitespace-nowrap text-gray">
-                {{ userUnitLabel(user) }}
-              </td>
-              <td class="px-4 py-2 whitespace-nowrap text-right">
-                <Link
-                  route="users.edit"
-                  :params="{ id: user.id }"
-                  class="hover:underline text-sm font-medium"
-                >
-                  Modifier
-                </Link>
-              </td>
-              <td class="px-4 py-2 whitespace-nowrap text-right">
-                <Link
-                  route="users.show"
-                  :params="{ id: user.id }"
-                  class="hover:underline text-sm font-medium"
-                >
-                  Voir
-                </Link>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <div class="mt-6">
+      <ZebraTable :headers="tableHeaders" :rows="props.users" :rowKey="(u) => u.id">
+        <template #cell:lots="{ row: user }">
+          {{ userUnitLabel(user) }}
+        </template>
+
+        <template #cell:action="{ row: user }">
+          <div class="inline-flex items-center justify-end gap-2">
+            <Link
+              route="users.show"
+              :params="{ id: user.id }"
+              class="btn btn-ghost btn-sm"
+              aria-label="Voir"
+              title="Voir"
+            >
+              <EyeIcon class="size-5" />
+            </Link>
+            <Link
+              route="users.edit"
+              :params="{ id: user.id }"
+              class="btn btn-ghost btn-sm"
+              aria-label="Modifier"
+              title="Modifier"
+            >
+              <PencilSquareIcon class="size-5" />
+            </Link>
+          </div>
+        </template>
+      </ZebraTable>
     </div>
-  </div>
+  </div>  
 </template>
