@@ -3,6 +3,7 @@ import { Head, router } from '@inertiajs/vue3'
 import { Link } from '@adonisjs/inertia/vue'
 import { useAuth } from '~/composables/use_auth'
 import ZebraTable from '~/components/common/zebraTable.vue'
+import { EyeIcon } from '@heroicons/vue/24/outline'
 
 const { isProvider } = useAuth()
 
@@ -31,7 +32,7 @@ const tableHeaders = [
   { key: 'unit', label: 'Lot' },
   { key: 'user', label: 'Locataire' },
   { key: 'status', label: 'Statut' },
-  { key: 'action', label: 'Action', thClass: 'text-right', tdClass: 'text-right' },
+  { key: 'action', label: 'Actions', thClass: 'text-right', tdClass: 'text-right' },
 ]
 
 function applyFilters(form: HTMLFormElement) {
@@ -126,22 +127,9 @@ function applyFilters(form: HTMLFormElement) {
           <Link
             route="tickets.show"
             :params="{ id: ticket.id }"
-            class="font-medium text-gray-700 hover:text-gray-900"
+            class="btn btn-ghost btn-sm"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="2"
-              stroke="currentColor"
-              class="size-5"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-              />
-            </svg>
+            <EyeIcon class="size-5" />
           </Link>
         </template>
       </ZebraTable>
