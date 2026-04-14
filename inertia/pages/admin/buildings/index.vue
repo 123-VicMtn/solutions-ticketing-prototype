@@ -92,7 +92,7 @@ const tableHeaders = [
         </template>
 
         <template #cell:actions="{ row: building }">
-          <div class="flex justify-end">
+          <div class="flex justify-end gap-1">
             <Link
               route="admin.buildings.edit"
               :params="{ id: building.id }"
