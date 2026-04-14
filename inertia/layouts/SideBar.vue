@@ -21,7 +21,7 @@ defineProps<{
   <div class="flex flex-1 min-h-0 min-w-0">
     <aside
       class="bg-base-200 border-r border-base-300 shrink-0 self-stretch flex flex-col"
-      :class="collapsed ? 'w-auto px-2 py-3' : 'w-auto px-3 py-4'"
+      :class="collapsed ? 'w-auto py-3' : 'w-auto px-3 py-4'"
       aria-label="Menu latéral"
     >
       <ul class="menu menu-vertical gap-1">
