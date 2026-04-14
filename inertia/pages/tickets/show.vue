@@ -2,7 +2,8 @@
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ChevronDownIcon } from '@heroicons/vue/24/outline'
 import { computed, ref } from 'vue'
-import { ticketStatusBadgeClass, type TicketStatus } from '~/utils/ticketStatus'
+import { ticketPriorityBadgeClass } from '~/utils/ticketPriority'
+import { TicketStatus } from '#models/ticket';
 
 const props = defineProps<{
   ticket: {
@@ -158,12 +159,12 @@ function resetStatusSelection() {
               {{ ticket.reference }} - {{ ticket.title }}
             </h1>
             <span class="text-sm">
-              <span :class="ticketStatusBadgeClass(ticket.status)">{{ ticket.status }}</span>
+              <span class="badge badge-primary badge-outline">{{ ticket.status }}</span>
             </span>
           </div>
           <p class="mt-1 text-sm text-gray-500">
             {{ ticket.unit.building.name }} / {{ ticket.unit.label }} - {{ ticket.category }} -
-            {{ ticket.priority }}
+            <span :class="ticketPriorityBadgeClass(ticket.priority)">{{ ticket.priority }}</span>
           </p>
         </div>
         <Link
