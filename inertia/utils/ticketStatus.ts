@@ -21,19 +21,19 @@ export function ticketStatusBadgeClass(status: string): string {
   const s = normalizeStatus(status)
   switch (s) {
     case 'ouvert':
-      return 'badge badge-info'
+      return 'badge badge-soft badge-info'
     case 'assigné':
-      return 'badge badge-accent'
+      return 'badge badge-soft badge-accent'
     case 'en cours':
-      return 'badge badge-warning'
+      return 'badge badge-soft badge-warning'
     case 'terminé':
-      return 'badge badge-success badge-outline'
+      return 'badge badge-soft badge-success badge-outline'
     case 'résolu':
-      return 'badge badge-success'
+      return 'badge badge-soft badge-success'
     case 'fermé':
-      return 'badge badge-error'
+      return 'badge badge-soft badge-error'
     default:
-      return 'badge badge-neutral'
+      return 'badge badge-soft badge-neutral'
   }
 }
 
