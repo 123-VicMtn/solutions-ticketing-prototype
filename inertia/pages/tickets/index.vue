@@ -3,6 +3,7 @@ import { Head, router } from '@inertiajs/vue3'
 import { Link } from '@adonisjs/inertia/vue'
 import { useAuth } from '~/composables/use_auth'
 import ZebraTable from '~/components/common/zebraTable.vue'
+import { ticketStatusBadgeClass, type TicketStatus } from '~/utils/ticketStatus'
 
 const { isProvider } = useAuth()
 
@@ -12,7 +13,7 @@ const props = defineProps<{
     reference: string | null
     category: string
     priority: string
-    status: string
+    status: TicketStatus
     title: string
     createdAt: string
     unit: { id: number; label: string; building: { id: number; name: string } }
@@ -126,7 +127,9 @@ function applyFilters(form: HTMLFormElement) {
         </template>
 
         <template #cell:status="{ row: ticket }">
-          {{ ticket.status }}
+          <span class="text-sm">
+            <span :class="ticketStatusBadgeClass(ticket.status)">{{ ticket.status }}</span>
+          </span>
         </template>
 
         <template #cell:action="{ row: ticket }">

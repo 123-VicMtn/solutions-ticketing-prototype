@@ -2,6 +2,7 @@
 import { Head } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import { Link } from '@adonisjs/inertia/vue'
+import { ticketStatusBadgeClass, type TicketStatus } from '~/utils/ticketStatus'
 
 const ROLE_LABELS: Record<string, string> = {
   admin: 'Administrateur',
@@ -33,7 +34,7 @@ const props = defineProps<{
     reference: string | null
     category: string
     priority: string
-    status: string
+    status: TicketStatus
     title: string
     description: string
     createdAt: string
@@ -114,7 +115,9 @@ const notificationLabel = computed(() =>
           >
           <span class="ml-2 text-xs text-gray-500">({{ ticket.category }})</span>
           <span class="ml-2 text-xs text-gray-500">({{ ticket.priority }})</span>
-          <span class="ml-2 text-xs text-gray-500">({{ ticket.status }})</span>
+          <span class="ml-2 text-xs">
+            <span :class="ticketStatusBadgeClass(ticket.status)">{{ ticket.status }}</span>
+          </span>
           <span class="ml-2 text-xs text-gray-500">({{ ticket.createdAt }})</span>
         </li>
         <li v-if="tickets.length === 0">

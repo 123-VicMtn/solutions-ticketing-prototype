@@ -2,6 +2,7 @@
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ChevronDownIcon } from '@heroicons/vue/24/outline'
 import { computed, ref } from 'vue'
+import { ticketStatusBadgeClass, type TicketStatus } from '~/utils/ticketStatus'
 
 const props = defineProps<{
   ticket: {
@@ -9,7 +10,7 @@ const props = defineProps<{
     reference: string | null
     category: string
     priority: string
-    status: string
+    status: TicketStatus
     title: string
     description: string
     unit: { label: string; building: { name: string } }
@@ -54,7 +55,7 @@ const props = defineProps<{
   providers: Array<{ id: number; companyName: string; speciality: string }>
 }>()
 
-const workflowStatuses = ['ouvert', 'assigné', 'en cours', 'terminé', 'résolu', 'fermé'] as const
+const workflowStatuses = ['ouvert', 'assigné', 'en cours', 'terminé', 'résolu', 'fermé'] as const satisfies readonly TicketStatus[]
 
 const STATUS_LABELS: Record<string, string> = {
   ouvert: 'Ouvert',
@@ -116,7 +117,7 @@ const isSubmitDisabled = computed(() => {
 })
 
 const currentIndex = computed(() => {
-  const idx = workflowStatuses.indexOf(props.ticket.status as any)
+  const idx = workflowStatuses.indexOf(props.ticket.status)
   return idx === -1 ? 0 : idx
 })
 
@@ -152,9 +153,14 @@ function resetStatusSelection() {
       >
       <div class="mt-2 flex items-start justify-between">
         <div>
-          <h1 class="text-2xl font-bold tracking-tight text-gray-900">
-            {{ ticket.reference }} - {{ ticket.title }}
-          </h1>
+          <div class="flex items-center gap-3">
+            <h1 class="text-2xl font-bold tracking-tight text-gray-900">
+              {{ ticket.reference }} - {{ ticket.title }}
+            </h1>
+            <span class="text-sm">
+              <span :class="ticketStatusBadgeClass(ticket.status)">{{ ticket.status }}</span>
+            </span>
+          </div>
           <p class="mt-1 text-sm text-gray-500">
             {{ ticket.unit.building.name }} / {{ ticket.unit.label }} - {{ ticket.category }} -
             {{ ticket.priority }}
