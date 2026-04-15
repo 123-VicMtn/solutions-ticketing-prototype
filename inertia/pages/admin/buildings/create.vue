@@ -11,7 +11,7 @@ import { ArrowLeftIcon } from '@heroicons/vue/24/outline'
 
   <div class="mx-auto w-full max-w-lg">
     <div class="mb-6">
-      <Link route="admin.buildings.index" class="text-sm text-gray-500 hover:text-gray-900">
+      <Link route="admin.buildings.index" class="text-sm text-muted ">
         <span class="inline-flex items-center gap-2"><ArrowLeftIcon class="size-4" />Retour aux immeubles</span>
       </Link>
     </div>
