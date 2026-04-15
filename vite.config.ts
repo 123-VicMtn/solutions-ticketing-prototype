@@ -22,7 +22,9 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     hmr: {
-      host: 'localhost',
+      port: 24678,
+      clientPort: 24678,
+      protocol: 'ws',
     },
     watch: {
       usePolling: true,
