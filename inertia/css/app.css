@@ -84,12 +84,15 @@
 
 @layer utilities {
   .text-muted {
-    color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
-    @apply hover:text-neutral;
+    color: oklch(55.1% 0.027 264.364);
   }
+  a .text-muted:hover,
+  a.text-muted:hover {
+    @apply text-neutral;
+  }
+}
 
   .placeholder-muted::placeholder {
     color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
     opacity: 1;
   }
-}
