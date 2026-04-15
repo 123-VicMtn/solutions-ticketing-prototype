@@ -8,6 +8,7 @@ import {
   PlusCircleIcon,
   TicketIcon,
   UsersIcon,
+  KeyIcon,
 } from '@heroicons/vue/24/outline'
 
 const { isAuthenticated } = useAuth()
@@ -72,6 +73,12 @@ defineProps<{
             <Link route="users.index">
               <UsersIcon class="size-5" />
               <span v-if="!collapsed">Utilisateurs</span>
+            </Link>
+          </li>
+          <li>
+            <Link route="manager.access_requests.index">
+              <KeyIcon class="size-5" />
+              <span v-if="!collapsed">Demandes d'accès</span>
             </Link>
           </li>
         </RoleGate>
