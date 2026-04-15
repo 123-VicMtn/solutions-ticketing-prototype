@@ -83,6 +83,12 @@
 @source "../../resources/views/**/*.edge";
 
 @layer utilities {
+  :where(.input, .select, .textarea):focus,
+  :where(.input, .select, .textarea):focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+
   .text-muted {
     color: oklch(55.1% 0.027 264.364);
   }
@@ -91,7 +97,6 @@
     @apply text-neutral;
   }
 }
-
   .placeholder-muted::placeholder {
     color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
     opacity: 1;
