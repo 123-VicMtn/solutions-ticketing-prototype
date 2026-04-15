@@ -81,3 +81,15 @@
 @source "../**/*.{vue,js,ts}";
 @source "../../inertia/**/*.{vue,js,ts}";
 @source "../../resources/views/**/*.edge";
+
+@layer utilities {
+  .text-muted {
+    color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
+    @apply hover:text-neutral;
+  }
+
+  .placeholder-muted::placeholder {
+    color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
+    opacity: 1;
+  }
+}
