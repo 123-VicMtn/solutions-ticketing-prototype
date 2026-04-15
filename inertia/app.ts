@@ -19,9 +19,17 @@ createInertiaApp({
     )
   },
   setup({ el, App, props, plugin }) {
-    createApp({ render: () => h(TuyauProvider, { client }, { default: () => h(App, props) }) })
-      .use(plugin)
-      .mount(el)
+    const app = createApp({
+      render: () => h(TuyauProvider, { client }, { default: () => h(App, props) }),
+    })
+
+    if (import.meta.env.DEV) {
+      app.config.errorHandler = (err, _instance, info) => {
+        console.error(`[Vue error] ${info}:`, err)
+      }
+    }
+
+    app.use(plugin).mount(el)
   },
   progress: {
     color: '#4B5563',
