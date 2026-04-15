@@ -4,6 +4,7 @@ import { Link } from '@adonisjs/inertia/vue'
 import { useAuth } from '~/composables/use_auth'
 import ZebraTable from '~/components/common/zebraTable.vue'
 import { EyeIcon } from '@heroicons/vue/24/outline'
+import { ticketPriorityBadgeClass } from '~/utils/ticketPriority'
 
 const { isProvider } = useAuth()
 
@@ -113,7 +114,7 @@ function applyFilters(form: HTMLFormElement) {
 
         <template #cell:priority="{ row: ticket }">
           <span class="text-sm">
-            <span class="badge badge-ghost">{{ ticket.priority }}</span>
+            <span :class="ticketPriorityBadgeClass(ticket.priority)">{{ ticket.priority }}</span>
           </span>
         </template>
 
