@@ -2,16 +2,11 @@
 import { ArrowRightIcon, EyeIcon } from '@heroicons/vue/24/outline'
 import { Link } from '@adonisjs/inertia/vue'
 import ZebraTable from '~/components/common/zebraTable.vue'
+import type { Data } from '@generated/data'
+import type { TicketStatus } from '~/utils/ticketStatus'
 
 const { recentTickets } = defineProps<{
-  recentTickets: Array<{
-    id: number
-    reference: string | null
-    title: string
-    status: TicketStatus
-    createdAt: string
-    unit: { label: string }
-  }>
+  recentTickets: Array<Data.Ticket & { status: TicketStatus }>
 }>()
 
 const tableHeaders = [
