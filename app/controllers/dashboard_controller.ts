@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Ticket from '#models/ticket'
 import UserUnit from '#models/user_unit'
+import TicketTransformer from '#transformers/ticket_transformer'
 
 export default class DashboardController {
   /**
@@ -55,25 +56,17 @@ export default class DashboardController {
     // Prototype: on masque volontairement le statut "fermé" dans le dashboard.
     const countsByStatusFiltered = countsByStatus.filter((row) => row.status !== 'fermé')
 
-    const recentRows = await applyScope(
-      Ticket.query()
-        .preload('unit', (q) => q.preload('building'))
-        .orderBy('id', 'desc')
-        .limit(5)
-    )
+    const recentTicketsQuery = Ticket.query()
+      .preload('unit', (q) => q.preload('building'))
+      .orderBy('id', 'desc')
+      .limit(5)
 
-    const recentTickets = (recentRows as any[]).map((ticket) => ({
-      id: ticket.id as number,
-      reference: ticket.reference as string | null,
-      title: ticket.title as string,
-      status: ticket.status as string,
-      createdAt: ticket.createdAt?.toISO?.() ?? '',
-      unit: {
-        label: ticket.unit?.label ?? '',
-      },
-    }))
+    const recentTickets = (await applyScope(recentTicketsQuery)) as Ticket[]
 
-    return inertia.render('dashboard', { countsByStatus: countsByStatusFiltered, recentTickets })
+    return inertia.render('dashboard', {
+      countsByStatus: countsByStatusFiltered,
+      recentTickets: TicketTransformer.transform(recentTickets),
+    })
   }
 
   /**
