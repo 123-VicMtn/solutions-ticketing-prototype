@@ -1,35 +1,24 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3'
 import { reactive } from 'vue'
+import type { Data } from '@generated/data'
 
 const props = defineProps<{
-  requests: Array<{
-    id: number
-    firstName: string
-    lastName: string
-    fullName: string | null
-    email: string | null
-    phone: string | null
-    role: 'tenant' | 'owner'
-    createdAt: string
-  }>
-  units: Array<{
-    id: number
-    label: string
-    building: { id: number; name: string }
-  }>
+  requests: Data.User[]
+  units: Data.Unit[]
 }>()
 
 const unitByRequest = reactive<Record<number, number | null>>({})
 const rejectReasonByRequest = reactive<Record<number, string>>({})
 
-function approve(requestId: number, relation: 'tenant' | 'owner') {
+function approve(requestId: number, role: string) {
   const unitId = unitByRequest[requestId]
   if (!unitId) return
+  if (role !== 'tenant' && role !== 'owner') return
 
   router.post(`/manager/access-requests/${requestId}/approve`, {
     unitId,
-    relation,
+    relation: role,
   })
 }
 
@@ -88,7 +77,7 @@ function reject(requestId: number) {
               >
                 <option :value="null">Choisir un logement</option>
                 <option v-for="unit in units" :key="unit.id" :value="unit.id">
-                  {{ unit.building.name }} - {{ unit.label }}
+                  {{ unit.building?.name }} - {{ unit.label }}
                 </option>
               </select>
             </div>
