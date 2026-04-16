@@ -1,17 +1,10 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ref } from 'vue'
+import type { Data } from '@generated/data'
 
 const props = defineProps<{
-  ticket: {
-    id: number
-    reference: string | null
-    title: string
-    description: string
-    priority: string
-    category: string
-    unit: { label: string; building: { name: string } }
-  }
+  ticket: Data.Ticket
   canModifyPriority: boolean
 }>()
 
@@ -57,7 +50,7 @@ function submit() {
       Modifier {{ ticket.reference }}
     </h1>
     <p class="mt-1 text-sm text-gray-500">
-      {{ ticket.unit.building.name }} / {{ ticket.unit.label }} — {{ ticket.category }}
+      {{ ticket.unit?.building?.name }} / {{ ticket.unit?.label }} — {{ ticket.category }}
     </p>
 
     <form class="mt-8 space-y-5" @submit.prevent="submit">
