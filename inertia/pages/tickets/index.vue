@@ -5,21 +5,12 @@ import { useAuth } from '~/composables/use_auth'
 import ZebraTable from '~/components/common/zebraTable.vue'
 import { EyeIcon } from '@heroicons/vue/24/outline'
 import { ticketPriorityBadgeClass } from '~/utils/ticketPriority'
+import type { Data } from '@generated/data'
 
 const { isProvider } = useAuth()
 
 const props = defineProps<{
-  tickets: Array<{
-    id: number
-    reference: string | null
-    category: string
-    priority: string
-    status: string
-    title: string
-    createdAt: string
-    unit: { id: number; label: string; building: { id: number; name: string } }
-    user: { id: number; fullName: string | null; email: string }
-  }>
+  tickets: Data.Ticket[]
   filters: { status?: string; priority?: string }
 }>()
 
@@ -105,11 +96,11 @@ function applyFilters(form: HTMLFormElement) {
         </template>
 
         <template #cell:unit="{ row: ticket }">
-          {{ ticket.unit.building.name }} / {{ ticket.unit.label }}
+          {{ ticket.unit?.building?.name }} / {{ ticket.unit?.label }}
         </template>
 
         <template #cell:user="{ row: ticket }">
-          {{ ticket.user.fullName }}
+          {{ ticket.user?.fullName }}
         </template>
 
         <template #cell:priority="{ row: ticket }">
