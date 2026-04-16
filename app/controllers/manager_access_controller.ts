@@ -2,6 +2,8 @@ import OnboardingNotifications from '#services/onboarding_notifications'
 import Unit from '#models/unit'
 import User from '#models/user'
 import UserUnit from '#models/user_unit'
+import UnitTransformer from '#transformers/unit_transformer'
+import UserTransformer from '#transformers/user_transformer'
 import db from '@adonisjs/lucid/services/db'
 import {
   approveAccessRequestValidator,
@@ -22,24 +24,8 @@ export default class ManagerAccessController {
     const units = await Unit.query().preload('building').orderBy('building_id').orderBy('label')
 
     return inertia.render('manager/access_requests', {
-      requests: pendingRequests.map((user) => ({
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        fullName: user.fullName,
-        email: user.email,
-        phone: user.phone,
-        role: user.role as 'tenant' | 'owner',
-        createdAt: user.createdAt.toISO() ?? '',
-      })),
-      units: units.map((unit) => ({
-        id: unit.id,
-        label: unit.label,
-        building: {
-          id: unit.building.id,
-          name: unit.building.name,
-        },
-      })),
+      requests: UserTransformer.transform(pendingRequests),
+      units: UnitTransformer.transform(units),
     })
   }
 
