@@ -6,11 +6,14 @@ export default class BuildingTransformer extends BaseTransformer<Building> {
     return this.pick(this.resource, ['id', 'name', 'address', 'city', 'postalCode'])
   }
 
-  /**
-   * Version légère pour les listes / sous-objets (ex: building lié à un unit).
-   */
   forSummary() {
     return this.pick(this.resource, ['id', 'name'])
   }
-}
 
+  forListing() {
+    return {
+      ...this.toObject(),
+      unitsCount: Number(this.resource.$extras?.units_count ?? 0),
+    }
+  }
+}
