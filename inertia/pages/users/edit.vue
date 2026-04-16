@@ -1,14 +1,10 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3'
 import { useForm } from '@inertiajs/vue3'
+import type { Data } from '@generated/data'
 
 const props = defineProps<{
-  user: {
-    id: number
-    firstName: string
-    lastName: string
-    email: string | null
-  }
+  user: Data.User
 }>()
 
 const form = useForm({
