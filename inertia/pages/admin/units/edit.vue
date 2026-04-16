@@ -1,17 +1,11 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3'
 import { Form, Link } from '@adonisjs/inertia/vue'
+import type { Data } from '@generated/data'
 
 defineProps<{
-  unit: {
-    id: number
-    label: string
-    floor: number
-    type: string
-    buildingId: number
-    building: { id: number; name: string }
-  }
-  buildings: Array<{ id: number; name: string }>
+  unit: Data.Unit
+  buildings: Data.Building.Variants['forSummary'][]
 }>()
 </script>
 
