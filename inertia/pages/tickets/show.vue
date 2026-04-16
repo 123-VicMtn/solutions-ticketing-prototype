@@ -4,56 +4,18 @@ import { ChevronDownIcon } from '@heroicons/vue/24/outline'
 import { computed, ref } from 'vue'
 import { ticketPriorityBadgeClass } from '~/utils/ticketPriority'
 import { TicketStatus } from '#models/ticket';
+import type { Data } from '@generated/data'
 
 const props = defineProps<{
-  ticket: {
-    id: number
-    reference: string | null
-    category: string
-    priority: string
-    status: TicketStatus
-    title: string
-    description: string
-    unit: { label: string; building: { name: string } }
-    user: {
-      id: number
-      fullName: string | null
-      email: string
-      phone: string
-      role: 'admin' | 'manager' | 'tenant' | 'owner' | 'provider'
-      notificationPreference: 'email' | 'sms'
-    }
-    provider: {
-      companyName: string
-      phone: string
-      speciality: string
-    } | null
-    assignee: {
-      id: number
-      fullName: string | null
-    } | null
-  }
-  comments: Array<{
-    id: number
-    content: string
-    isInternal: boolean
-    createdAt: string
-    user: { fullName: string | null; email: string }
-  }>
-  attachments: Array<{
-    id: number
-    originalName: string
-    mimeType: string
-    sizeBytes: number
-    filePath: string
-    createdAt: string
-  }>
+  ticket: Data.Ticket
+  comments: Data.TicketComment[]
+  attachments: Data.TicketAttachment[]
   canSeeInternal: boolean
   canEditFields: boolean
   canChangeStatus: boolean
   allowedStatusTransitions: string[]
   canAssign: boolean
-  providers: Array<{ id: number; companyName: string; speciality: string }>
+  providers: Data.Provider[]
 }>()
 
 const workflowStatuses = ['ouvert', 'assigné', 'en cours', 'terminé', 'résolu', 'fermé'] as const satisfies readonly TicketStatus[]
@@ -163,7 +125,7 @@ function resetStatusSelection() {
             </span>
           </div>
           <p class="mt-1 text-sm text-gray-500">
-            {{ ticket.unit.building.name }} / {{ ticket.unit.label }} - {{ ticket.category }} -
+            {{ ticket.unit?.building?.name }} / {{ ticket.unit?.label }} - {{ ticket.category }} -
             <span :class="ticketPriorityBadgeClass(ticket.priority)">{{ ticket.priority }}</span>
           </p>
         </div>
@@ -185,11 +147,11 @@ function resetStatusSelection() {
     <div class="grid w-full grid-flow-col grid-cols-3 gap-4">
       <div class="col-span-2 rounded-lg border border-gray-200 bg-white p-6">
         <div class="mb-3 text-xs uppercase tracking-wide text-gray-500">Demandeur</div>
-        <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.user.fullName }}</p>
-        <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.user.email }}</p>
-        <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.user.phone }}</p>
+        <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.user?.fullName }}</p>
+        <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.user?.email }}</p>
+        <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.user?.phone }}</p>
         <p class="whitespace-pre-wrap text-sm text-gray-800">
-          {{ ticket.user.notificationPreference }}
+          {{ ticket.user?.notificationPreference }}
         </p>
       </div>
 
@@ -331,7 +293,7 @@ function resetStatusSelection() {
       <div class="space-y-3">
         <div v-for="c in comments" :key="c.id" class="rounded-md bg-gray-50 p-3">
           <div class="mb-1 text-xs text-gray-500">
-            {{ c.user.fullName ?? c.user.email }}
+            {{ c.user?.fullName ?? c.user?.email }}
             <span
               v-if="c.isInternal"
               class="ml-2 rounded bg-amber-100 px-2 py-0.5 text-amber-800"
