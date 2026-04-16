@@ -13,4 +13,14 @@ export default class UserUnitTransformer extends BaseTransformer<UserUnit> {
       unit: UnitTransformer.transform(this.whenLoaded(this.resource.unit)),
     }
   }
+
+  forUnitListing() {
+    return {
+      id: this.resource.id,
+      relation: this.resource.relation,
+      user: UserTransformer.transform(this.whenLoaded(this.resource.user))?.useVariant(
+        'forUserUnitUser'
+      ),
+    }
+  }
 }
