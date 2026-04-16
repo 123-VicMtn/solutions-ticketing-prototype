@@ -5,6 +5,11 @@ import UserUnit from '#models/user_unit'
 import Provider from '#models/provider'
 import TicketComment from '#models/ticket_comment'
 import TicketAttachment from '#models/ticket_attachment'
+import ProviderTransformer from '#transformers/provider_transformer'
+import TicketAttachmentTransformer from '#transformers/ticket_attachment_transformer'
+import TicketCommentTransformer from '#transformers/ticket_comment_transformer'
+import TicketTransformer from '#transformers/ticket_transformer'
+import UnitTransformer from '#transformers/unit_transformer'
 import {
   commentTicketValidator,
   createTicketValidator,
@@ -64,28 +69,7 @@ export default class TicketsController {
     const tickets = await query
 
     return inertia.render('tickets/index', {
-      tickets: tickets.map((ticket) => ({
-        id: ticket.id,
-        reference: ticket.reference,
-        category: ticket.category,
-        priority: ticket.priority,
-        status: ticket.status,
-        title: ticket.title,
-        createdAt: ticket.createdAt.toISO() ?? '',
-        unit: {
-          id: ticket.unit.id,
-          label: ticket.unit.label,
-          building: {
-            id: ticket.unit.building.id,
-            name: ticket.unit.building.name,
-          },
-        },
-        user: {
-          id: ticket.user.id,
-          fullName: ticket.user.fullName,
-          email: ticket.user.email ?? '-',
-        },
-      })),
+      tickets: TicketTransformer.transform(tickets),
       filters,
     })
   }
@@ -109,15 +93,7 @@ export default class TicketsController {
 
     return inertia.render('tickets/create', {
       canModifyPriority,
-      units: units.map((unit) => ({
-        id: unit.id,
-        label: unit.label,
-        type: unit.type,
-        building: {
-          id: unit.building.id,
-          name: unit.building.name,
-        },
-      })),
+      units: UnitTransformer.transform(units),
     })
   }
 
@@ -187,77 +163,20 @@ export default class TicketsController {
           })
       : []
 
-    const providerRows = canAssign
+    const providers = canAssign
       ? await Provider.query().where('isActive', true).orderBy('companyName')
       : []
 
-    const providers = providerRows.map((p) => ({
-      id: p.id,
-      companyName: p.companyName,
-      speciality: p.speciality,
-    }))
-
     return inertia.render('tickets/show', {
-      ticket: {
-        id: ticket.id,
-        reference: ticket.reference,
-        category: ticket.category,
-        priority: ticket.priority,
-        status: ticket.status,
-        title: ticket.title,
-        description: ticket.description,
-        unit: {
-          label: ticket.unit.label,
-          building: { name: ticket.unit.building.name },
-        },
-        user: {
-          id: ticket.user.id,
-          fullName: ticket.user.fullName,
-          email: ticket.user.email ?? '-',
-          phone: ticket.user.phone ?? '-',
-          role: ticket.user.role,
-          notificationPreference: ticket.user.notificationPreference,
-        },
-        provider: ticket.provider
-          ? {
-              companyName: ticket.provider.companyName,
-              phone: ticket.provider.phone ?? '',
-              speciality: ticket.provider.speciality,
-            }
-          : null,
-        assignee: ticket.assignee
-          ? {
-              id: ticket.assignee.id,
-              fullName: ticket.assignee.fullName,
-            }
-          : null,
-      },
-      comments: visibleComments.map((comment) => ({
-        id: comment.id,
-        userId: comment.userId,
-        content: comment.content,
-        isInternal: comment.isInternal,
-        createdAt: comment.createdAt.toISO() ?? '',
-        user: {
-          id: comment.user.id,
-          fullName: comment.user.fullName,
-          email: comment.user.email ?? '-',
-        },
-      })),
-      attachments: ticket.attachments.map((attachment) => ({
-        id: attachment.id,
-        originalName: attachment.originalName,
-        mimeType: attachment.mimeType,
-        sizeBytes: attachment.sizeBytes,
-        filePath: attachment.filePath,
-        createdAt: attachment.createdAt.toISO() ?? '',
-      })),
+      ticket: TicketTransformer.transform(ticket),
+      comments: TicketCommentTransformer.transform(visibleComments),
+      attachments: TicketAttachmentTransformer.transform(ticket.attachments),
       canSeeInternal,
       canEditFields,
       canChangeStatus,
       allowedStatusTransitions,
       canAssign,
-      providers,
+      providers: ProviderTransformer.transform(providers),
     })
   }
 
@@ -280,18 +199,7 @@ export default class TicketsController {
     }
 
     return inertia.render('tickets/edit', {
-      ticket: {
-        id: ticket.id,
-        reference: ticket.reference,
-        title: ticket.title,
-        description: ticket.description,
-        priority: ticket.priority,
-        category: ticket.category,
-        unit: {
-          label: ticket.unit.label,
-          building: { name: ticket.unit.building.name },
-        },
-      },
+      ticket: TicketTransformer.transform(ticket),
       canModifyPriority: isManagerOrAbove,
     })
   }
