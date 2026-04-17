@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3'
 import { Form, Link } from '@adonisjs/inertia/vue'
+import BaseButton from '~/components/common/buttons/BaseButton.vue'
+import { ArrowLeftIcon } from '@heroicons/vue/24/outline'
+import BaseCard from '~/components/common/cards/BaseCard.vue'
+import FormField from '~/components/common/forms/FormField.vue'
 import type { Data } from '@generated/data'
 
 defineProps<{
@@ -11,91 +15,87 @@ defineProps<{
 <template>
   <Head :title="`Modifier ${building.name}`" />
 
-  <div class="mx-auto max-w-lg">
+  <div class="mx-auto w-full max-w-lg">
     <div class="mb-6">
-      <Link route="admin.buildings.index" class="text-sm text-gray-500 hover:text-gray-900">
-        &larr; Retour aux immeubles
+      <Link route="admin.buildings.index" class="text-sm text-muted">
+        <span class="inline-flex items-center gap-2">
+          <ArrowLeftIcon class="size-4" />
+          Retour aux immeubles
+        </span>
       </Link>
     </div>
 
-    <h1 class="text-2xl font-bold tracking-tight text-gray-900">Modifier l'immeuble</h1>
-    <p class="mt-1 text-sm text-gray-500">{{ building.name }}</p>
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold tracking-tight text-base-content">Modifier l'immeuble</h1>
+      <p class="mt-1 text-sm text-muted">{{ building.name }}</p>
+    </div>
 
-    <Form
-      route="admin.buildings.update"
-      :params="{ id: building.id }"
-      method="put"
-      #default="{ processing, errors }"
-      class="mt-8 space-y-5"
-    >
-      <div>
-        <label for="name" class="mb-1.5 block text-sm font-medium text-gray-700">Nom</label>
-        <input
-          type="text"
-          name="name"
-          id="name"
-          :value="building.name"
-          class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none"
-          :class="{ 'border-red-500': errors.name }"
-        />
-        <p v-if="errors.name" class="mt-1 text-sm text-red-600">{{ errors.name }}</p>
-      </div>
-
-      <div>
-        <label for="address" class="mb-1.5 block text-sm font-medium text-gray-700">Adresse</label>
-        <input
-          type="text"
-          name="address"
-          id="address"
-          :value="building.address"
-          class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none"
-          :class="{ 'border-red-500': errors.address }"
-        />
-        <p v-if="errors.address" class="mt-1 text-sm text-red-600">{{ errors.address }}</p>
-      </div>
-
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label for="city" class="mb-1.5 block text-sm font-medium text-gray-700">Ville</label>
+    <BaseCard bodyClass="p-6 sm:p-8">
+      <Form
+        route="admin.buildings.update"
+        :params="{ id: building.id }"
+        method="put"
+        #default="{ processing, errors }"
+        class="space-y-5"
+      >
+        <FormField id="name" label="Nom" :error="errors.name">
           <input
+            id="name"
+            name="name"
             type="text"
-            name="city"
-            id="city"
-            :value="building.city"
-            class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none"
-            :class="{ 'border-red-500': errors.city }"
+            :value="building.name"
+            class="input input-bordered w-full text-base-content"
+            :class="{ 'input-error': errors.name }"
           />
-          <p v-if="errors.city" class="mt-1 text-sm text-red-600">{{ errors.city }}</p>
-        </div>
-        <div>
-          <label for="postalCode" class="mb-1.5 block text-sm font-medium text-gray-700">NPA</label>
-          <input
-            type="text"
-            name="postalCode"
-            id="postalCode"
-            :value="building.postalCode"
-            class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none"
-            :class="{ 'border-red-500': errors.postalCode }"
-          />
-          <p v-if="errors.postalCode" class="mt-1 text-sm text-red-600">{{ errors.postalCode }}</p>
-        </div>
-      </div>
+        </FormField>
 
-      <div class="flex justify-end gap-3 pt-4">
-        <Link
-          route="admin.buildings.index"
-          class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          Annuler
-        </Link>
-        <button
-          type="submit"
-          :disabled="processing"
-          class="cursor-pointer rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
-        >
-          Enregistrer
-        </button>
-      </div>
-    </Form>
+        <FormField id="address" label="Adresse" :error="errors.address">
+          <input
+            id="address"
+            name="address"
+            type="text"
+            :value="building.address"
+            class="input input-bordered w-full text-base-content"
+            :class="{ 'input-error': errors.address }"
+          />
+        </FormField>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <FormField id="city" label="Ville" :error="errors.city">
+            <input
+              id="city"
+              name="city"
+              type="text"
+              :value="building.city"
+              class="input input-bordered w-full text-base-content"
+              :class="{ 'input-error': errors.city }"
+            />
+          </FormField>
+
+          <FormField id="postalCode" label="NPA" :error="errors.postalCode">
+            <input
+              id="postalCode"
+              name="postalCode"
+              type="text"
+              :value="building.postalCode"
+              class="input input-bordered w-full text-base-content"
+              :class="{ 'input-error': errors.postalCode }"
+            />
+          </FormField>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <Link route="admin.buildings.index" class="btn btn-ghost">
+            Annuler
+          </Link>
+          <BaseButton
+            type="submit"
+            :disabled="processing"
+            label="Enregistrer"
+            class="m-0"
+          />
+        </div>
+      </Form>
+    </BaseCard>
   </div>
 </template>
