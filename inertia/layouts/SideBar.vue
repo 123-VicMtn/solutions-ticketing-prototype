@@ -19,77 +19,75 @@ defineProps<{
 </script>
 
 <template>
-  <div class="flex flex-1 min-h-0 min-w-0 items-stretch">
-    <aside
-      class="bg-base-200 border-r border-base-300 shrink-0 flex flex-col self-stretch overflow-y-hidden"
-      :class="collapsed ? 'w-auto py-3' : 'w-auto px-3 py-4'"
-      aria-label="Menu latéral"
+  <aside
+    class="bg-base-200 border-r border-base-300 shrink-0 h-full flex flex-col overflow-x-hidden overflow-y-auto transition-[width] duration-200 ease-out"
+    :class="collapsed ? 'w-min' : 'w-auto'"
+    aria-label="Menu latéral"
+  >
+    <ul
+      class="menu menu-vertical gap-1 w-full flex-nowrap"
+      :class="collapsed ? 'px-1 py-3' : 'px-3 py-4'"
     >
-      <ul class="menu menu-vertical gap-1">
-        <li class="menu-title" v-if="!collapsed"><span>Général</span></li>
+      <li class="menu-title" v-if="!collapsed"><span>Général</span></li>
 
-        <template v-if="isAuthenticated">
-          <li>
-            <Link route="dashboard.index">
-              <HomeIcon class="size-5" />
-              <span v-if="!collapsed">Tableau de bord</span>
-            </Link>
-          </li>
-        </template>
+      <template v-if="isAuthenticated">
+        <li>
+          <Link route="dashboard.index" :class="collapsed ? 'justify-center tooltip tooltip-right' : ''" :data-tip="collapsed ? 'Tableau de bord' : undefined">
+            <HomeIcon class="size-5 shrink-0" />
+            <span v-if="!collapsed" class="truncate">Tableau de bord</span>
+          </Link>
+        </li>
+      </template>
 
-        <li class="menu-title" v-if="!collapsed"><span>Tickets</span></li>
-        <template v-if="isAuthenticated">
-          <li>
-            <Link route="tickets.index">
-              <TicketIcon class="size-5" />
-              <span v-if="!collapsed">Tous les tickets</span>
-            </Link>
-          </li>
-          <li>
-            <Link route="tickets.create">
-              <PlusCircleIcon class="size-5" />
-              <span v-if="!collapsed">Créer un ticket</span>
-            </Link>
-          </li>
-        </template>
-        <template v-else>
-          <li>
-            <Link route="session.create">
-              <HomeIcon class="size-5" />
-              <span v-if="!collapsed">Se connecter</span>
-            </Link>
-          </li>
-        </template>
+      <li class="menu-title" v-if="!collapsed"><span>Tickets</span></li>
+      <template v-if="isAuthenticated">
+        <li>
+          <Link route="tickets.index" :class="collapsed ? 'justify-center tooltip tooltip-right' : ''" :data-tip="collapsed ? 'Tous les tickets' : undefined">
+            <TicketIcon class="size-5 shrink-0" />
+            <span v-if="!collapsed" class="truncate">Tous les tickets</span>
+          </Link>
+        </li>
+        <li>
+          <Link route="tickets.create" :class="collapsed ? 'justify-center tooltip tooltip-right' : ''" :data-tip="collapsed ? 'Créer un ticket' : undefined">
+            <PlusCircleIcon class="size-5 shrink-0" />
+            <span v-if="!collapsed" class="truncate">Créer un ticket</span>
+          </Link>
+        </li>
+      </template>
+      <template v-else>
+        <li>
+          <Link route="session.create" :class="collapsed ? 'justify-center tooltip tooltip-right' : ''" :data-tip="collapsed ? 'Se connecter' : undefined">
+            <HomeIcon class="size-5 shrink-0" />
+            <span v-if="!collapsed" class="truncate">Se connecter</span>
+          </Link>
+        </li>
+      </template>
 
-        <RoleGate min="manager">
-          <li class="menu-title" v-if="!collapsed"><span>Administration</span></li>
-          <li>
-            <Link route="admin.buildings.index">
-              <BuildingOffice2Icon class="size-5" />
-              <span v-if="!collapsed">Objets Immobiliers</span>
-            </Link>
-          </li>
-          </RoleGate>
-          <RoleGate min="admin">
-            <li class="menu-title" v-if="!collapsed"><span>Gestion</span></li>
-            <li>
-            <Link route="users.index">
-              <UsersIcon class="size-5" />
-              <span v-if="!collapsed">Utilisateurs</span>
-            </Link>
-            </li>
-          <li>
-            <Link route="manager.access_requests.index">
-              <KeyIcon class="size-5" />
-              <span v-if="!collapsed">Demandes d'accès</span>
-            </Link>
-          </li>
-        </RoleGate>
-      </ul>
-    </aside>
+      <RoleGate min="manager">
+        <li class="menu-title" v-if="!collapsed"><span>Administration</span></li>
+        <li>
+          <Link route="admin.buildings.index" :class="collapsed ? 'justify-center tooltip tooltip-right' : ''" :data-tip="collapsed ? 'Objets Immobiliers' : undefined">
+            <BuildingOffice2Icon class="size-5 shrink-0" />
+            <span v-if="!collapsed" class="truncate">Objets Immobiliers</span>
+          </Link>
+        </li>
+      </RoleGate>
 
-    <div class="min-w-0 flex-1">
-      <slot />
-    </div>
-  </div>
+      <RoleGate min="admin">
+        <li class="menu-title" v-if="!collapsed"><span>Gestion</span></li>
+        <li>
+          <Link route="users.index" :class="collapsed ? 'justify-center tooltip tooltip-right' : ''" :data-tip="collapsed ? 'Utilisateurs' : undefined">
+            <UsersIcon class="size-5 shrink-0" />
+            <span v-if="!collapsed" class="truncate">Utilisateurs</span>
+          </Link>
+        </li>
+        <li>
+          <Link route="manager.access_requests.index" :class="collapsed ? 'justify-center tooltip tooltip-right' : ''" :data-tip="collapsed ? 'Demandes d\'accès' : undefined">
+            <KeyIcon class="size-5 shrink-0" />
+            <span v-if="!collapsed" class="truncate">Demandes d'accès</span>
+          </Link>
+        </li>
+      </RoleGate>
+    </ul>
+  </aside>
 </template>
