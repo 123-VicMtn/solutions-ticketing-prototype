@@ -1,7 +1,12 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3'
+import { Head, router } from '@inertiajs/vue3'
+import { Link } from '@adonisjs/inertia/vue'
 import { ref } from 'vue'
 import type { Data } from '@generated/data'
+import BaseCard from '~/components/common/cards/BaseCard.vue'
+import CenteredContent from '~/components/common/layouts/CenteredContent.vue'
+import FormField from '~/components/common/forms/FormField.vue'
+import BaseButton from '~/components/common/buttons/BaseButton.vue'
 
 const props = defineProps<{
   canModifyPriority: boolean
@@ -32,144 +37,119 @@ async function submitTicket(event: Event) {
 
 <template>
   <Head title="Nouveau ticket" />
-  <div class="mx-auto max-w-2xl">
+  <CenteredContent maxWidthClass="max-w-2xl" minHeightClass="min-h-[calc(100vh-10rem)]">
     <div class="mb-6">
-      <Link href="/tickets" class="text-sm text-gray-500 hover:text-gray-900"
-        >&larr; Retour aux tickets</Link
-      >
+      <Link route="tickets.index" class="text-sm text-muted">
+        &larr; Retour aux tickets
+      </Link>
     </div>
 
-    <h1 class="text-2xl font-bold tracking-tight text-gray-900">Nouveau ticket</h1>
-    <p class="mt-1 text-sm text-gray-500">Décrivez votre demande d'intervention</p>
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold tracking-tight text-base-content">Nouveau ticket</h1>
+      <p class="mt-1 text-sm text-muted">Décrivez votre demande d'intervention</p>
+    </div>
 
-    <form class="mt-8 space-y-5" @submit.prevent="submitTicket">
-      <div>
-        <label for="unitId" class="mb-1.5 block text-sm font-medium text-gray-700"
-          >Lot concerné</label
-        >
-        <select
-          name="unitId"
-          id="unitId"
-          class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-        >
-          <option value="">Sélectionner un lot</option>
-          <option v-for="unit in units" :key="unit.id" :value="unit.id">
-            {{ unit.building?.name }} - {{ unit.label }} ({{ unit.type }})
-          </option>
-        </select>
-        <p v-if="errors.unitId" class="mt-1 text-sm text-red-600">{{ errors.unitId }}</p>
-      </div>
-
-        <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label for="category" class="mb-1.5 block text-sm font-medium text-gray-700"
-            >Catégorie</label
-          >
+    <BaseCard bodyClass="p-6 sm:p-8">
+      <form class="space-y-5" @submit.prevent="submitTicket">
+        <FormField id="unitId" label="Lot concerné" :error="errors.unitId">
           <select
-            name="category"
-            id="category"
-            class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+            name="unitId"
+            id="unitId"
+            class="select select-bordered w-full"
+            :class="{ 'select-error': errors.unitId }"
           >
-            <option value="Technique & Maintenance">Technique & Maintenance</option>
-            <option value="Entretien & Nettoyage">Entretien & Nettoyage</option>
-            <option value="Administratifs & Contrats">Administratifs & Contrats</option>
-            <option value="Finance & Facturation">Finance & Facturation</option>
-            <option value="Relations & Conflits">Relations & Conflits</option>
-            <option value="Gestion des accès">Gestion des accès</option>
-            <option value="Déménagement">Déménagement</option>
-            <option value="Urgences">Urgences</option>
+            <option value="">Sélectionner un lot</option>
+            <option v-for="unit in units" :key="unit.id" :value="unit.id">
+              {{ unit.building?.name }} - {{ unit.label }} ({{ unit.type }})
+            </option>
           </select>
-        </div>
-        <div v-if="canModifyPriority">
-          <label for="priority" class="mb-1.5 block text-sm font-medium text-gray-700"
-            >Priorité</label
-          >
-          <select
+        </FormField>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <FormField id="category" label="Catégorie" :error="errors.category">
+            <select
+              name="category"
+              id="category"
+              class="select select-bordered w-full"
+              :class="{ 'select-error': errors.category }"
+            >
+              <option value="Technique & Maintenance">Technique & Maintenance</option>
+              <option value="Entretien & Nettoyage">Entretien & Nettoyage</option>
+              <option value="Administratifs & Contrats">Administratifs & Contrats</option>
+              <option value="Finance & Facturation">Finance & Facturation</option>
+              <option value="Relations & Conflits">Relations & Conflits</option>
+              <option value="Gestion des accès">Gestion des accès</option>
+              <option value="Déménagement">Déménagement</option>
+              <option value="Urgences">Urgences</option>
+            </select>
+          </FormField>
+
+          <FormField v-if="canModifyPriority" id="priority" label="Priorité" :error="errors.priority">
+            <select
+              name="priority"
+              id="priority"
+              class="select select-bordered w-full"
+              :class="{ 'select-error': errors.priority }"
+            >
+              <option value="basse">Basse</option>
+              <option value="moyenne">Moyenne</option>
+              <option value="élevée">Élevée</option>
+              <option value="urgente">Urgente</option>
+            </select>
+          </FormField>
+
+          <input
+            v-else
+            type="hidden"
             name="priority"
             id="priority"
-            class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-          >
-            <option value="basse">Basse</option>
-            <option value="moyenne">Moyenne</option>
-            <option value="élevée">Élevée</option>
-            <option value="urgente">Urgente</option>
-          </select>
+            :value="priorityDefault"
+          />
         </div>
-        <input
-          v-else
-          type="hidden"
-          name="priority"
-          id="priority"
-          :value="priorityDefault"
-        />
-      </div>
 
-      <div>
-        <label for="title" class="mb-1.5 block text-sm font-medium text-gray-700">Titre</label>
-        <input
-          name="title"
-          id="title"
-          type="text"
-          class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-        />
-        <p v-if="errors.title" class="mt-1 text-sm text-red-600">{{ errors.title }}</p>
-      </div>
+        <FormField id="title" label="Titre" :error="errors.title">
+          <input
+            name="title"
+            id="title"
+            type="text"
+            class="input input-bordered w-full placeholder-muted"
+            :class="{ 'input-error': errors.title }"
+          />
+        </FormField>
 
-      <div>
-        <label for="description" class="mb-1.5 block text-sm font-medium text-gray-700"
-          >Description</label
-        >
-        <textarea
-          name="description"
-          id="description"
-          rows="5"
-          class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-        />
-        <p v-if="errors.description" class="mt-1 text-sm text-red-600">{{ errors.description }}</p>
-      </div>
+        <FormField id="description" label="Description" :error="errors.description">
+          <textarea
+            name="description"
+            id="description"
+            rows="5"
+            class="textarea textarea-bordered w-full placeholder-muted"
+            :class="{ 'textarea-error': errors.description }"
+          />
+        </FormField>
 
-      <div>
-        <label for="attachments" class="mb-1.5 block text-sm font-medium text-gray-700"
-          >Photos (optionnel)</label
-        >
-        <div class="flex items-center gap-2">
-          <span class="text-xs text-gray-500">Formats acceptés: JPG, PNG, GIF</span>
-          <span class="text-xs text-gray-500">Taille maximale: 10MB</span>
-        </div>
-        <div class="relative flex justify-center items-center w-full">
+        <FormField id="attachments" label="Photos (optionnel)" :error="errors.attachments">
           <input
             name="attachments"
             id="attachments"
             type="file"
             multiple
             accept="image/*"
-            class="opacity-0 absolute inset-0 w-full h-full cursor-pointer z-10"
+            class="file-input file-input-bordered w-full"
           />
-          <div
-            class="flex flex-col justify-center items-center w-full border border-gray-300 rounded py-12 px-3 bg-white text-gray-500 pointer-events-none"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-8 w-8 mb-2 text-gray-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              src="resources/assets/svg/photo.svg"
-            ></svg>
-            <span class="text-sm">Cliquez pour ajouter des photos</span>
-          </div>
-        </div>
-      </div>
+          <p class="mt-1 text-xs text-muted">
+            Formats acceptés: JPG, PNG, GIF — Taille maximale: 10MB
+          </p>
+        </FormField>
 
-      <div class="flex justify-end">
-        <button
-          type="submit"
-          :disabled="processing"
-          class="cursor-pointer rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
-        >
-          Créer le ticket
-        </button>
-      </div>
-    </form>
-  </div>
+        <div class="flex justify-end">
+          <BaseButton
+            type="submit"
+            :disabled="processing"
+            label="Créer le ticket"
+            class="m-0"
+          />
+        </div>
+      </form>
+    </BaseCard>
+  </CenteredContent>
 </template>
