@@ -80,6 +80,9 @@ router
     router.get('buildings/create', [controllers.Buildings, 'create']).as('buildings.create')
     router.post('buildings', [controllers.Buildings, 'store']).as('buildings.store')
     router.get('buildings/:id/edit', [controllers.Buildings, 'edit']).as('buildings.edit')
+    router
+      .get('buildings/:id/units', [controllers.Buildings, 'units'])
+      .as('buildings.units.index')
     router.put('buildings/:id', [controllers.Buildings, 'update']).as('buildings.update')
     router.delete('buildings/:id', [controllers.Buildings, 'destroy']).as('buildings.destroy')
 
