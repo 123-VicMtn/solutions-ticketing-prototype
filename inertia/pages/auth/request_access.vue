@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3'
-import { Form } from '@adonisjs/inertia/vue'
+import { Head } from '@inertiajs/vue3'
+import { Form, Link } from '@adonisjs/inertia/vue'
 import BaseCard from '~/components/common/cards/BaseCard.vue'
 import CenteredContent from '~/components/common/layouts/CenteredContent.vue'
 import FormField from '~/components/common/forms/FormField.vue'
@@ -16,7 +16,7 @@ import FormField from '~/components/common/forms/FormField.vue'
           <div
             class="w-32 transition sm:w-20"
           >
-            <img src="/resources/assets/images/logo.png" alt="Logo" />
+            <img src="/resources/assets/images/logo.png" alt="Logo" class="rounded" />
           </div>
         </div>
       </div>
