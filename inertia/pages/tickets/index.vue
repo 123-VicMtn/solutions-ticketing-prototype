@@ -87,7 +87,7 @@ function applyFilters() {
       <Link
         v-if="!isProvider"
         route="tickets.create"
-        class="btn m-1 ml-auto items-center gap-1 text-base-content hover:bg-base-300"
+        class="btn btn-primary m-1 ml-auto items-center gap-1"
       >
         <PlusCircleIcon class="size-5" />
         Créer un ticket
