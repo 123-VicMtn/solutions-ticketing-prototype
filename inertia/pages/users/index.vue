@@ -3,28 +3,18 @@ import { Head } from '@inertiajs/vue3'
 import { Link } from '@adonisjs/inertia/vue'
 import { EyeIcon, PencilSquareIcon } from '@heroicons/vue/24/outline'
 import ZebraTable from '~/components/common/zebraTable.vue'
+import type { Data } from '@generated/data'
 
 const props = defineProps<{
-  users: Array<{
-    id: number
-    firstName: string
-    lastName: string
-    email: string
-    userUnits: Array<{
-      id: number
-      unit: {
-        id: number
-        label: string
-      }
-    }>
-  }>
+  users: Data.User[]
 }>()
 
-const userUnitLabel = (user: { userUnits: Array<{ unit: { label: string } }> }) => {
-  if (user.userUnits.length > 1) {
+const userUnitLabel = (user: Data.User) => {
+  const userUnits = user.userUnits ?? []
+  if (userUnits.length > 1) {
     return 'Plusieurs lots'
   }
-  return user.userUnits[0]?.unit?.label ?? ''
+  return userUnits[0]?.unit?.label ?? ''
 }
 
 const tableHeaders = [

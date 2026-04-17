@@ -3,18 +3,12 @@ import { Head } from '@inertiajs/vue3'
 import { Form, Link } from '@adonisjs/inertia/vue'
 import ZebraTable from '~/components/common/zebraTable.vue'
 import { PencilSquareIcon } from '@heroicons/vue/24/outline'
+import type { Data } from '@generated/data'
 
 import { ref } from 'vue'
 
 const props = defineProps<{
-  buildings: Array<{
-    id: number
-    name: string
-    address: string
-    city: string
-    postalCode: string
-    unitsCount: number
-  }>
+  buildings: Data.Building.Variants['forListing'][]
 }>()
 
 const deleteDialogRef = ref<HTMLDialogElement | null>(null)

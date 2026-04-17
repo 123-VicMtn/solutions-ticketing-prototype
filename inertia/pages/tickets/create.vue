@@ -1,15 +1,11 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ref } from 'vue'
+import type { Data } from '@generated/data'
 
 const props = defineProps<{
   canModifyPriority: boolean
-  units: Array<{
-    id: number
-    label: string
-    type: string
-    building: { id: number; name: string }
-  }>
+  units: Data.Unit[]
 }>()
 
 const errors = ref<Record<string, string>>({})
@@ -58,7 +54,7 @@ async function submitTicket(event: Event) {
         >
           <option value="">Sélectionner un lot</option>
           <option v-for="unit in units" :key="unit.id" :value="unit.id">
-            {{ unit.building.name }} - {{ unit.label }} ({{ unit.type }})
+            {{ unit.building?.name }} - {{ unit.label }} ({{ unit.type }})
           </option>
         </select>
         <p v-if="errors.unitId" class="mt-1 text-sm text-red-600">{{ errors.unitId }}</p>

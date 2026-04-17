@@ -6,6 +6,7 @@ tmp/*
 
 # AdonisJS build
 .adonisjs/
+tsconfig.inertia.tsbuildinfo
 
 # Secrets
 .env

@@ -1,19 +1,14 @@
 import Building from '#models/building'
+import BuildingTransformer from '#transformers/building_transformer'
 import { createBuildingValidator, updateBuildingValidator } from '#validators/building'
 import type { HttpContext } from '@adonisjs/core/http'
 
 export default class BuildingsController {
   async index({ inertia }: HttpContext) {
     const buildings = await Building.query().withCount('units').orderBy('name')
+
     return inertia.render('admin/buildings/index', {
-      buildings: buildings.map((b) => ({
-        id: b.id,
-        name: b.name,
-        address: b.address,
-        city: b.city,
-        postalCode: b.postalCode,
-        unitsCount: Number(b.$extras.units_count),
-      })),
+      buildings: BuildingTransformer.transform(buildings).useVariant('forListing'),
     })
   }
 
@@ -30,7 +25,10 @@ export default class BuildingsController {
 
   async edit({ inertia, params }: HttpContext) {
     const building = await Building.findOrFail(params.id)
-    return inertia.render('admin/buildings/edit', { building })
+
+    return inertia.render('admin/buildings/edit', {
+      building: BuildingTransformer.transform(building),
+    })
   }
 
   async update({ request, response, params, session }: HttpContext) {

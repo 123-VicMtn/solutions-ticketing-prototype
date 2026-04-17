@@ -1,4 +1,7 @@
 import User from '#models/user'
+import TicketTransformer from '#transformers/ticket_transformer'
+import UserTransformer from '#transformers/user_transformer'
+import UserUnitTransformer from '#transformers/user_unit_transformer'
 import { createUserValidator, updateUserValidator } from '#validators/user'
 import type { HttpContext } from '@adonisjs/core/http'
 
@@ -7,28 +10,16 @@ export default class UsersController {
     const users = await User.query()
       .preload('userUnits', (q) => q.preload('unit', (r) => r.preload('building')))
       .preload('tickets')
-      .then((users) =>
-        users.map((user) => ({
-          id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email ?? '',
-          userUnits: user.userUnits.map((userUnit) => ({
-            id: userUnit.id,
-            unit: {
-              id: userUnit.unit.id,
-              label: userUnit.unit.label,
-            },
-          })),
-        }))
-      )
+
     return inertia.render('users/index', {
-      users,
+      users: UserTransformer.transform(users),
     })
   }
+
   async create({ inertia }: HttpContext) {
     return inertia.render('users/create', {})
   }
+
   async store({ request, response, session }: HttpContext) {
     const payload = await request.validateUsing(createUserValidator)
     const user = await User.create(payload)
@@ -49,48 +40,17 @@ export default class UsersController {
       .firstOrFail()
 
     return inertia.render('users/show', {
-      profileUser: {
-        id: user.id,
-        role: user.role,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email ?? '-',
-        phone: user.phone ?? '-',
-        notificationPreference: user.notificationPreference,
-        createdAt: user.createdAt.toISO() ?? '',
-        updatedAt: user.updatedAt?.toISO() ?? '',
-      },
-      userUnits: user.userUnits.map((userUnit) => ({
-        id: userUnit.id,
-        relation: userUnit.relation,
-        unit: {
-          id: userUnit.unit.id,
-          label: userUnit.unit.label,
-          building: { id: userUnit.unit.building.id, name: userUnit.unit.building.name },
-        },
-      })),
-      tickets: user.tickets.map((ticket) => ({
-        id: ticket.id,
-        reference: ticket.reference,
-        category: ticket.category,
-        priority: ticket.priority,
-        status: ticket.status,
-        title: ticket.title,
-        description: ticket.description,
-        createdAt: ticket.createdAt.toISO() ?? '',
-      })),
+      profileUser: UserTransformer.transform(user),
+      userUnits: UserUnitTransformer.transform(user.userUnits),
+      tickets: TicketTransformer.transform(user.tickets),
     })
   }
 
   async edit({ inertia, params }: HttpContext) {
     const user = await User.findOrFail(params.id)
+
     return inertia.render('users/edit', {
-      user: {
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-      },
+      user: UserTransformer.transform(user),
     })
   }
 

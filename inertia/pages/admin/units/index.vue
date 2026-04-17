@@ -2,22 +2,13 @@
 import { Head, router } from '@inertiajs/vue3'
 import { Link, Form } from '@adonisjs/inertia/vue'
 import ZebraTable from '~/components/common/zebraTable.vue'
+import type { Data } from '@generated/data'
 
 import { ref } from 'vue'
 
 const props = defineProps<{
-  units: Array<{
-    id: number
-    label: string
-    floor: number
-    type: string
-    building: { id: number; name: string }
-    userUnits: Array<{
-      id: number
-      user: { id: number; fullName: string; email: string; phone: string; role: string }
-    }>
-  }>
-  buildings: Array<{ id: number; name: string }>
+  units: Data.Unit[]
+  buildings: Data.Building.Variants['forSummary'][]
   filters: { buildingId: number | null }
 }>()
 
@@ -118,7 +109,7 @@ function filterByBuilding(event: Event) {
         </template>
 
         <template #cell:tenant="{ row: unit }">
-          <template v-if="unit.userUnits.length > 0 && unit.userUnits[0].user">
+          <template v-if="unit.userUnits?.[0]?.user">
             <Link
               route="users.show"
               :params="{ id: unit.userUnits[0].user.id }"
