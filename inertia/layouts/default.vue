@@ -13,31 +13,32 @@ const isSidebarCollapsed = ref(false)
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col">
+  <div class="h-screen flex flex-col overflow-hidden">
     <Navbar
       v-if="isAuthenticated"
-      class="sticky top-0 z-50 w-full"
+      class="shrink-0 w-full z-50"
       @toggle-sidebar="isSidebarCollapsed = !isSidebarCollapsed"
     />
 
-    <Sidebar v-if="isAuthenticated" class="flex-1 min-h-0" :collapsed="isSidebarCollapsed">
-      <div class="h-full min-h-0 flex flex-col">
-        <main class="mx-auto w-full flex-1 min-h-0 overflow-y-auto px-6 py-4">
+    <div v-if="isAuthenticated" class="flex-1 min-h-0 flex">
+      <Sidebar :collapsed="isSidebarCollapsed" />
+
+      <main class="flex-1 min-w-0 overflow-y-auto">
+        <div class="mx-auto w-full px-6 py-4">
           <RoleGate :min="user?.role">
             <slot />
           </RoleGate>
-        </main>
-        <Toaster position="top-center" rich-colors />
-      </div>
-    </Sidebar>
-
-    <div v-else class="flex-1 flex flex-col">
-      <main class="mx-auto w-full flex-1 px-6 py-4">
-        <slot />
+        </div>
       </main>
-      <Toaster position="top-center" rich-colors />
     </div>
 
-    <Footer />
+    <div v-else class="flex-1 min-h-0 overflow-y-auto">
+      <main class="mx-auto w-full px-6 py-4">
+        <slot />
+      </main>
+    </div>
+
+    <Toaster position="top-center" rich-colors />
+    <Footer class="shrink-0" />
   </div>
 </template>
