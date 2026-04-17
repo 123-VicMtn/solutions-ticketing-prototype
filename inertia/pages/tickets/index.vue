@@ -3,9 +3,11 @@ import { Head, router } from '@inertiajs/vue3'
 import { Link } from '@adonisjs/inertia/vue'
 import { useAuth } from '~/composables/use_auth'
 import ZebraTable from '~/components/common/zebraTable.vue'
+import DropdownFilter from '~/components/common/dropdowns/DropdownFilter.vue'
 import { EyeIcon } from '@heroicons/vue/24/outline'
 import { ticketPriorityBadgeClass } from '~/utils/ticketPriority'
 import type { Data } from '@generated/data'
+import { ref } from 'vue'
 
 const { isProvider } = useAuth()
 
@@ -17,6 +19,9 @@ const props = defineProps<{
 const statuses = ['ouvert', 'assigné', 'en cours', 'résolu', 'fermé']
 const priorities = ['basse', 'moyenne', 'élevée', 'urgente']
 
+const selectedStatus = ref(props.filters.status ?? '')
+const selectedPriority = ref(props.filters.priority ?? '')
+
 const tableHeaders = [
   { key: 'reference', label: 'Réf' },
   { key: 'priority', label: 'Priorité' },
@@ -27,10 +32,9 @@ const tableHeaders = [
   { key: 'action', label: 'Actions', thClass: 'text-right', tdClass: 'text-right' },
 ]
 
-function applyFilters(form: HTMLFormElement) {
-  const formData = new FormData(form)
-  const status = String(formData.get('status') || '')
-  const priority = String(formData.get('priority') || '')
+function applyFilters() {
+  const status = selectedStatus.value
+  const priority = selectedPriority.value
   router.get(
     '/tickets',
     {
@@ -59,30 +63,22 @@ function applyFilters(form: HTMLFormElement) {
       </Link>
     </div>
 
-    <form class="mt-6 flex gap-3" @change="(e) => applyFilters(e.currentTarget as HTMLFormElement)">
-      <select name="status" class="rounded-md border border-gray-300 p-2 text-sm">
-        <option value="">Tous les statuts</option>
-        <option
-          v-for="status in statuses"
-          :key="status"
-          :value="status"
-          :selected="filters.status === status"
-        >
-          {{ status }}
-        </option>
-      </select>
-      <select name="priority" class="rounded-md border border-gray-300 p-2 text-sm">
-        <option value="">Toutes les priorités</option>
-        <option
-          v-for="priority in priorities"
-          :key="priority"
-          :value="priority"
-          :selected="filters.priority === priority"
-        >
-          {{ priority }}
-        </option>
-      </select>
-    </form>
+    <div class="mt-6 flex gap-3">
+      <DropdownFilter
+        v-model="selectedStatus"
+        title="Statut"
+        :items="statuses"
+        all-label="Tous"
+        @change="applyFilters"
+      />
+      <DropdownFilter
+        v-model="selectedPriority"
+        title="Priorité"
+        :items="priorities"
+        all-label="Toutes"
+        @change="applyFilters"
+      />
+    </div>
 
     <div class="mt-6">
       <ZebraTable :headers="tableHeaders" :rows="props.tickets" :rowKey="(t) => t.id">
