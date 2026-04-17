@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
+import { MoonIcon, SunIcon } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
   appName: {
@@ -50,7 +51,7 @@ watch(isDark, (next) => {
   <footer class="relative z-20 w-full border-t border-base-300 bg-base-200">
     <div class="max-w-7xl mx-auto px-6 py-2 flex items-center justify-between flex-wrap gap-4">
       <div class="flex items-center gap-3">
-        <span class="font-mono text-xs font-medium text-base-content/70 tracking-widest uppercase">
+        <span class="font-mono text-xs font-medium text-muted tracking-widest uppercase">
           {{ appName }}
         </span>
       </div>
@@ -59,7 +60,7 @@ watch(isDark, (next) => {
         <template v-for="(link, index) in links" :key="link.label">
           <a
             :href="link.href"
-            class="text-xs text-base-content/70 hover:text-base-content transition-colors duration-200"
+            class="text-xs text-muted hover:text-base-content transition-colors duration-200"
           >
             {{ link.label }}
           </a>
@@ -67,17 +68,18 @@ watch(isDark, (next) => {
         </template>
       </nav>
 
-      <div class="flex items-center gap-4">
-        <label class="flex items-center gap-2 text-xs text-base-content/70 select-none">
-          <span>Clair</span>
+      <div class="flex items-center">
+        <p class="text-xs text-muted mr-2">Thème</p>
+        <label class="toggle">
+          
           <input
             type="checkbox"
-            class="toggle toggle-sm theme-controller"
-            aria-label="Toggle dark mode"
+            class="theme-controller"
             value="dark-custom"
             v-model="isDark"
           />
-          <span>Sombre</span>
+          <SunIcon class="text-warning" aria-label="Thème clair" />
+          <MoonIcon class="text-primary" aria-label="Thème sombre" />
         </label>
       </div>
     </div>
