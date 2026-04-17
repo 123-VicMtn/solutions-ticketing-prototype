@@ -32,18 +32,13 @@ const props = defineProps({
 const currentYear = computed(() => new Date().getFullYear())
 
 const STORAGE_KEY = 'theme'
-const theme = ref('light')
-const isDark = computed({
-  get: () => theme.value === 'dark',
-  set: (value) => {
-    theme.value = value ? 'dark' : 'light'
-  },
-})
+const mode = ref('light') // 'light' | 'dark' (stored)
+const isDark = computed(() => mode.value === 'dark')
 
-function applyTheme(nextTheme) {
-  theme.value = nextTheme
-  document.documentElement.dataset.theme = nextTheme
-  localStorage.setItem(STORAGE_KEY, nextTheme)
+function applyTheme(nextMode) {
+  mode.value = nextMode
+  document.documentElement.dataset.theme = nextMode === 'dark' ? 'dark-custom' : 'light-custom'
+  localStorage.setItem(STORAGE_KEY, nextMode)
 }
 
 onMounted(() => {
@@ -53,8 +48,7 @@ onMounted(() => {
     return
   }
 
-  const prefersDark = window.matchMedia?.('(prefers-color-scheme: light)')?.matches ?? false
-  applyTheme(prefersDark ? 'dark' : 'light')
+  applyTheme('light')
 })
 </script>
 <template>
@@ -82,11 +76,11 @@ onMounted(() => {
         <label class="flex items-center gap-2 text-xs text-base-content/70 select-none">
           <span>Clair</span>
           <input
-            v-model="isDark"
             type="checkbox"
             class="toggle toggle-sm"
             aria-label="Toggle dark mode"
-            @change="applyTheme(isDark ? 'dark' : 'light')"
+            :checked="isDark"
+            @change="applyTheme($event.target?.checked ? 'dark' : 'light')"
           />
           <span>Sombre</span>
         </label>
