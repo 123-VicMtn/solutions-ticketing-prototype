@@ -29,6 +29,7 @@ export default class TicketsController {
     const filters = {
       status: request.input('status') as string | undefined,
       priority: request.input('priority') as string | undefined,
+      category: request.input('category') as string | undefined,
     }
 
     const query = Ticket.query()
@@ -65,6 +66,7 @@ export default class TicketsController {
 
     if (filters.status) query.where('status', filters.status)
     if (filters.priority) query.where('priority', filters.priority)
+    if (filters.category) query.where('category', filters.category)
 
     const tickets = await query
 
