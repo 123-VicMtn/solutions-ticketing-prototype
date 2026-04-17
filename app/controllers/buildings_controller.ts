@@ -1,5 +1,7 @@
 import Building from '#models/building'
 import BuildingTransformer from '#transformers/building_transformer'
+import Unit from '#models/unit'
+import UnitTransformer from '#transformers/unit_transformer'
 import { createBuildingValidator, updateBuildingValidator } from '#validators/building'
 import type { HttpContext } from '@adonisjs/core/http'
 
@@ -45,5 +47,17 @@ export default class BuildingsController {
     await building.delete()
     session.flash('success', 'Immeuble supprimé')
     return response.redirect().toRoute('admin.buildings.index')
+  }
+
+  async units({ inertia, params }: HttpContext) {
+    const building = await Building.findOrFail(params.id)
+    const units = await Unit.query()
+      .where('buildingId', building.id)
+      .orderBy('label')
+
+    return inertia.render('admin/buildings/units', {
+      building: BuildingTransformer.transform(building).useVariant('forSummary'),
+      units: UnitTransformer.transform(units),
+    })
   }
 }
