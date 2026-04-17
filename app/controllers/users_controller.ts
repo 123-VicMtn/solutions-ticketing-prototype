@@ -4,17 +4,32 @@ import UserTransformer from '#transformers/user_transformer'
 import UserUnitTransformer from '#transformers/user_unit_transformer'
 import { createUserValidator, updateUserValidator } from '#validators/user'
 import type { HttpContext } from '@adonisjs/core/http'
+import type { UserRole } from '#models/user'
 
 export default class UsersController {
-  async index({ inertia }: HttpContext) {
-    const users = await User.query()
+  async index({ inertia, request }: HttpContext) {
+    const requestedRole = request.input('role') as UserRole | undefined
+    const role: UserRole | undefined = ['tenant', 'owner', 'manager', 'admin', 'provider'].includes(
+      requestedRole as any
+    )
+      ? requestedRole
+      : undefined
+
+    const filters = { role }
+
+    const query = User.query()
       .where('status', 'active')
       .preload('userUnits', (q) => q.preload('unit', (r) => r.preload('building')))
       .preload('tickets')
 
+    if (filters.role) query.where('role', filters.role)
+
+    const users = await query
+
     return inertia.render('users/index', {
       users: UserTransformer.transform(users),
-    })
+      filters,
+    } as any)
   }
 
   async create({ inertia }: HttpContext) {
