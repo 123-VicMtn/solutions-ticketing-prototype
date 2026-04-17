@@ -4,6 +4,7 @@ import { Link } from '@adonisjs/inertia/vue'
 import { useAuth } from '~/composables/use_auth'
 import ZebraTable from '~/components/common/zebraTable.vue'
 import DropdownFilter from '~/components/common/dropdowns/DropdownFilter.vue'
+import BaseButton from '~/components/common/buttons/BaseButton.vue'
 import { EyeIcon, PlusCircleIcon } from '@heroicons/vue/24/outline'
 import { ticketPriorityBadgeClass } from '~/utils/ticketPriority'
 import type { Data } from '@generated/data'
@@ -84,14 +85,14 @@ function applyFilters() {
         all-label="Toutes"
         @change="applyFilters"
       />
-      <Link
+      <BaseButton
         v-if="!isProvider"
         route="tickets.create"
-        class="btn btn-primary m-1 ml-auto items-center gap-1"
-      >
-        <PlusCircleIcon class="size-5" />
-        Créer un ticket
-      </Link>
+        label="Créer un ticket"
+        :icon="PlusCircleIcon"
+        type="button"
+        class="ml-auto"
+      />
     </div>
 
     <div class="mt-6">
