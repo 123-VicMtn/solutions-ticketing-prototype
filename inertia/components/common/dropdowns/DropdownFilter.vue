@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import Dropdown from './Dropdown.vue'
 
 const props = withDefaults(
