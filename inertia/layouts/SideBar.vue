@@ -66,7 +66,7 @@ defineProps<{
           <li>
             <Link route="admin.buildings.index">
               <BuildingOffice2Icon class="size-5" />
-              <span v-if="!collapsed">Immeubles</span>
+              <span v-if="!collapsed">Objets Immobiliers</span>
             </Link>
           </li>
           <li>
