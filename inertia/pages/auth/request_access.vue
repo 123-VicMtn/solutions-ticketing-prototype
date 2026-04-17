@@ -4,18 +4,17 @@ import { Form, Link } from '@adonisjs/inertia/vue'
 import BaseCard from '~/components/common/cards/BaseCard.vue'
 import CenteredContent from '~/components/common/layouts/CenteredContent.vue'
 import FormField from '~/components/common/forms/FormField.vue'
+import BaseButton from '~/components/common/buttons/BaseButton.vue'
 </script>
 
 <template>
-  <Head title="Demander un acces" />
+  <Head title="Demander un accès" />
 
   <CenteredContent maxWidthClass="max-w-xl">
     <div class="mb-8 flex justify-center">
       <div class="group inline-flex items-center gap-3">
         <div class="avatar">
-          <div
-            class="w-32 transition sm:w-20"
-          >
+          <div class="w-32 transition sm:w-20">
             <img src="/resources/assets/images/logo.png" alt="Logo" class="rounded" />
           </div>
         </div>
@@ -23,7 +22,7 @@ import FormField from '~/components/common/forms/FormField.vue'
     </div>
 
     <div class="mb-6">
-      <h1 class="text-2xl font-bold tracking-tight text-base-content">Demande d'acces</h1>
+      <h1 class="text-2xl font-bold tracking-tight text-base-content">Demande d'accès</h1>
       <p class="mt-1 text-sm text-muted">
         Envoyez votre demande, un gestionnaire la validera.
       </p>
@@ -38,6 +37,7 @@ import FormField from '~/components/common/forms/FormField.vue'
               id="lastName"
               name="lastName"
               type="text"
+              autocomplete="family-name"
               class="input input-bordered w-full placeholder-muted"
               :class="{ 'input-error': errors.lastName }"
             />
@@ -48,6 +48,7 @@ import FormField from '~/components/common/forms/FormField.vue'
               id="firstName"
               name="firstName"
               type="text"
+              autocomplete="given-name"
               class="input input-bordered w-full placeholder-muted"
               :class="{ 'input-error': errors.firstName }"
             />
@@ -70,6 +71,7 @@ import FormField from '~/components/common/forms/FormField.vue'
             id="phone"
             name="phone"
             type="text"
+            autocomplete="tel"
             class="input input-bordered w-full placeholder-muted"
             :class="{ 'input-error': errors.phone }"
           />
@@ -90,7 +92,7 @@ import FormField from '~/components/common/forms/FormField.vue'
 
           <FormField
             id="notificationPreference"
-            label=" Préférence de notification"
+            label="Préférence de notification"
             :error="errors.notificationPreference"
           >
             <select
@@ -105,9 +107,12 @@ import FormField from '~/components/common/forms/FormField.vue'
           </FormField>
         </div>
 
-        <button type="submit" :disabled="processing" class="btn btn-primary w-full">
-          Envoyer la demande
-        </button>
+        <BaseButton
+          type="submit"
+          :disabled="processing"
+          label="Envoyer la demande"
+          class="w-full"
+        />
 
         <p class="text-center text-sm text-muted">
           Déjà un accès ?
