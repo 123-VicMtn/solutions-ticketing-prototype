@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3'
-import { Link } from '@adonisjs/inertia/vue'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
+import CenteredContent from '~/components/common/layouts/CenteredContent.vue'
+import BaseCard from '~/components/common/cards/BaseCard.vue'
+import BaseButton from '~/components/common/buttons/BaseButton.vue'
 
 let redirectTimer: number | undefined
 let countdownTimer: number | undefined
@@ -27,20 +29,23 @@ onBeforeUnmount(() => {
 <template>
   <Head title="Accès refusé" />
 
-  <div class="flex min-h-[calc(100vh-12rem)] flex-col items-center justify-center text-center">
-    <p class="text-sm font-semibold text-gray-500">403</p>
-    <h1 class="mt-2 text-3xl font-bold tracking-tight text-gray-900">Accès refusé</h1>
-    <p class="mt-2 text-sm text-gray-500">
-      Vous n'avez pas les permissions nécessaires pour accéder à cette page.
-    </p>
-    <p class="mt-2 text-sm text-gray-500">
-      Redirection vers l'accueil dans {{ secondsLeft }} seconde{{ secondsLeft > 1 ? 's' : '' }}.
-    </p>
-    <Link
-      route="home"
-      class="mt-6 rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
-    >
-      Retour à l'accueil
-    </Link>
-  </div>
+  <CenteredContent maxWidthClass="max-w-md">
+    <div class="mb-6 text-center">
+      <p class="text-sm font-semibold text-muted">403</p>
+      <h1 class="mt-2 text-2xl font-bold tracking-tight text-base-content">Accès refusé</h1>
+      <p class="mt-1 text-sm text-muted">
+        Vous n'avez pas les permissions nécessaires pour accéder à cette page.
+      </p>
+    </div>
+
+    <BaseCard bodyClass="p-6 sm:p-8">
+      <div class="space-y-4 text-center">
+        <p class="text-sm text-muted">
+          Redirection vers l'accueil dans {{ secondsLeft }} seconde{{ secondsLeft > 1 ? 's' : '' }}.
+        </p>
+
+        <BaseButton route="home" label="Retour à l'accueil" class="w-full" />
+      </div>
+    </BaseCard>
+  </CenteredContent>
 </template>
