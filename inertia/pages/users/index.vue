@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3'
+import { Head, router } from '@inertiajs/vue3'
 import { Link } from '@adonisjs/inertia/vue'
 import {
   BuildingOffice2Icon,
@@ -13,10 +13,13 @@ import {
   WrenchScrewdriverIcon,
 } from '@heroicons/vue/24/outline'
 import ZebraTable from '~/components/common/zebraTable.vue'
+import DropdownFilter from '~/components/common/dropdowns/DropdownFilter.vue'
 import type { Data } from '@generated/data'
+import { ref } from 'vue'
 
 const props = defineProps<{
   users: Data.User[]
+  filters: { role?: Data.User['role'] }
 }>()
 
 type Role = Data.User['role']
@@ -74,6 +77,14 @@ const tableHeaders = [
   { key: 'contact', label: 'Mail & SMS' },
   { key: 'action', label: 'Actions', thClass: 'text-right', tdClass: 'text-right' },
 ]
+
+const roles: Role[] = ['tenant', 'owner', 'manager', 'admin', 'provider']
+const selectedRole = ref<Role | ''>(props.filters.role ?? '')
+
+function applyFilters() {
+  const role = selectedRole.value
+  router.get('/users', { ...(role ? { role } : {}) }, { preserveState: true })
+}
 </script>
 
 <template>
@@ -83,6 +94,16 @@ const tableHeaders = [
     <div>
       <h1 class="text-2xl font-bold tracking-tight text-base-content">Utilisateurs</h1>
       <p class="mt-1 text-sm text-muted">Gérez les utilisateurs de votre plateforme</p>
+    </div>
+
+    <div class="mt-6 flex w-full gap-3">
+      <DropdownFilter
+        v-model="selectedRole"
+        title="Rôle"
+        :items="roles"
+        all-label="Tous"
+        @change="applyFilters"
+      />
     </div>
 
     <div class="mt-6">
