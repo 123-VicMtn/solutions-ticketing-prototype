@@ -69,12 +69,15 @@ defineProps<{
               <span v-if="!collapsed">Objets Immobiliers</span>
             </Link>
           </li>
-          <li>
+          </RoleGate>
+          <RoleGate min="admin">
+            <li class="menu-title" v-if="!collapsed"><span>Gestion</span></li>
+            <li>
             <Link route="users.index">
               <UsersIcon class="size-5" />
               <span v-if="!collapsed">Utilisateurs</span>
             </Link>
-          </li>
+            </li>
           <li>
             <Link route="manager.access_requests.index">
               <KeyIcon class="size-5" />
