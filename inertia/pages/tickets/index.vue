@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3'
-import { Link } from '@adonisjs/inertia/vue'
+import ActionButton from '~/components/common/buttons/ActionButton.vue'
 import { useAuth } from '~/composables/use_auth'
 import ZebraTable from '~/components/common/zebraTable.vue'
 import DropdownFilter from '~/components/common/dropdowns/DropdownFilter.vue'
@@ -130,13 +130,12 @@ function applyFilters() {
         </template>
 
         <template #cell:action="{ row: ticket }">
-          <Link
+          <ActionButton
             route="tickets.show"
             :params="{ id: ticket.id }"
-            class="btn btn-ghost btn-sm"
-          >
-            <EyeIcon class="size-5" />
-          </Link>
+            :icon="EyeIcon"
+            ariaLabel="Voir"
+            title="Voir"/>
         </template>
       </ZebraTable>
     </div>
