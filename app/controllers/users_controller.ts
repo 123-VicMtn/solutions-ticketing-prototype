@@ -8,6 +8,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 export default class UsersController {
   async index({ inertia }: HttpContext) {
     const users = await User.query()
+      .where('status', 'active')
       .preload('userUnits', (q) => q.preload('unit', (r) => r.preload('building')))
       .preload('tickets')
 
