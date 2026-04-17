@@ -13,18 +13,21 @@ const { isProvider } = useAuth()
 
 const props = defineProps<{
   tickets: Data.Ticket[]
-  filters: { status?: string; priority?: string }
+  filters: { status?: string; priority?: string; category?: string }
 }>()
 
 const statuses = ['ouvert', 'assigné', 'en cours', 'résolu', 'fermé']
 const priorities = ['basse', 'moyenne', 'élevée', 'urgente']
+const categories = ['Technique & Maintenance', 'Entretien & Nettoyage', 'Administratifs & Contrats', 'Finance & Facturation', 'Relations & Conflits', 'Gestion des accès', 'Déménagement', 'Urgences']
 
 const selectedStatus = ref(props.filters.status ?? '')
 const selectedPriority = ref(props.filters.priority ?? '')
+const selectedCategory = ref(props.filters.category ?? '')
 
 const tableHeaders = [
   { key: 'reference', label: 'Réf' },
   { key: 'priority', label: 'Priorité' },
+  { key: 'category', label: 'Catégorie' },
   { key: 'title', label: 'Titre' },
   { key: 'unit', label: 'Lot' },
   { key: 'user', label: 'Locataire' },
@@ -35,11 +38,13 @@ const tableHeaders = [
 function applyFilters() {
   const status = selectedStatus.value
   const priority = selectedPriority.value
+  const category = selectedCategory.value
   router.get(
     '/tickets',
     {
       ...(status ? { status } : {}),
       ...(priority ? { priority } : {}),
+      ...(category ? { category } : {}),
     },
     { preserveState: true }
   )
@@ -78,6 +83,13 @@ function applyFilters() {
         all-label="Toutes"
         @change="applyFilters"
       />
+      <DropdownFilter
+        v-model="selectedCategory"
+        title="Catégorie"
+        :items="categories"
+        all-label="Toutes"
+        @change="applyFilters"
+      />
     </div>
 
     <div class="mt-6">
@@ -86,9 +98,12 @@ function applyFilters() {
           {{ ticket.reference ?? '-' }}
         </template>
 
+        <template #cell:category="{ row: ticket }">
+          <span>{{ ticket.category }}</span>
+        </template>
+
         <template #cell:title="{ row: ticket }">
-          <div class="font-medium">{{ ticket.title }}</div>
-          <div class="text-xs text-gray-500">{{ ticket.category }}</div>
+          <div>{{ ticket.title }}</div>
         </template>
 
         <template #cell:unit="{ row: ticket }">
