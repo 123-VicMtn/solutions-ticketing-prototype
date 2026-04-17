@@ -3,7 +3,7 @@ import { Head } from '@inertiajs/vue3'
 import ZebraTable from '~/components/common/zebraTable.vue'
 import BaseButton from '~/components/common/buttons/BaseButton.vue'
 import ActionButton from '~/components/common/buttons/ActionButton.vue'
-import { PencilSquareIcon, PlusCircleIcon } from '@heroicons/vue/24/outline'
+import { PencilSquareIcon, PlusCircleIcon, Square3Stack3DIcon } from '@heroicons/vue/24/outline'
 import type { Data } from '@generated/data'
 
 const props = defineProps<{
@@ -76,6 +76,14 @@ const tableHeaders = [
 
         <template #cell:actions="{ row: building }">
           <div class="flex justify-end gap-1">
+            <ActionButton
+              v-if="building.unitsCount > 0"
+              route="admin.buildings.units.index"
+              :params="{ id: building.id }"
+              :icon="Square3Stack3DIcon"
+              ariaLabel="Voir les lots"
+              title="Lots"
+            />
             <ActionButton
               route="admin.buildings.edit"
               :params="{ id: building.id }"
