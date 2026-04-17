@@ -13,8 +13,8 @@
       ;(() => {
         try {
           const saved = localStorage.getItem('theme')
-          const theme = saved === 'dark' ? 'dark' : 'light'
-          document.documentElement.dataset.theme = theme === 'dark' ? 'dark-custom' : 'light-custom'
+          const theme = saved === 'dark-custom' || saved === 'light-custom' ? saved : 'light-custom'
+          document.documentElement.dataset.theme = theme
         } catch {}
       })()
     </script>
