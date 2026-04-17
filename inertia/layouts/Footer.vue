@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 
 const props = defineProps({
   appName: {
@@ -32,23 +32,18 @@ const props = defineProps({
 const currentYear = computed(() => new Date().getFullYear())
 
 const STORAGE_KEY = 'theme'
-const mode = ref('light') // 'light' | 'dark' (stored)
-const isDark = computed(() => mode.value === 'dark')
-
-function applyTheme(nextMode) {
-  mode.value = nextMode
-  document.documentElement.dataset.theme = nextMode === 'dark' ? 'dark-custom' : 'light-custom'
-  localStorage.setItem(STORAGE_KEY, nextMode)
-}
+const isDark = ref(false)
 
 onMounted(() => {
   const saved = localStorage.getItem(STORAGE_KEY)
-  if (saved === 'light' || saved === 'dark') {
-    applyTheme(saved)
-    return
-  }
+  isDark.value = saved === 'dark-custom'
+  document.documentElement.dataset.theme = isDark.value ? 'dark-custom' : 'light-custom'
+})
 
-  applyTheme('light')
+watch(isDark, (next) => {
+  const theme = next ? 'dark-custom' : 'light-custom'
+  localStorage.setItem(STORAGE_KEY, theme)
+  document.documentElement.dataset.theme = theme
 })
 </script>
 <template>
@@ -77,10 +72,10 @@ onMounted(() => {
           <span>Clair</span>
           <input
             type="checkbox"
-            class="toggle toggle-sm"
+            class="toggle toggle-sm theme-controller"
             aria-label="Toggle dark mode"
-            :checked="isDark"
-            @change="applyTheme($event.target?.checked ? 'dark' : 'light')"
+            value="dark-custom"
+            v-model="isDark"
           />
           <span>Sombre</span>
         </label>
