@@ -89,7 +89,7 @@ const tableHeaders = [
               :params="{ id: building.id }"
               :icon="PencilSquareIcon"
               ariaLabel="Editer"
-              title="Edit"
+              title="Editer"
             />
     
           </div>
