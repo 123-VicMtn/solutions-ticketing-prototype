@@ -2,7 +2,8 @@
 import { Head } from '@inertiajs/vue3'
 import { Form, Link } from '@adonisjs/inertia/vue'
 import ZebraTable from '~/components/common/zebraTable.vue'
-import { PencilSquareIcon } from '@heroicons/vue/24/outline'
+import BaseButton from '~/components/common/buttons/BaseButton.vue'
+import { PencilSquareIcon, PlusCircleIcon } from '@heroicons/vue/24/outline'
 import type { Data } from '@generated/data'
 
 import { ref } from 'vue'
@@ -43,12 +44,13 @@ const tableHeaders = [
         <h1 class="text-2xl font-bold tracking-tight text-gray-900">Immeubles</h1>
         <p class="mt-1 text-sm text-gray-500">Gérez les immeubles et leurs lots</p>
       </div>
-      <Link
+      <BaseButton
         route="admin.buildings.create"
-        class="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
-      >
-        Ajouter un immeuble
-      </Link>
+        label="Ajouter un immeuble"
+        :icon="PlusCircleIcon"
+        type="button"
+        class="ml-auto"
+      />
     </div>
 
     <div
