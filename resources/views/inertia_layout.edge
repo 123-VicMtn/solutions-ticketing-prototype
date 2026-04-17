@@ -13,10 +13,8 @@
       ;(() => {
         try {
           const saved = localStorage.getItem('theme')
-          const prefersDark =
-            window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-          const theme = saved === 'light' || saved === 'dark' ? saved : prefersDark ? 'dark' : 'light'
-          document.documentElement.dataset.theme = theme
+          const theme = saved === 'dark' ? 'dark' : 'light'
+          document.documentElement.dataset.theme = theme === 'dark' ? 'dark-custom' : 'light-custom'
         } catch {}
       })()
     </script>
