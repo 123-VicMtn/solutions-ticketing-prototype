@@ -7,9 +7,7 @@ export default class UnitTransformer extends BaseTransformer<Unit> {
   toObject() {
     return {
       ...this.pick(this.resource, ['id', 'buildingId', 'label', 'floor', 'type']),
-      building: BuildingTransformer.transform(this.whenLoaded(this.resource.building))?.useVariant(
-        'forSummary'
-      ),
+      building: BuildingTransformer.transform(this.whenLoaded(this.resource.building)),
       userUnits: UserUnitTransformer.transform(
         this.whenLoaded(this.resource.userUnits)
       )?.useVariant('forUnitListing'),
