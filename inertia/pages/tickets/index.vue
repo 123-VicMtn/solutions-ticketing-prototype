@@ -4,7 +4,7 @@ import { Link } from '@adonisjs/inertia/vue'
 import { useAuth } from '~/composables/use_auth'
 import ZebraTable from '~/components/common/zebraTable.vue'
 import DropdownFilter from '~/components/common/dropdowns/DropdownFilter.vue'
-import { EyeIcon } from '@heroicons/vue/24/outline'
+import { EyeIcon, PlusCircleIcon } from '@heroicons/vue/24/outline'
 import { ticketPriorityBadgeClass } from '~/utils/ticketPriority'
 import type { Data } from '@generated/data'
 import { ref } from 'vue'
@@ -56,19 +56,13 @@ function applyFilters() {
   <div>
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-bold tracking-tight text-gray-900">Tickets</h1>
-        <p class="mt-1 text-sm text-gray-500">Suivez les demandes d'intervention</p>
+        <h1 class="text-2xl font-bold tracking-tight text-base-content">Tickets</h1>
+        <p class="mt-1 text-sm text-muted">Suivez les demandes d'intervention</p>
       </div>
-      <Link
-        v-if="!isProvider"
-        route="tickets.create"
-        class="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
-      >
-        Nouveau ticket
-      </Link>
+
     </div>
 
-    <div class="mt-6 flex gap-3">
+    <div class="mt-6 flex w-full gap-3">
       <DropdownFilter
         v-model="selectedStatus"
         title="Statut"
@@ -90,6 +84,14 @@ function applyFilters() {
         all-label="Toutes"
         @change="applyFilters"
       />
+      <Link
+        v-if="!isProvider"
+        route="tickets.create"
+        class="btn m-1 ml-auto items-center gap-1 text-base-content hover:bg-base-300"
+      >
+        <PlusCircleIcon class="size-5" />
+        Créer un ticket
+      </Link>
     </div>
 
     <div class="mt-6">
