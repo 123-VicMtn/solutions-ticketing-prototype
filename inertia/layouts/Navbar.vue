@@ -23,7 +23,7 @@ const emit = defineEmits<{
 
       <Link route="dashboard.index" class="btn btn-ghost gap-2 hover:none">
         <span class="inline-flex size-8 items-center justify-center rounded-lg text-primary-content">
-            <img :src="'/resources/assets/images/logo.png'" alt="Logo" class="size-8" />
+            <img :src="'/resources/assets/images/logo.png'" alt="Logo" class="size-8 rounded" />
         </span>
         <span class="text-lg font-semibold">Ticketing</span>
       </Link>
