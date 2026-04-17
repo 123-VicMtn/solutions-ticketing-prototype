@@ -26,14 +26,14 @@ function select(value: string) {
 </script>
 
 <template>
-  <Dropdown :title="`${props.title}`" class="">
+  <Dropdown :title="`${props.title}` + ' : ' + props.modelValue" class="">
     <li>
       <button type="button" :class="{ active: !props.modelValue }" @click="select('')">
         {{ props.allLabel }}
       </button>
     </li>
     <li v-for="item in props.items" :key="item">
-      <button type="button" :class="{ active: props.modelValue === item }" @click="select(item)">
+      <button onclick="document.activeElement.blur()" type="button" :class="{ active: props.modelValue === item }" @click="select(item)">
         {{ item }}
       </button>
     </li>
