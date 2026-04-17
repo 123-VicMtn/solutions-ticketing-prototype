@@ -45,7 +45,7 @@ const iconComponent = computed<Component | null>(() => {
   <button
     v-else
     :type="props.type"
-    class="btn btn-primary m-1 items-center gap-1" :class="props.class"
+    class="btn btn-primary items-center gap-1" :class="props.class"
     :disabled="props.disabled"
   >
     <component :is="iconComponent" v-if="iconComponent" class="size-5 text-base-content" />
