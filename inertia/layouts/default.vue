@@ -22,7 +22,7 @@ const isSidebarCollapsed = ref(false)
 
     <Sidebar v-if="isAuthenticated" class="flex-1 min-h-0" :collapsed="isSidebarCollapsed">
       <div class="h-full min-h-0 flex flex-col">
-        <main class="mx-auto w-full flex-1 px-6 py-8">
+        <main class="mx-auto w-full flex-1 px-6 py-4">
           <RoleGate :min="user?.role">
             <slot />
           </RoleGate>
@@ -32,7 +32,7 @@ const isSidebarCollapsed = ref(false)
     </Sidebar>
 
     <div v-else class="flex-1 flex flex-col">
-      <main class="mx-auto w-full flex-1 px-6 py-8">
+      <main class="mx-auto w-full flex-1 px-6 py-4">
         <slot />
       </main>
       <Toaster position="top-center" rich-colors />
