@@ -12,12 +12,14 @@ const props = withDefaults(
     params?: Record<string, any>
     type?: 'button' | 'submit' | 'reset'
     disabled?: boolean
+    variant?: string
   }>(),
   {
     type: 'button',
     disabled: false,
     params: () => ({}),
     class: '',
+    variant: 'primary',
   }
 )
 
@@ -30,6 +32,8 @@ const iconComponent = computed<Component | null>(() => {
     return null
   }
 })
+
+const variantClass = computed(() => (props.variant ? `btn-${props.variant}` : 'btn-primary'))
 </script>
 
 <template>
@@ -37,7 +41,9 @@ const iconComponent = computed<Component | null>(() => {
     v-if="props.route"
     :route="props.route as any"
     :params="props.params"
-    class="btn btn-primary m-1 items-center gap-1" :class="props.class">
+    class="btn m-1 items-center gap-1"
+    :class="[variantClass, props.class]"
+  >
     <component :is="iconComponent" v-if="iconComponent" class="size-5" />
     <span>{{ props.label }}</span>
   </Link>
@@ -45,7 +51,8 @@ const iconComponent = computed<Component | null>(() => {
   <button
     v-else
     :type="props.type"
-    class="btn btn-primary items-center gap-1" :class="props.class"
+    class="btn items-center gap-1"
+    :class="[variantClass, props.class]"
     :disabled="props.disabled"
   >
     <component :is="iconComponent" v-if="iconComponent" class="size-5 text-base-content" />
