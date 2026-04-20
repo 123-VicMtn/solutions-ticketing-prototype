@@ -10,11 +10,12 @@ import { ticketPriorityBadgeClass } from '~/utils/ticketPriority'
 import type { Data } from '@generated/data'
 import { ref } from 'vue'
 
-const { isProvider } = useAuth()
+const { isProvider, user } = useAuth()
 
 const props = defineProps<{
   tickets: Data.Ticket[]
-  filters: { status?: string; priority?: string; category?: string }
+  filters: { status?: string; priority?: string; category?: string; assignedTo?: string }
+  assignees: { id: number; fullName: string | null }[]
 }>()
 
 const statuses = ['ouvert', 'assigné', 'en cours', 'résolu', 'fermé']
@@ -24,6 +25,7 @@ const categories = ['Technique & Maintenance', 'Entretien & Nettoyage', 'Adminis
 const selectedStatus = ref(props.filters.status ?? '')
 const selectedPriority = ref(props.filters.priority ?? '')
 const selectedCategory = ref(props.filters.category ?? '')
+const selectedAssignedTo = ref(props.filters.assignedTo ?? '')
 
 const tableHeaders = [
   { key: 'reference', label: 'Réf' },
@@ -32,20 +34,28 @@ const tableHeaders = [
   { key: 'title', label: 'Titre' },
   { key: 'unit', label: 'Lot' },
   { key: 'user', label: 'Locataire' },
+  { key: 'assignee', label: 'Assigné' },
   { key: 'status', label: 'Statut' },
   { key: 'action', label: 'Actions', thClass: 'text-right', tdClass: 'text-right' },
 ]
+
+const assigneeItems = props.assignees.map((a) => ({
+  label: a.fullName ?? `#${a.id}`,
+  value: String(a.id),
+}))
 
 function applyFilters() {
   const status = selectedStatus.value
   const priority = selectedPriority.value
   const category = selectedCategory.value
+  const assignedTo = selectedAssignedTo.value
   router.get(
     '/tickets',
     {
       ...(status ? { status } : {}),
       ...(priority ? { priority } : {}),
       ...(category ? { category } : {}),
+      ...(assignedTo ? { assignedTo } : {}),
     },
     { preserveState: true }
   )
@@ -85,6 +95,14 @@ function applyFilters() {
         all-label="Toutes"
         @change="applyFilters"
       />
+      <DropdownFilter
+        v-if="!isProvider && assigneeItems.length"
+        v-model="selectedAssignedTo"
+        title="Assigné"
+        :items="assigneeItems"
+        all-label="Tous"
+        @change="applyFilters"
+      />
       <BaseButton
         v-if="!isProvider"
         route="tickets.create"
@@ -115,6 +133,12 @@ function applyFilters() {
 
         <template #cell:user="{ row: ticket }">
           {{ ticket.user?.fullName }}
+        </template>
+
+        <template #cell:assignee="{ row: ticket }">
+          <span class="text-sm text-base-content">
+            {{ ticket.assignee?.fullName ?? '—' }}
+          </span>
         </template>
 
         <template #cell:priority="{ row: ticket }">
