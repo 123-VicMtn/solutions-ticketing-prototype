@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
+import { Link } from '@adonisjs/inertia/vue'
 import { MoonIcon, SunIcon } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
@@ -16,15 +17,18 @@ const props = defineProps({
     default: () => [
       {
         label: 'Documentation',
+        kind: 'external',
         href: "https://github.com/123-VicMtn/solutions-ticketing-prototype/wiki/Plan-d'action",
       },
       {
         label: 'Support',
-        href: 'https://github.com/123-VicMtn/solutions-ticketing-prototype/issues',
+        kind: 'route',
+        route: 'support.index',
       },
       {
         label: 'Confidentialité',
-        href: '',
+        kind: 'route',
+        route: 'privacy.index',
       },
     ],
   },
@@ -59,11 +63,21 @@ watch(isDark, (next) => {
       <nav class="flex items-center gap-5">
         <template v-for="(link, index) in links" :key="link.label">
           <a
+            v-if="link.kind === 'external'"
             :href="link.href"
+            target="_blank"
+            rel="noopener noreferrer"
             class="text-xs text-muted hover:text-base-content transition-colors duration-200"
           >
             {{ link.label }}
           </a>
+          <Link
+            v-else
+            :route="link.route"
+            class="text-xs text-muted hover:text-base-content transition-colors duration-200"
+          >
+            {{ link.label }}
+          </Link>
           <span v-if="index < links.length - 1" class="w-px h-3 bg-base-300"></span>
         </template>
       </nav>
