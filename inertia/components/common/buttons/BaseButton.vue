@@ -8,6 +8,9 @@ const props = withDefaults(
     label: string
     icon?: Component | string
     route?: any
+    href?: string
+    target?: string
+    rel?: string
     class?: string
     params?: Record<string, any>
     type?: 'button' | 'submit' | 'reset'
@@ -20,6 +23,8 @@ const props = withDefaults(
     params: () => ({}),
     class: '',
     variant: 'primary',
+    target: '_blank',
+    rel: 'noopener noreferrer',
   }
 )
 
@@ -47,6 +52,20 @@ const variantClass = computed(() => (props.variant ? `btn-${props.variant}` : 'b
     <component :is="iconComponent" v-if="iconComponent" class="size-5" />
     <span>{{ props.label }}</span>
   </Link>
+
+  <a
+    v-else-if="props.href"
+    :href="props.href"
+    class="btn m-1 items-center gap-1"
+    :class="[variantClass, props.class]"
+    :target="props.target"
+    :rel="props.rel"
+    :aria-disabled="props.disabled ? 'true' : undefined"
+    @click="props.disabled ? $event.preventDefault() : undefined"
+  >
+    <component :is="iconComponent" v-if="iconComponent" class="size-5" />
+    <span>{{ props.label }}</span>
+  </a>
 
   <button
     v-else
