@@ -3,6 +3,7 @@ import Ticket, { PROVIDER_ALLOWED_TRANSITIONS, VALID_TRANSITIONS } from '#models
 import Unit from '#models/unit'
 import UserUnit from '#models/user_unit'
 import Provider from '#models/provider'
+import User from '#models/user'
 import TicketComment from '#models/ticket_comment'
 import TicketAttachment from '#models/ticket_attachment'
 import ProviderTransformer from '#transformers/provider_transformer'
@@ -43,7 +44,7 @@ export default class TicketsController {
         break
 
       case 'provider':
-        query.where('assignedTo', user.id)
+        query.whereHas('provider', (q) => q.where('userId', user.id))
         break
 
       case 'owner': {
@@ -154,13 +155,13 @@ export default class TicketsController {
     // Autorise uniquement les transitions correspondant au workflow, et restreint
     // celles autorisées au rôle "provider".
     const workflowNextStatuses = VALID_TRANSITIONS[ticket.status] ?? []
-    const hasAssignedProvider = Boolean(ticket.providerId && ticket.assignedTo)
+    const hasAssignee = Boolean(ticket.assignedTo)
 
     const allowedStatusTransitions = canChangeStatus
       ? user.role === 'provider'
         ? workflowNextStatuses.filter((s) => PROVIDER_ALLOWED_TRANSITIONS.includes(s))
         : workflowNextStatuses.filter((s) => {
-            if (s === 'assigné' && !hasAssignedProvider) return false
+            if (s === 'assigné' && !hasAssignee) return false
             return true
           })
       : []
@@ -169,7 +170,17 @@ export default class TicketsController {
       ? await Provider.query().where('isActive', true).orderBy('companyName')
       : []
 
-    return inertia.render('tickets/show', {
+    const internalAssignees = canAssign
+      ? await User.query()
+          .whereIn('role', ['manager', 'admin'])
+          .where('status', 'active')
+          .orderBy('first_name')
+          .orderBy('last_name')
+      : []
+
+    return inertia.render(
+      'tickets/show',
+      {
       ticket: TicketTransformer.transform(ticket),
       comments: TicketCommentTransformer.transform(visibleComments),
       attachments: TicketAttachmentTransformer.transform(ticket.attachments),
@@ -179,7 +190,9 @@ export default class TicketsController {
       allowedStatusTransitions,
       canAssign,
       providers: ProviderTransformer.transform(providers),
-    })
+      assignees: internalAssignees.map((u) => ({ id: u.id, fullName: u.fullName })),
+      } as any
+    )
   }
 
   async edit({ inertia, params, auth, response }: HttpContext) {
@@ -243,9 +256,6 @@ export default class TicketsController {
     }
 
     if (user.role === 'provider') {
-      if (ticket.assignedTo !== user.id) {
-        return response.abort('Non autorisé', 403)
-      }
       if (!PROVIDER_ALLOWED_TRANSITIONS.includes(payload.status)) {
         session.flash('error', 'Transition non autorisée pour un prestataire')
         return response.redirect().toPath(`/tickets/${ticket.id}`)
@@ -255,11 +265,11 @@ export default class TicketsController {
     }
 
     if (payload.status === 'assigné') {
-      const hasAssignedProvider = Boolean(ticket.providerId && ticket.assignedTo)
-      if (!hasAssignedProvider) {
+      const hasAssignee = Boolean(ticket.assignedTo)
+      if (!hasAssignee) {
         session.flash(
           'error',
-          'Impossible de passer à "assigné" : aucun prestataire n\'est assigné.'
+          'Impossible de passer à "assigné" : aucune assignation (interne ou prestataire) n\'est définie.'
         )
         return response.redirect().toPath(`/tickets/${ticket.id}`)
       }
@@ -280,17 +290,40 @@ export default class TicketsController {
     }
 
     const payload = await request.validateUsing(assignTicketValidator)
-    const provider = await Provider.findOrFail(payload.providerId)
-
-    if (!provider.isActive) {
-      session.flash('error', "Ce prestataire n'est pas actif")
-      return response.redirect().toPath(`/tickets/${params.id}`)
-    }
 
     const ticket = await Ticket.findOrFail(params.id)
 
-    ticket.providerId = provider.id
-    ticket.assignedTo = provider.userId
+    const assignee = await User.findOrFail(payload.assigneeUserId)
+
+    if (!assignee.isActive) {
+      session.flash('error', "Cet utilisateur n'est pas actif")
+      return response.redirect().toPath(`/tickets/${params.id}`)
+    }
+
+    if (assignee.role === 'provider') {
+      session.flash('error', "Impossible d'assigner le suivi interne à un compte prestataire")
+      return response.redirect().toPath(`/tickets/${params.id}`)
+    }
+
+    if (!assignee.hasAtLeastRole('manager')) {
+      session.flash('error', "Seuls les comptes gérance peuvent être assignés au suivi interne")
+      return response.redirect().toPath(`/tickets/${params.id}`)
+    }
+
+    ticket.assignedTo = assignee.id
+
+    let assignedProvider: Provider | null = null
+    if (payload.providerId) {
+      const provider = await Provider.findOrFail(payload.providerId)
+      if (!provider.isActive) {
+        session.flash('error', "Ce prestataire n'est pas actif")
+        return response.redirect().toPath(`/tickets/${params.id}`)
+      }
+      ticket.providerId = provider.id
+      assignedProvider = provider
+    } else {
+      ticket.providerId = null
+    }
 
     if (ticket.status === 'ouvert') {
       ticket.status = 'assigné'
@@ -298,9 +331,16 @@ export default class TicketsController {
 
     await ticket.save()
 
-    await TicketNotifications.notifyProviderAssigned(ticket, provider)
+    if (assignedProvider) {
+      await TicketNotifications.notifyProviderAssigned(ticket, assignedProvider)
+    }
 
-    session.flash('success', `Ticket assigné à ${provider.companyName}`)
+    session.flash(
+      'success',
+      assignedProvider
+        ? `Ticket assigné (suivi interne: ${assignee.fullName ?? '—'}) et prestataire: ${assignedProvider.companyName}`
+        : `Ticket assigné (suivi interne: ${assignee.fullName ?? '—'}) sans prestataire`
+    )
     return response.redirect().toPath(`/tickets/${ticket.id}`)
   }
 
@@ -344,7 +384,11 @@ export default class TicketsController {
 
   private async canAccessTicket(userId: number, role: UserRole, ticket: Ticket): Promise<boolean> {
     if (role === 'admin' || role === 'manager') return true
-    if (role === 'provider') return ticket.assignedTo === userId
+    if (role === 'provider') {
+      const provider = await Provider.query().where('userId', userId).select(['id']).first()
+      if (!provider) return false
+      return ticket.providerId === provider.id
+    }
     if (ticket.userId === userId) return true
 
     const userUnit = await UserUnit.query()
