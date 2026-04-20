@@ -31,11 +31,22 @@ export default class TicketsController {
       status: request.input('status') as string | undefined,
       priority: request.input('priority') as string | undefined,
       category: request.input('category') as string | undefined,
+      assignedTo: request.input('assignedTo') as string | undefined,
     }
+
+    const canAssign = user.hasAtLeastRole('manager')
+    const assignees = canAssign
+      ? await User.query()
+          .whereIn('role', ['manager', 'admin'])
+          .where('status', 'active')
+          .orderBy('first_name')
+          .orderBy('last_name')
+      : []
 
     const query = Ticket.query()
       .preload('unit', (q) => q.preload('building'))
       .preload('user')
+      .preload('assignee')
       .orderBy('id', 'desc')
 
     switch (user.role) {
@@ -68,13 +79,27 @@ export default class TicketsController {
     if (filters.status) query.where('status', filters.status)
     if (filters.priority) query.where('priority', filters.priority)
     if (filters.category) query.where('category', filters.category)
+    if (filters.assignedTo) {
+      if (filters.assignedTo === 'me') {
+        query.where('assignedTo', user.id)
+      } else if (user.hasAtLeastRole('manager')) {
+        const maybeId = Number(filters.assignedTo)
+        if (!Number.isNaN(maybeId) && Number.isFinite(maybeId)) {
+          query.where('assignedTo', maybeId)
+        }
+      }
+    }
 
     const tickets = await query
 
-    return inertia.render('tickets/index', {
-      tickets: TicketTransformer.transform(tickets),
-      filters,
-    })
+    return inertia.render(
+      'tickets/index',
+      {
+        tickets: TicketTransformer.transform(tickets),
+        filters,
+        assignees: assignees.map((u) => ({ id: u.id, fullName: u.fullName })),
+      } as any
+    )
   }
 
   async create({ inertia, auth }: HttpContext) {
