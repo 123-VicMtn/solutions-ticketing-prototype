@@ -1,7 +1,12 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3'
+import { Head, router } from '@inertiajs/vue3'
+import { Link } from '@adonisjs/inertia/vue'
 import { ref } from 'vue'
 import type { Data } from '@generated/data'
+import BaseCard from '~/components/common/cards/BaseCard.vue'
+import CenteredContent from '~/components/common/layouts/CenteredContent.vue'
+import FormField from '~/components/common/forms/FormField.vue'
+import BaseButton from '~/components/common/buttons/BaseButton.vue'
 
 const props = defineProps<{
   ticket: Data.Ticket
@@ -39,83 +44,76 @@ function submit() {
 
 <template>
   <Head :title="`Modifier ${ticket.reference ?? 'Ticket'}`" />
-  <div class="mx-auto max-w-2xl">
+  <CenteredContent maxWidthClass="max-w-2xl" minHeightClass="min-h-[calc(100vh-10rem)]">
     <div class="mb-6">
-      <Link :href="`/tickets/${ticket.id}`" class="text-sm text-gray-500 hover:text-gray-900">
+      <Link route="tickets.show" :params="{ id: ticket.id }" class="text-sm text-muted">
         &larr; Retour au ticket
       </Link>
     </div>
 
-    <h1 class="text-2xl font-bold tracking-tight text-gray-900">
-      Modifier {{ ticket.reference }}
-    </h1>
-    <p class="mt-1 text-sm text-gray-500">
-      {{ ticket.unit?.building?.name }} / {{ ticket.unit?.label }} — {{ ticket.category }}
-    </p>
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold tracking-tight text-base-content">
+        Modifier {{ ticket.reference }}
+      </h1>
+      <p class="mt-1 text-sm text-muted">
+        {{ ticket.unit?.building?.name }} / {{ ticket.unit?.label }} — {{ ticket.category }}
+      </p>
+    </div>
 
-    <form class="mt-8 space-y-5" @submit.prevent="submit">
-      <div>
-        <label for="title" class="mb-1.5 block text-sm font-medium text-gray-700">Titre</label>
-        <input
-          id="title"
-          v-model="title"
-          name="title"
-          type="text"
-          class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none"
-          :class="{ 'border-red-500': errors.title }"
-        />
-        <p v-if="errors.title" class="mt-1 text-sm text-red-600">{{ errors.title }}</p>
-      </div>
+    <BaseCard bodyClass="p-6 sm:p-8">
+      <form class="space-y-5" @submit.prevent="submit">
+        <FormField id="title" label="Titre" :error="errors.title">
+          <input
+            id="title"
+            v-model="title"
+            name="title"
+            type="text"
+            class="input input-bordered w-full placeholder-muted"
+            :class="{ 'input-error': errors.title }"
+          />
+        </FormField>
 
-      <div>
-        <label for="description" class="mb-1.5 block text-sm font-medium text-gray-700">
-          Description
-        </label>
-        <textarea
-          id="description"
-          v-model="description"
-          name="description"
-          rows="6"
-          class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none"
-          :class="{ 'border-red-500': errors.description }"
-        />
-        <p v-if="errors.description" class="mt-1 text-sm text-red-600">
-          {{ errors.description }}
-        </p>
-      </div>
+        <FormField id="description" label="Description" :error="errors.description">
+          <textarea
+            id="description"
+            v-model="description"
+            name="description"
+            rows="6"
+            class="textarea textarea-bordered w-full placeholder-muted"
+            :class="{ 'textarea-error': errors.description }"
+          />
+        </FormField>
 
-      <div v-if="canModifyPriority">
-        <label for="priority" class="mb-1.5 block text-sm font-medium text-gray-700">
-          Priorité
-        </label>
-        <select
-          id="priority"
-          v-model="priority"
-          name="priority"
-          class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none"
-        >
-          <option value="basse">Basse</option>
-          <option value="moyenne">Moyenne</option>
-          <option value="élevée">Élevée</option>
-          <option value="urgente">Urgente</option>
-        </select>
-      </div>
+        <FormField v-if="canModifyPriority" id="priority" label="Priorité">
+          <select
+            id="priority"
+            v-model="priority"
+            name="priority"
+            class="select select-bordered w-full"
+          >
+            <option value="basse">Basse</option>
+            <option value="moyenne">Moyenne</option>
+            <option value="élevée">Élevée</option>
+            <option value="urgente">Urgente</option>
+          </select>
+        </FormField>
 
-      <div class="flex items-center justify-end gap-3">
-        <Link
-          :href="`/tickets/${ticket.id}`"
-          class="rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          Annuler
-        </Link>
-        <button
-          type="submit"
-          :disabled="processing"
-          class="cursor-pointer rounded-md bg-gray-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
-        >
-          Enregistrer
-        </button>
-      </div>
-    </form>
-  </div>
+        <div class="flex items-center justify-end gap-2">
+          <BaseButton
+            route="tickets.show"
+            :params="{ id: ticket.id }"
+            label="Annuler"
+            variant="secondary"
+            class="m-0"
+          />
+          <BaseButton
+            type="submit"
+            :disabled="processing"
+            label="Enregistrer"
+            class="m-0"
+          />
+        </div>
+      </form>
+    </BaseCard>
+  </CenteredContent>
 </template>
