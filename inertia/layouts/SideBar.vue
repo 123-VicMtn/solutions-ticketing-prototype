@@ -47,6 +47,14 @@ defineProps<{
             <span v-if="!collapsed" class="truncate">Tous les tickets</span>
           </Link>
         </li>
+        <li v-if="!collapsed">
+          <Link
+            href="/tickets?assignedTo=me"
+          >
+            <TicketIcon class="size-5 shrink-0" />
+            <span class="truncate">Mes tiquets</span>
+          </Link>
+        </li>
         <li>
           <Link route="tickets.create" :class="collapsed ? 'justify-center tooltip tooltip-right' : ''" :data-tip="collapsed ? 'Créer un ticket' : undefined">
             <PlusCircleIcon class="size-5 shrink-0" />
