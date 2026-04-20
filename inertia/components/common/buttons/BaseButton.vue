@@ -46,7 +46,7 @@ const variantClass = computed(() => (props.variant ? `btn-${props.variant}` : 'b
     v-if="props.route"
     :route="props.route as any"
     :params="props.params"
-    class="btn m-1 items-center gap-1"
+    class="btn items-center gap-1"
     :class="[variantClass, props.class]"
   >
     <component :is="iconComponent" v-if="iconComponent" class="size-5" />
@@ -56,7 +56,7 @@ const variantClass = computed(() => (props.variant ? `btn-${props.variant}` : 'b
   <a
     v-else-if="props.href"
     :href="props.href"
-    class="btn m-1 items-center gap-1"
+    class="btn items-center gap-1"
     :class="[variantClass, props.class]"
     :target="props.target"
     :rel="props.rel"
