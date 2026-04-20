@@ -98,3 +98,6 @@ router
   .prefix('admin')
   .as('admin')
   .use([middleware.auth(), middleware.requireActiveUser(), middleware.requireRole('manager')])
+
+router.on('/support').renderInertia('support', {}).as('support.index')
+router.on('/privacy').renderInertia('privacy', {}).as('privacy.index')
