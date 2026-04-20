@@ -16,6 +16,7 @@ const props = defineProps<{
   allowedStatusTransitions: string[]
   canAssign: boolean
   providers: Data.Provider[]
+  assignees: { id: number; fullName: string | null }[]
 }>()
 
 const workflowStatuses = ['ouvert', 'assigné', 'en cours', 'terminé', 'résolu', 'fermé'] as const satisfies readonly TicketStatus[]
@@ -37,6 +38,7 @@ const statusValue = ref(props.ticket.status)
 const comment = ref('')
 const isInternal = ref(false)
 const selectedProviderId = ref('')
+const selectedAssigneeUserId = ref('')
 
 function submitStatus(ticketId: number) {
   if (!statusValue.value) return
@@ -44,8 +46,12 @@ function submitStatus(ticketId: number) {
 }
 
 function submitAssign(ticketId: number) {
-  if (!selectedProviderId.value) return
-  router.post(`/tickets/${ticketId}/assign`, { providerId: selectedProviderId.value })
+  if (!selectedAssigneeUserId.value) return
+
+  router.post(`/tickets/${ticketId}/assign`, {
+    assigneeUserId: selectedAssigneeUserId.value,
+    providerId: selectedProviderId.value || undefined,
+  })
 }
 
 function submitComment(ticketId: number) {
@@ -156,39 +162,62 @@ function resetStatusSelection() {
       </div>
 
       <div class="rounded-lg border border-gray-200 bg-white p-6">
-        <div class="mb-3 text-xs uppercase tracking-wide text-gray-500">Prestataire</div>
+        <div class="mb-3 text-xs uppercase tracking-wide text-gray-500">Assignation</div>
+
         <template v-if="ticket.provider">
-          <p class="whitespace-pre-wrap text-sm text-gray-800">
-            {{ ticket.provider.companyName }}
-          </p>
-          <p class="whitespace-pre-wrap text-sm text-gray-800">
-            {{ ticket.provider.speciality }}
-          </p>
+          <div class="text-xs uppercase tracking-wide text-gray-500">Prestataire</div>
+          <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.provider.companyName }}</p>
+          <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.provider.speciality }}</p>
           <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.provider.phone }}</p>
         </template>
+
+        <template v-else-if="ticket.assignee">
+          <div class="text-xs uppercase tracking-wide text-gray-500">Interne</div>
+          <p class="whitespace-pre-wrap text-sm text-gray-800">
+            {{ ticket.assignee.fullName ?? '—' }}
+          </p>
+        </template>
+
         <p v-else-if="!canAssign" class="text-sm text-gray-400 italic">Pas encore assigné</p>
 
         <form
           v-if="canAssign"
-          class="mt-3 flex items-center gap-2"
-          :class="{ 'border-t border-gray-100 pt-3': ticket.provider }"
+          class="mt-3 space-y-3"
+          :class="{ 'border-t border-gray-100 pt-3': ticket.provider || ticket.assignee }"
           @submit.prevent="submitAssign(ticket.id)"
         >
-          <select
-            v-model="selectedProviderId"
-            class="block w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm"
-          >
-            <option value="">{{ ticket.provider ? 'Réassigner…' : 'Sélectionner…' }}</option>
-            <option v-for="provider in providers" :key="provider.id" :value="provider.id">
-              {{ provider.companyName }} — {{ provider.speciality }}
-            </option>
-          </select>
+          <div class="space-y-2">
+            <div class="text-xs uppercase tracking-wide text-gray-500">Suivi interne (obligatoire)</div>
+            <select
+              v-model="selectedAssigneeUserId"
+              class="block w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm"
+            >
+              <option value="">{{ ticket.assignee ? 'Réassigner…' : 'Sélectionner…' }}</option>
+              <option v-for="a in assignees" :key="a.id" :value="a.id">
+                {{ a.fullName ?? `#${a.id}` }}
+              </option>
+            </select>
+          </div>
+
+          <div class="space-y-2">
+            <div class="text-xs uppercase tracking-wide text-gray-500">Prestataire</div>
+            <select
+              v-model="selectedProviderId"
+              class="block w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm"
+            >
+              <option value="">{{ ticket.provider ? 'Réassigner…' : 'Aucun prestataire' }}</option>
+              <option v-for="provider in providers" :key="provider.id" :value="provider.id">
+                {{ provider.companyName }} — {{ provider.speciality }}
+              </option>
+            </select>
+          </div>
+
           <button
             type="submit"
-            :disabled="!selectedProviderId"
-            class="shrink-0 rounded-md bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+            :disabled="!selectedAssigneeUserId"
+            class="w-full rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
           >
-            {{ ticket.provider ? 'Réassigner' : 'Assigner' }}
+            Enregistrer l’assignation
           </button>
         </form>
       </div>
