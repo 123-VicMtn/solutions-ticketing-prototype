@@ -15,7 +15,7 @@ export default class MainSeeder extends BaseSeeder {
       {
         firstName: 'Gérance',
         lastName: '123 Soleil',
-        email: 'admin@ticketing.ch',
+        email: 'v.montavon@123-soleil.ch',
         password: 'password123',
         role: 'admin',
         status: 'active',
@@ -255,7 +255,7 @@ export default class MainSeeder extends BaseSeeder {
       {
         firstName: 'Sébastien',
         lastName: 'Prestataire',
-        email: 'provider@ticketing.ch',
+        email: 'victorien.montavon@gmail.com',
         password: 'password123',
         role: 'provider',
         status: 'active',
