@@ -18,7 +18,7 @@ const props = defineProps<{
   assignees: { id: number; fullName: string | null }[]
 }>()
 
-const statuses = ['ouvert', 'assigné', 'en cours', 'résolu', 'fermé']
+const statuses = ['ouvert', 'assigné', 'en cours', 'terminé', 'résolu', 'fermé']
 const priorities = ['basse', 'moyenne', 'élevée', 'urgente']
 const categories = ['Technique & Maintenance', 'Entretien & Nettoyage', 'Administratifs & Contrats', 'Finance & Facturation', 'Relations & Conflits', 'Gestion des accès', 'Déménagement', 'Urgences']
 
