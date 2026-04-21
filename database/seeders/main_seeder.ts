@@ -13,8 +13,8 @@ export default class MainSeeder extends BaseSeeder {
   async run() {
     const users = await User.createMany([
       {
-        firstName: 'Gerance',
-        lastName: 'Gerance',
+        firstName: 'Gérance',
+        lastName: '123 Soleil',
         email: 'admin@ticketing.ch',
         password: 'password123',
         role: 'admin',
@@ -45,7 +45,7 @@ export default class MainSeeder extends BaseSeeder {
       {
         firstName: 'Nicolas',
         lastName: 'Molina',
-        email: 'nicolas.molina@ticketing.ch',
+        email: 'manager@ticketing.ch',
         password: 'password123',
         role: 'manager',
         status: 'active',
@@ -65,7 +65,7 @@ export default class MainSeeder extends BaseSeeder {
       {
         firstName: 'Luca',
         lastName: 'Favre',
-        email: 'luca.favre@example.ch',
+        email: 'owner@ticketing.ch',
         password: 'password123',
         role: 'owner',
         status: 'active',
@@ -125,7 +125,7 @@ export default class MainSeeder extends BaseSeeder {
       {
         firstName: 'Marie',
         lastName: 'Dupont',
-        email: 'marie.dupont@example.ch',
+        email: 'tenant@ticketing.ch',
         password: 'password123',
         role: 'tenant',
         status: 'active',
@@ -254,8 +254,8 @@ export default class MainSeeder extends BaseSeeder {
       },
       {
         firstName: 'Sébastien',
-        lastName: 'Bauer',
-        email: 'sebastien.bauer@example.ch',
+        lastName: 'Prestataire',
+        email: 'provider@ticketing.ch',
         password: 'password123',
         role: 'provider',
         status: 'active',
