@@ -10,6 +10,8 @@ import BaseCard from '~/components/common/cards/BaseCard.vue'
 import BaseButton from '~/components/common/buttons/BaseButton.vue'
 import FormField from '~/components/common/forms/FormField.vue'
 
+type UnitWithBuilding = Data.Unit & { building?: { name?: string | null } | null }
+
 const props = defineProps<{
   ticket: Data.Ticket
   comments: Data.TicketComment[]
@@ -41,8 +43,12 @@ function statusLabel(status: string): string {
 const statusValue = ref<TicketStatus>(props.ticket.status as TicketStatus)
 const comment = ref('')
 const isInternal = ref(false)
-const selectedProviderId = ref('')
-const selectedAssigneeUserId = ref('')
+const selectedProviderId = ref<number | null>(props.ticket.provider?.id ?? null)
+const selectedAssigneeUserId = ref<number | null>(props.ticket.assignee?.id ?? null)
+
+const canSubmitAssign = computed(() => {
+  return Boolean(selectedAssigneeUserId.value)
+})
 
 function submitStatus(ticketId: number) {
   if (!statusValue.value) return
@@ -54,7 +60,7 @@ function submitAssign(ticketId: number) {
 
   router.post(`/tickets/${ticketId}/assign`, {
     assigneeUserId: selectedAssigneeUserId.value,
-    providerId: selectedProviderId.value || undefined,
+    providerId: selectedProviderId.value ?? undefined,
   })
 }
 
@@ -117,9 +123,9 @@ function resetStatusSelection() {
 }
 
 const createdAtLabel = computed(() => {
-  const value = (props.ticket as any)?.createdAt
+  const value = props.ticket.createdAt
   if (!value) return '—'
-  const date = value instanceof Date ? value : new Date(value)
+  const date = new Date(String(value))
   if (Number.isNaN(date.getTime())) return '—'
   return date.toLocaleString('fr-CH', {
     year: 'numeric',
@@ -128,6 +134,11 @@ const createdAtLabel = computed(() => {
     hour: '2-digit',
     minute: '2-digit',
   })
+})
+
+const unitBuildingName = computed(() => {
+  const unit = props.ticket.unit as UnitWithBuilding | null | undefined
+  return unit?.building?.name ?? '—'
 })
 </script>
 
@@ -152,7 +163,7 @@ const createdAtLabel = computed(() => {
             </span>
           </div>
           <p class="mt-1 text-sm text-muted">
-            {{ (ticket as any)?.unit?.building?.name }} / {{ ticket.unit?.label }} - {{ ticket.category }} -
+            {{ unitBuildingName }} / {{ ticket.unit?.label }} - {{ ticket.category }} -
             <span :class="ticketPriorityBadgeClass(ticket.priority)">{{ ticket.priority }}</span>
           </p>
           <div class="mt-2">
@@ -260,7 +271,7 @@ const createdAtLabel = computed(() => {
             <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
               <FormField id="assigneeUserId" label="Suivi interne (obligatoire)">
                 <select v-model="selectedAssigneeUserId" class="select select-bordered w-full">
-                  <option value="">{{ ticket.assignee ? 'Réassigner…' : 'Sélectionner…' }}</option>
+                  <option :value="null">{{ ticket.assignee ? 'Réassigner…' : 'Sélectionner…' }}</option>
                   <option v-for="a in assignees" :key="a.id" :value="a.id">
                     {{ a.fullName ?? `#${a.id}` }}
                   </option>
@@ -269,11 +280,11 @@ const createdAtLabel = computed(() => {
 
               <FormField id="providerId" label="Prestataire">
                 <select v-model="selectedProviderId" class="select select-bordered w-full">
-                  <option value="">{{ ticket.provider ? 'Réassigner…' : 'Aucun prestataire' }}</option>
+                  <option :value="null">{{ ticket.provider ? 'Réassigner…' : 'Aucun prestataire' }}</option>
                   <option
                     v-for="provider in providers"
-                    :key="(provider as any).id"
-                    :value="(provider as any).id"
+                    :key="provider.id"
+                    :value="provider.id"
                   >
                     {{ provider.companyName }} — {{ provider.speciality }}
                   </option>
@@ -284,7 +295,7 @@ const createdAtLabel = computed(() => {
             <div class="flex items-center justify-end">
               <BaseButton
                 type="submit"
-                :disabled="!selectedAssigneeUserId"
+                :disabled="!canSubmitAssign"
                 label="Enregistrer"
                 class="min-w-44"
               />
