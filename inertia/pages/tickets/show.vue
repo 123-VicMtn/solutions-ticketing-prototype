@@ -5,6 +5,7 @@ import { computed, ref } from 'vue'
 import { ticketPriorityBadgeClass } from '~/utils/ticketPriority'
 import { TicketStatus } from '#models/ticket';
 import type { Data } from '@generated/data'
+import { isTicketStatus } from '~/utils/ticketStatus'
 
 const props = defineProps<{
   ticket: Data.Ticket
@@ -34,7 +35,7 @@ function statusLabel(status: string): string {
   return STATUS_LABELS[status] ?? status
 }
 
-const statusValue = ref(props.ticket.status)
+const statusValue = ref<TicketStatus>(props.ticket.status as TicketStatus)
 const comment = ref('')
 const isInternal = ref(false)
 const selectedProviderId = ref('')
@@ -284,7 +285,7 @@ function resetStatusSelection() {
                     ? 'border-gray-900 bg-gray-900 text-white'
                     : 'border-green-200 bg-white text-green-800 hover:bg-green-50'
                 "
-                @click="statusValue = nextStatus"
+                @click="statusValue = isTicketStatus(nextStatus) ? nextStatus : statusValue"
               >
                 {{ statusLabel(nextStatus) }}
               </button>
