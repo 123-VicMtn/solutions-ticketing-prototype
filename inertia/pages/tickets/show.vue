@@ -66,10 +66,20 @@ function submitAssign(ticketId: number) {
 
 function submitComment(ticketId: number) {
   if (!comment.value.trim()) return
-  router.post(`/tickets/${ticketId}/comments`, {
-    content: comment.value,
-    isInternal: isInternal.value,
-  })
+  router.post(
+    `/tickets/${ticketId}/comments`,
+    {
+      content: comment.value,
+      isInternal: isInternal.value,
+    },
+    {
+      preserveScroll: true,
+      onSuccess: () => {
+        comment.value = ''
+        isInternal.value = false
+      },
+    }
+  )
 }
 
 const uploadingFiles = ref(false)
