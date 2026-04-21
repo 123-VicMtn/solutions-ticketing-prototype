@@ -1,42 +1,70 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3'
+import { Head, router } from '@inertiajs/vue3'
+import ActionButton from '~/components/common/buttons/ActionButton.vue'
 import { useAuth } from '~/composables/use_auth'
+import ZebraTable from '~/components/common/zebraTable.vue'
+import DropdownFilter from '~/components/common/dropdowns/DropdownFilter.vue'
+import BaseButton from '~/components/common/buttons/BaseButton.vue'
+import { EyeIcon, PlusCircleIcon } from '@heroicons/vue/24/outline'
+import { ticketPriorityBadgeClass } from '~/utils/ticketPriority'
+import type { Data } from '@generated/data'
+import { computed, ref } from 'vue'
 
 const { isProvider } = useAuth()
 
 const props = defineProps<{
-  tickets: Array<{
-    id: number
-    reference: string | null
-    category: string
-    priority: string
-    status: string
-    title: string
-    createdAt: string
-    unit: { id: number; label: string; building: { id: number; name: string } }
-    user: { id: number; fullName: string | null; email: string }
-  }>
-  filters: { status?: string; priority?: string }
+  tickets: Data.Ticket[]
+  filters: { status?: string; priority?: string; category?: string; assignedTo?: string }
+  assignees: { id: number; fullName: string | null }[]
 }>()
 
-const statuses = ['ouvert', 'assigné', 'en cours', 'résolu', 'fermé']
+const statuses = ['ouvert', 'assigné', 'en cours', 'terminé', 'résolu', 'fermé']
 const priorities = ['basse', 'moyenne', 'élevée', 'urgente']
-const priorityColors = {
-  basse: 'bg-green-100 text-green-800',
-  moyenne: 'bg-yellow-100 text-yellow-800',
-  élevée: 'bg-orange-100 text-orange-800',
-  urgente: 'bg-red-100 text-red-800',
-}
+const categories = ['Technique & Maintenance', 'Entretien & Nettoyage', 'Administratifs & Contrats', 'Finance & Facturation', 'Relations & Conflits', 'Gestion des accès', 'Déménagement', 'Urgences']
 
-function applyFilters(form: HTMLFormElement) {
-  const formData = new FormData(form)
-  const status = String(formData.get('status') || '')
-  const priority = String(formData.get('priority') || '')
+const selectedStatus = ref(props.filters.status ?? '')
+const selectedPriority = ref(props.filters.priority ?? '')
+const selectedCategory = ref(props.filters.category ?? '')
+const selectedAssignedTo = ref(props.filters.assignedTo ?? '')
+
+const hasActiveFilters = computed(() => {
+  return Boolean(
+    selectedStatus.value ||
+      selectedPriority.value ||
+      selectedCategory.value ||
+      selectedAssignedTo.value
+  )
+})
+
+const tableHeaders = [
+  { key: 'reference', label: 'Réf' },
+  { key: 'priority', label: 'Priorité' },
+  { key: 'category', label: 'Catégorie' },
+  { key: 'title', label: 'Titre' },
+  { key: 'unit', label: 'Lot' },
+  { key: 'user', label: 'Locataire' },
+  { key: 'assignee', label: 'Assigné' },
+  { key: 'status', label: 'Statut' },
+  { key: 'action', label: 'Actions', thClass: 'text-right', tdClass: 'text-right' },
+]
+
+const assigneeItems = props.assignees.map((a) => ({
+  label: a.fullName ?? `#${a.id}`,
+  value: String(a.id),
+}))
+
+function applyFilters() {
+  const status = selectedStatus.value
+  const priority = selectedPriority.value
+  const category = selectedCategory.value
+  const assignedTo = selectedAssignedTo.value
   router.get(
     '/tickets',
     {
       ...(status ? { status } : {}),
       ...(priority ? { priority } : {}),
+      ...(category ? { category } : {}),
+      ...(assignedTo ? { assignedTo } : {}),
     },
     { preserveState: true }
   )
@@ -48,119 +76,105 @@ function applyFilters(form: HTMLFormElement) {
   <div>
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-bold tracking-tight text-gray-900">Tickets</h1>
-        <p class="mt-1 text-sm text-gray-500">Suivez les demandes d'intervention</p>
+        <h1 class="text-2xl font-bold tracking-tight text-base-content">Tickets</h1>
+        <p class="mt-1 text-sm text-muted">Suivez les demandes d'intervention</p>
       </div>
-      <Link
-        v-if="!isProvider"
-        href="/tickets/create"
-        class="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
-      >
-        Nouveau ticket
-      </Link>
+
     </div>
 
-    <form class="mt-6 flex gap-3" @change="(e) => applyFilters(e.currentTarget as HTMLFormElement)">
-      <select name="status" class="rounded-md border border-gray-300 p-2 text-sm">
-        <option value="">Tous les statuts</option>
-        <option
-          v-for="status in statuses"
-          :key="status"
-          :value="status"
-          :selected="filters.status === status"
-        >
-          {{ status }}
-        </option>
-      </select>
-      <select name="priority" class="rounded-md border border-gray-300 p-2 text-sm">
-        <option value="">Toutes les priorités</option>
-        <option
-          v-for="priority in priorities"
-          :key="priority"
-          :value="priority"
-          :selected="filters.priority === priority"
-        >
-          {{ priority }}
-        </option>
-      </select>
-    </form>
+    <div class="mt-6 flex w-full gap-3">
+      <DropdownFilter
+        v-model="selectedStatus"
+        title="Statut"
+        :items="statuses"
+        all-label="Tous"
+        @change="applyFilters"
+      />
+      <DropdownFilter
+        v-model="selectedPriority"
+        title="Priorité"
+        :items="priorities"
+        all-label="Toutes"
+        @change="applyFilters"
+      />
+      <DropdownFilter
+        v-model="selectedCategory"
+        title="Catégorie"
+        :items="categories"
+        all-label="Toutes"
+        @change="applyFilters"
+      />
+      <DropdownFilter
+        v-if="!isProvider && assigneeItems.length"
+        v-model="selectedAssignedTo"
+        title="Assigné"
+        :items="assigneeItems"
+        all-label="Tous"
+        @change="applyFilters"
+      />
+      <BaseButton
+        v-if="!isProvider"
+        route="tickets.create"
+        label="Créer un ticket"
+        :icon="PlusCircleIcon"
+        type="button"
+        class="ml-auto"
+      />
+    </div>
 
-    <div class="mt-6 overflow-hidden rounded-lg border border-gray-200 bg-white">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-            >
-              Réf
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-            >
-              Titre
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-            >
-              Lot
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-            >
-              Locataire
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-            >
-              Priorité
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-            >
-              Statut
-            </th>
-            <th
-              class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500"
-            >
-              Action
-            </th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200">
-          <tr v-for="ticket in props.tickets" :key="ticket.id">
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-              {{ ticket.reference ?? '-' }}
-            </td>
-            <td class="px-6 py-4 text-sm text-gray-900">
-              <div class="font-medium">{{ ticket.title }}</div>
-              <div class="text-xs text-gray-500">{{ ticket.category }}</div>
-            </td>
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-              {{ ticket.unit.building.name }} / {{ ticket.unit.label }}
-            </td>
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-              {{ ticket.user.fullName }}
-            </td>
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-              <span
-                class="rounded-full px-2.5 py-0.5 text-xs font-medium"
-                :class="priorityColors[ticket.priority as keyof typeof priorityColors]"
-              >
-                {{ ticket.priority }}
-              </span>
-            </td>
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ ticket.status }}</td>
-            <td class="whitespace-nowrap px-6 py-4 text-right text-sm">
-              <Link
-                :href="`/tickets/${ticket.id}`"
-                class="font-medium text-gray-700 hover:text-gray-900"
-              >
-                Ouvrir
-              </Link>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="mt-6">
+      <ZebraTable :headers="tableHeaders" :rows="props.tickets" :rowKey="(t) => t.id">
+        <template #empty>
+          <span v-if="hasActiveFilters">Aucun ticket ne correspond aux filtres sélectionnés.</span>
+          <span v-else>Aucun ticket à afficher.</span>
+        </template>
+        <template #cell:reference="{ row: ticket }">
+          {{ ticket.reference ?? '-' }}
+        </template>
+
+        <template #cell:category="{ row: ticket }">
+          <span>{{ ticket.category }}</span>
+        </template>
+
+        <template #cell:title="{ row: ticket }">
+          <div>{{ ticket.title }}</div>
+        </template>
+
+        <template #cell:unit="{ row: ticket }">
+          {{ ticket.unit?.building?.name }} / {{ ticket.unit?.label }}
+        </template>
+
+        <template #cell:user="{ row: ticket }">
+          {{ ticket.user?.fullName }}
+        </template>
+
+        <template #cell:assignee="{ row: ticket }">
+          <span class="text-sm text-base-content">
+            {{ ticket.assignee?.fullName ?? '—' }}
+          </span>
+        </template>
+
+        <template #cell:priority="{ row: ticket }">
+          <span class="text-sm">
+            <span :class="ticketPriorityBadgeClass(ticket.priority)">{{ ticket.priority }}</span>
+          </span>
+        </template>
+
+        <template #cell:status="{ row: ticket }">
+          <span class="text-sm">
+            <span class="badge badge-primary h-auto">{{ ticket.status }}</span>
+          </span>
+        </template>
+
+        <template #cell:action="{ row: ticket }">
+          <ActionButton
+            route="tickets.show"
+            :params="{ id: ticket.id }"
+            :icon="EyeIcon"
+            ariaLabel="Voir"
+            title="Voir"/>
+        </template>
+      </ZebraTable>
     </div>
   </div>
 </template>

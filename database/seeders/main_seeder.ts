@@ -13,9 +13,9 @@ export default class MainSeeder extends BaseSeeder {
   async run() {
     const users = await User.createMany([
       {
-        firstName: 'Gerance',
-        lastName: 'Gerance',
-        email: 'admin@ticketing.ch',
+        firstName: 'Gérance',
+        lastName: '123 Soleil',
+        email: 'v.montavon@123-soleil.ch',
         password: 'password123',
         role: 'admin',
         status: 'active',
@@ -45,7 +45,7 @@ export default class MainSeeder extends BaseSeeder {
       {
         firstName: 'Nicolas',
         lastName: 'Molina',
-        email: 'nicolas.molina@ticketing.ch',
+        email: 'manager@ticketing.ch',
         password: 'password123',
         role: 'manager',
         status: 'active',
@@ -65,7 +65,7 @@ export default class MainSeeder extends BaseSeeder {
       {
         firstName: 'Luca',
         lastName: 'Favre',
-        email: 'luca.favre@example.ch',
+        email: 'owner@ticketing.ch',
         password: 'password123',
         role: 'owner',
         status: 'active',
@@ -125,7 +125,7 @@ export default class MainSeeder extends BaseSeeder {
       {
         firstName: 'Marie',
         lastName: 'Dupont',
-        email: 'marie.dupont@example.ch',
+        email: 'tenant@ticketing.ch',
         password: 'password123',
         role: 'tenant',
         status: 'active',
@@ -254,8 +254,8 @@ export default class MainSeeder extends BaseSeeder {
       },
       {
         firstName: 'Sébastien',
-        lastName: 'Bauer',
-        email: 'sebastien.bauer@example.ch',
+        lastName: 'Prestataire',
+        email: 'victorien.montavon@gmail.com',
         password: 'password123',
         role: 'provider',
         status: 'active',
@@ -300,6 +300,7 @@ export default class MainSeeder extends BaseSeeder {
     const tenants = users.filter((user) => user.role === 'tenant' && user.status === 'active')
     const providerUsers = users.filter((user) => user.role === 'provider')
     const gerances = [...managers, ...admins]
+    const managementUsers = [...managers, ...admins]
 
     const buildings = await Building.createMany([
       {
@@ -449,7 +450,6 @@ export default class MainSeeder extends BaseSeeder {
       const title = `${topics[index % topics.length]}`
       const description = `Signalement créé pour ${title.toLowerCase()} dans l'unité ${tenantLink.unitId}.`
 
-      const managementUsers = [...managers, ...admins]
       const defaultAssignee = managementUsers[index % managementUsers.length]
 
       const provider =
@@ -475,12 +475,88 @@ export default class MainSeeder extends BaseSeeder {
       tickets.push(ticket)
     }
 
+    // Tickets explicitement assignes a un compte interne (assignedTo),
+    // avec et sans prestataire, pour couvrir les cas du workflow d'assignation.
+    const explicitlyAssignedPayload: Array<{
+      title: string
+      description: string
+      status: TicketStatus
+      category: TicketCategory
+      priority: TicketPriority
+      requester: (typeof tenants)[number]
+      unitId: number
+      assignee: (typeof managementUsers)[number]
+      provider: (typeof providers)[number] | null
+    }> = [
+      {
+        title: 'Suivi gérance - contrôle porte palière',
+        description: 'Ticket assigné à la gérance sans prestataire externe.',
+        status: 'assigné',
+        category: 'Gestion des accès',
+        priority: 'moyenne',
+        requester: tenants[0]!,
+        unitId: tenantLinks[0]!.unitId,
+        assignee: managementUsers[0]!,
+        provider: null,
+      },
+      {
+        title: 'Intervention serrurerie en cours',
+        description: 'Ticket assigné en interne et routé vers un prestataire actif.',
+        status: 'en cours',
+        category: 'Technique & Maintenance',
+        priority: 'élevée',
+        requester: tenants[1]!,
+        unitId: tenantLinks[1]!.unitId,
+        assignee: managementUsers[1]!,
+        provider: providers[0]!,
+      },
+      {
+        title: 'Nettoyage de cage d’escalier programmé',
+        description: 'Suivi interne actif avec prestataire de nettoyage.',
+        status: 'assigné',
+        category: 'Entretien & Nettoyage',
+        priority: 'basse',
+        requester: tenants[2]!,
+        unitId: tenantLinks[2]!.unitId,
+        assignee: managementUsers[2]!,
+        provider: providers[1]!,
+      },
+      {
+        title: 'Clôture après intervention prestataire',
+        description: 'Ticket terminé et assigné à un responsable interne.',
+        status: 'terminé',
+        category: 'Administratifs & Contrats',
+        priority: 'moyenne',
+        requester: tenants[3]!,
+        unitId: tenantLinks[3]!.unitId,
+        assignee: managementUsers[3 % managementUsers.length]!,
+        provider: providers[2]!,
+      },
+    ]
+
+    for (const [index, payload] of explicitlyAssignedPayload.entries()) {
+      const ticket = await Ticket.create({
+        userId: payload.requester.id,
+        unitId: payload.unitId,
+        assignedTo: payload.assignee.id,
+        providerId: payload.provider?.id ?? null,
+        reference: `TK-2026-${String(900 + index + 1).padStart(4, '0')}`,
+        category: payload.category,
+        priority: payload.priority,
+        status: payload.status,
+        title: payload.title,
+        description: payload.description,
+        resolvedAt: null,
+      })
+
+      tickets.push(ticket)
+    }
+
     let commentsCount = 0
     let attachmentsCount = 0
 
     for (const [index, ticket] of tickets.entries()) {
       const tenant = tenants.find((row) => row.id === ticket.userId)!
-      const managementUsers = [...managers, ...admins]
       const manager =
         ticket.assignedTo !== null
           ? (managementUsers.find((user) => user.id === ticket.assignedTo) ?? managementUsers[0]!)

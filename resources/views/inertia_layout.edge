@@ -3,10 +3,21 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/png" href="resources/assets/svg/icon.png" />
+    <link rel="icon" type="image/png" href="/resources/assets/images/logo.png" />
+
     <title inertia>
       123-Immo
     </title>
+
+    <script>
+      ;(() => {
+        try {
+          const saved = localStorage.getItem('theme')
+          const theme = saved === 'dark-custom' || saved === 'light-custom' ? saved : 'light-custom'
+          document.documentElement.dataset.theme = theme
+        } catch {}
+      })()
+    </script>
 
     @vite(['inertia/app.ts'])
     @inertiaHead()

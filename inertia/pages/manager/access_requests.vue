@@ -1,35 +1,27 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3'
 import { reactive } from 'vue'
+import type { Data } from '@generated/data'
+import BaseCard from '~/components/common/cards/BaseCard.vue'
+import BaseButton from '~/components/common/buttons/BaseButton.vue'
+import FormField from '~/components/common/forms/FormField.vue'
 
 const props = defineProps<{
-  requests: Array<{
-    id: number
-    firstName: string
-    lastName: string
-    fullName: string | null
-    email: string | null
-    phone: string | null
-    role: 'tenant' | 'owner'
-    createdAt: string
-  }>
-  units: Array<{
-    id: number
-    label: string
-    building: { id: number; name: string }
-  }>
+  requests: Data.User[]
+  units: Data.Unit[]
 }>()
 
 const unitByRequest = reactive<Record<number, number | null>>({})
 const rejectReasonByRequest = reactive<Record<number, string>>({})
 
-function approve(requestId: number, relation: 'tenant' | 'owner') {
+function approve(requestId: number, role: string) {
   const unitId = unitByRequest[requestId]
   if (!unitId) return
+  if (role !== 'tenant' && role !== 'owner') return
 
   router.post(`/manager/access-requests/${requestId}/approve`, {
     unitId,
-    relation,
+    relation: role,
   })
 }
 
@@ -41,95 +33,82 @@ function reject(requestId: number) {
 </script>
 
 <template>
-  <Head title="Demandes d'acces" />
+  <Head title="Demandes d'accès" />
 
   <div class="space-y-6">
     <div>
-      <h1 class="text-2xl font-bold tracking-tight text-gray-900">Demandes d'acces</h1>
-      <p class="mt-1 text-sm text-gray-500">
-        Validation des inscriptions locataires/proprietaires.
-      </p>
+      <h1 class="text-2xl font-bold tracking-tight text-base-content">Demandes d'accès</h1>
+      <p class="mt-1 text-sm text-muted">Validation des inscriptions locataires/propriétaires.</p>
     </div>
 
-    <div
-      v-if="requests.length === 0"
-      class="rounded-lg border border-gray-200 bg-white p-6 text-sm text-gray-600"
-    >
-      Aucune demande en attente.
-    </div>
+    <BaseCard v-if="requests.length === 0" bodyClass="p-6 sm:p-8">
+      <div class="text-sm text-muted">Aucune demande en attente.</div>
+    </BaseCard>
 
     <div v-else class="space-y-4">
-      <div
+      <BaseCard
         v-for="request in requests"
         :key="request.id"
-        class="rounded-lg border border-gray-200 bg-white p-6"
+        bodyClass="p-6 sm:p-8"
       >
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-base font-semibold text-gray-900">
-              {{ request.fullName ?? `${request.firstName} ${request.lastName}` }}
-            </p>
-            <p class="text-sm text-gray-600">
-              {{ request.email ?? '-' }} - {{ request.phone ?? '-' }}
-            </p>
-            <p class="text-xs text-gray-500">Role demande: {{ request.role }}</p>
-          </div>
+        <div>
+          <p class="text-base font-semibold text-base-content">
+            {{ request.fullName ?? `${request.firstName} ${request.lastName}` }}
+          </p>
+          <p class="text-sm text-muted">
+            {{ request.email ?? '-' }} - {{ request.phone ?? '-' }}
+          </p>
+          <p class="text-xs text-muted">Rôle demandé: {{ request.role }}</p>
         </div>
 
         <div class="mt-4 space-y-3">
           <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
             <div class="min-w-0 flex-1">
-              <label class="mb-1 block text-sm font-medium text-gray-700"
-                >Logement à assigner</label
-              >
-              <select
-                v-model.number="unitByRequest[request.id]"
-                class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-              >
-                <option :value="null">Choisir un logement</option>
-                <option v-for="unit in units" :key="unit.id" :value="unit.id">
-                  {{ unit.building.name }} - {{ unit.label }}
-                </option>
-              </select>
+              <FormField :id="`unit-${request.id}`" label="Logement à assigner">
+                <select
+                  :id="`unit-${request.id}`"
+                  v-model.number="unitByRequest[request.id]"
+                  class="select select-bordered w-full"
+                >
+                  <option :value="null">Choisir un logement</option>
+                  <option v-for="unit in units" :key="unit.id" :value="unit.id">
+                    {{ unit.building?.name }} - {{ unit.label }}
+                  </option>
+                </select>
+              </FormField>
             </div>
 
-            <button
+            <BaseButton
               type="button"
-              class="shrink-0 rounded-md bg-gray-900 px-4 py-2 text-sm text-white disabled:opacity-50"
+              variant="success"
+              class="w-full shrink-0 sm:w-auto"
               :disabled="!unitByRequest[request.id]"
+              label="Approuver"
               @click="approve(request.id, request.role)"
-            >
-              Approuver
-            </button>
+            />
           </div>
 
-          <div>
-            <label
-              class="mb-1 block text-xs font-medium text-gray-600"
-              :for="`reject-${request.id}`"
-            >
-              Motif du rejet (optionnel, envoyé par email)
-            </label>
+          <FormField :id="`reject-${request.id}`" label="Motif du rejet (optionnel, envoyé par email)">
             <textarea
               :id="`reject-${request.id}`"
               v-model="rejectReasonByRequest[request.id]"
               rows="2"
-              class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-              placeholder="Ex. Informations éronnées..."
+              class="textarea textarea-bordered w-full"
+              placeholder="Ex. Informations erronées..."
             />
-          </div>
+          </FormField>
 
           <div class="flex justify-end">
-            <button
+            <BaseButton
               type="button"
-              class="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700"
+              variant="error"
+              class="btn-outline"
+              label="Rejeter"
               @click="reject(request.id)"
-            >
-              Rejeter
-            </button>
+            />
           </div>
         </div>
-      </div>
+      </BaseCard>
     </div>
   </div>
 </template>

@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3'
 import { Form } from '@adonisjs/inertia/vue'
+import BaseCard from '~/components/common/cards/BaseCard.vue'
+import CenteredContent from '~/components/common/layouts/CenteredContent.vue'
+import FormField from '~/components/common/forms/FormField.vue'
+import BaseButton from '~/components/common/buttons/BaseButton.vue'
 
 defineProps<{
   token: string
@@ -8,51 +12,49 @@ defineProps<{
 </script>
 
 <template>
-  <Head title="Definir le mot de passe" />
+  <Head title="Définir le mot de passe" />
 
-  <div class="flex min-h-[calc(100vh-12rem)] items-center justify-center">
-    <div class="w-full max-w-sm">
-      <div class="mb-8">
-        <h1 class="text-2xl font-bold tracking-tight text-gray-900">Definir mon mot de passe</h1>
-      </div>
+  <CenteredContent maxWidthClass="max-w-sm">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold tracking-tight text-base-content">Définir mon mot de passe</h1>
+      <p class="mt-1 text-sm text-muted">Choisissez un mot de passe pour activer votre accès</p>
+    </div>
 
+    <BaseCard bodyClass="p-6 sm:p-8">
       <Form route="set_password.store" :params="{ token }" class="space-y-5" #default="{ processing, errors }">
-        <div>
-          <label for="password" class="mb-1.5 block text-sm font-medium text-gray-700">
-            Mot de passe
-          </label>
+        <FormField id="password" label="Mot de passe" :error="errors.password">
           <input
             id="password"
             name="password"
             type="password"
-            class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none"
-            :class="{ 'border-red-500': errors.password }"
+            autocomplete="new-password"
+            class="input input-bordered w-full placeholder-muted"
+            :class="{ 'input-error': errors.password }"
           />
-          <p v-if="errors.password" class="mt-1 text-sm text-red-600">{{ errors.password }}</p>
-        </div>
+        </FormField>
 
-        <div>
-          <label for="passwordConfirmation" class="mb-1.5 block text-sm font-medium text-gray-700">
-            Confirmation
-          </label>
+        <FormField
+          id="passwordConfirmation"
+          label="Confirmation"
+          :error="errors.passwordConfirmation"
+        >
           <input
             id="passwordConfirmation"
             name="passwordConfirmation"
             type="password"
-            class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none"
-            :class="{ 'border-red-500': errors.passwordConfirmation }"
+            autocomplete="new-password"
+            class="input input-bordered w-full placeholder-muted"
+            :class="{ 'input-error': errors.passwordConfirmation }"
           />
-          <p v-if="errors.passwordConfirmation" class="mt-1 text-sm text-red-600">{{ errors.passwordConfirmation }}</p>
-        </div>
+        </FormField>
 
-        <button
+        <BaseButton
           type="submit"
           :disabled="processing"
-          class="w-full cursor-pointer rounded-md bg-gray-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
-        >
-          Enregistrer
-        </button>
+          label="Enregistrer"
+          class="w-full"
+        />
       </Form>
-    </div>
-  </div>
+    </BaseCard>
+  </CenteredContent>
 </template>

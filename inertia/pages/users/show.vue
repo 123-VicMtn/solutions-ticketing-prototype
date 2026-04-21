@@ -2,6 +2,8 @@
 import { Head } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import { Link } from '@adonisjs/inertia/vue'
+import { ticketPriorityBadgeClass } from '~/utils/ticketPriority'
+import type { Data } from '@generated/data'
 
 const ROLE_LABELS: Record<string, string> = {
   admin: 'Administrateur',
@@ -12,32 +14,9 @@ const ROLE_LABELS: Record<string, string> = {
 }
 
 const props = defineProps<{
-  profileUser: {
-    id: number
-    role: string
-    firstName: string
-    lastName: string
-    email: string
-    phone: string
-    notificationPreference: 'email' | 'sms'
-    createdAt: string
-    updatedAt: string
-  }
-  userUnits: Array<{
-    id: number
-    relation: string
-    unit: { id: number; label: string; building: { id: number; name: string } }
-  }>
-  tickets: Array<{
-    id: number
-    reference: string | null
-    category: string
-    priority: string
-    status: string
-    title: string
-    description: string
-    createdAt: string
-  }>
+  profileUser: Data.User
+  userUnits: Data.UserUnit[]
+  tickets: Data.Ticket[]
 }>()
 
 const roleLabel = computed(() => ROLE_LABELS[props.profileUser.role] ?? props.profileUser.role)
@@ -91,7 +70,7 @@ const notificationLabel = computed(() =>
           class="rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-800"
         >
           <div class="flex items-center justify-between transition">
-            <div>{{ userUnit.unit.building.name }} / {{ userUnit.unit.label }}</div>
+            <div>{{ userUnit.unit?.building?.name }} / {{ userUnit.unit?.label }}</div>
             <div class="ml-2 text-xs text-gray-500">({{ roleLabel }})</div>
           </div>
         </li>
@@ -113,8 +92,12 @@ const notificationLabel = computed(() =>
             >{{ ticket.title }}</Link
           >
           <span class="ml-2 text-xs text-gray-500">({{ ticket.category }})</span>
-          <span class="ml-2 text-xs text-gray-500">({{ ticket.priority }})</span>
-          <span class="ml-2 text-xs text-gray-500">({{ ticket.status }})</span>
+          <span class="ml-2 text-xs">
+            <span :class="ticketPriorityBadgeClass(ticket.priority)">{{ ticket.priority }}</span>
+          </span>
+          <span class="ml-2 text-xs">
+            <span class="badge badge-primary badge-outline">{{ ticket.status }}</span>
+          </span>
           <span class="ml-2 text-xs text-gray-500">({{ ticket.createdAt }})</span>
         </li>
         <li v-if="tickets.length === 0">

@@ -1,90 +1,83 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3'
 import { Form, Link } from '@adonisjs/inertia/vue'
+import BaseCard from '~/components/common/cards/BaseCard.vue'
+import FormField from '~/components/common/forms/FormField.vue'
+import { ArrowLeftIcon } from '@heroicons/vue/24/outline'
 </script>
 
 <template>
   <Head title="Nouvel immeuble" />
 
-  <div class="mx-auto max-w-lg">
+  <div class="mx-auto w-full max-w-lg">
     <div class="mb-6">
-      <Link route="admin.buildings.index" class="text-sm text-gray-500 hover:text-gray-900">
-        &larr; Retour aux immeubles
+      <Link route="admin.buildings.index" class="text-sm text-muted ">
+        <span class="inline-flex items-center gap-2"><ArrowLeftIcon class="size-4" />Retour aux immeubles</span>
       </Link>
     </div>
 
-    <h1 class="text-2xl font-bold tracking-tight text-gray-900">Nouvel immeuble</h1>
-    <p class="mt-1 text-sm text-gray-500">Ajoutez un nouvel immeuble au parc immobilier</p>
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold tracking-tight text-base-content">Nouvel immeuble</h1>
+      <p class="mt-1 text-sm text-muted">Ajoutez un nouvel immeuble au parc immobilier</p>
+    </div>
 
-    <Form route="admin.buildings.store" #default="{ processing, errors }" class="mt-8 space-y-5">
-      <div>
-        <label for="name" class="mb-1.5 block text-sm font-medium text-gray-700">Nom</label>
-        <input
-          type="text"
-          name="name"
-          id="name"
-          placeholder="Résidence des Alpes"
-          class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none"
-          :class="{ 'border-red-500': errors.name }"
-        />
-        <p v-if="errors.name" class="mt-1 text-sm text-red-600">{{ errors.name }}</p>
-      </div>
-
-      <div>
-        <label for="address" class="mb-1.5 block text-sm font-medium text-gray-700">Adresse</label>
-        <input
-          type="text"
-          name="address"
-          id="address"
-          placeholder="Rue du Lac 12"
-          class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none"
-          :class="{ 'border-red-500': errors.address }"
-        />
-        <p v-if="errors.address" class="mt-1 text-sm text-red-600">{{ errors.address }}</p>
-      </div>
-
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label for="city" class="mb-1.5 block text-sm font-medium text-gray-700">Ville</label>
+    <BaseCard bodyClass="p-6 sm:p-8">
+      <Form route="admin.buildings.store" #default="{ processing, errors }" class="space-y-5">
+        <FormField id="name" label="Nom" :error="errors.name">
           <input
             type="text"
-            name="city"
-            id="city"
-            placeholder="Lausanne"
-            class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none"
-            :class="{ 'border-red-500': errors.city }"
+            name="name"
+            id="name"
+            placeholder="Résidence des Alpes"
+            class="input input-bordered w-full text-base-content"
+            :class="{ 'input-error': errors.name }"
           />
-          <p v-if="errors.city" class="mt-1 text-sm text-red-600">{{ errors.city }}</p>
-        </div>
-        <div>
-          <label for="postalCode" class="mb-1.5 block text-sm font-medium text-gray-700">NPA</label>
+        </FormField>
+
+        <FormField id="address" label="Adresse" :error="errors.address">
           <input
             type="text"
-            name="postalCode"
-            id="postalCode"
-            placeholder="1000"
-            class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none"
-            :class="{ 'border-red-500': errors.postalCode }"
+            name="address"
+            id="address"
+            placeholder="Rue du Lac 12"
+            class="input input-bordered w-full placeholder-muted"
+            :class="{ 'input-error': errors.address }"
           />
-          <p v-if="errors.postalCode" class="mt-1 text-sm text-red-600">{{ errors.postalCode }}</p>
-        </div>
-      </div>
+        </FormField>
 
-      <div class="flex justify-end gap-3 pt-4">
-        <Link
-          route="admin.buildings.index"
-          class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          Annuler
-        </Link>
-        <button
-          type="submit"
-          :disabled="processing"
-          class="cursor-pointer rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
-        >
-          Créer l'immeuble
-        </button>
-      </div>
-    </Form>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <FormField id="city" label="Ville" :error="errors.city">
+            <input
+              type="text"
+              name="city"
+              id="city"
+              placeholder="Lausanne"
+              class="input input-bordered w-full placeholder-muted"
+              :class="{ 'input-error': errors.city }"
+            />
+          </FormField>
+
+          <FormField id="postalCode" label="NPA" :error="errors.postalCode">
+            <input
+              type="text"
+              name="postalCode"
+              id="postalCode"
+              placeholder="1000"
+              class="input input-bordered w-full placeholder-muted"
+              :class="{ 'input-error': errors.postalCode }"
+            />
+          </FormField>
+        </div>
+
+        <div class="flex flex-col-reverse gap-3 pt-4 sm:flex-row sm:justify-end">
+          <Link route="admin.buildings.index" class="btn btn-ghost">
+            Annuler
+          </Link>
+          <button type="submit" :disabled="processing" class="btn btn-primary">
+            Créer l'immeuble
+          </button>
+        </div>
+      </Form>
+    </BaseCard>
   </div>
 </template>

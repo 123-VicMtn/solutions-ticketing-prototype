@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { Head, usePage } from '@inertiajs/vue3'
-import SummaryWidget from '~/components/SummaryWidget.vue'
-import LatestTicketsWidgets from '~/components/LatestTicketsWidgets.vue'
+import { Head } from '@inertiajs/vue3'
+import SummaryWidget from '~/components/widgets/SummaryWidget.vue'
+import LatestTicketsWidgets from '~/components/widgets/LatestTicketsWidgets.vue'
+import { isTicketStatus, type TicketStatus } from '~/utils/ticketStatus'
+import type { Data } from '@generated/data'
 
-const page = usePage()
-const countsByStatus = page.props.countsByStatus as { status: string; count: number }[]
-const recentTickets = page.props.recentTickets as Array<{
-  id: number
-  reference: string | null
-  title: string
-  status: string
-  createdAt: string
-  unit: { label: string }
-}>
+const props = defineProps<{
+  countsByStatus: Array<{ status: string; count: number }>
+  recentTickets: Data.Ticket[]
+}>()
+
+const visibleRecentTickets = props.recentTickets.filter(
+  (t): t is Data.Ticket & { status: TicketStatus } => isTicketStatus(t.status)
+)
 </script>
 
 <template>
@@ -20,6 +20,6 @@ const recentTickets = page.props.recentTickets as Array<{
   <div class="px-4 max-w-7xl mx-auto">
     <h1 class="text-3xl font-bold text-gray-900 mb-4">Tableau de bord</h1>
     <SummaryWidget :counts-by-status="countsByStatus" />
-    <LatestTicketsWidgets :recent-tickets="recentTickets" />
+    <LatestTicketsWidgets :recent-tickets="visibleRecentTickets" />
   </div>
 </template>

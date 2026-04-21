@@ -1,60 +1,31 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3'
+import { Head, router } from '@inertiajs/vue3'
 import { ChevronDownIcon } from '@heroicons/vue/24/outline'
 import { computed, ref } from 'vue'
+import { ticketPriorityBadgeClass } from '~/utils/ticketPriority'
+import { TicketStatus } from '#models/ticket';
+import type { Data } from '@generated/data'
+import { isTicketStatus } from '~/utils/ticketStatus'
+import BaseCard from '~/components/common/cards/BaseCard.vue'
+import BaseButton from '~/components/common/buttons/BaseButton.vue'
+import FormField from '~/components/common/forms/FormField.vue'
+
+type UnitWithBuilding = Data.Unit & { building?: { name?: string | null } | null }
 
 const props = defineProps<{
-  ticket: {
-    id: number
-    reference: string | null
-    category: string
-    priority: string
-    status: string
-    title: string
-    description: string
-    unit: { label: string; building: { name: string } }
-    user: {
-      id: number
-      fullName: string | null
-      email: string
-      phone: string
-      role: 'admin' | 'manager' | 'tenant' | 'owner' | 'provider'
-      notificationPreference: 'email' | 'sms'
-    }
-    provider: {
-      companyName: string
-      phone: string
-      speciality: string
-    } | null
-    assignee: {
-      id: number
-      fullName: string | null
-    } | null
-  }
-  comments: Array<{
-    id: number
-    content: string
-    isInternal: boolean
-    createdAt: string
-    user: { fullName: string | null; email: string }
-  }>
-  attachments: Array<{
-    id: number
-    originalName: string
-    mimeType: string
-    sizeBytes: number
-    filePath: string
-    createdAt: string
-  }>
+  ticket: Data.Ticket
+  comments: Data.TicketComment[]
+  attachments: Data.TicketAttachment[]
   canSeeInternal: boolean
   canEditFields: boolean
   canChangeStatus: boolean
   allowedStatusTransitions: string[]
   canAssign: boolean
-  providers: Array<{ id: number; companyName: string; speciality: string }>
+  providers: Data.Provider[]
+  assignees: { id: number; fullName: string | null }[]
 }>()
 
-const workflowStatuses = ['ouvert', 'assigné', 'en cours', 'terminé', 'résolu', 'fermé'] as const
+const workflowStatuses = ['ouvert', 'assigné', 'en cours', 'terminé', 'résolu', 'fermé'] as const satisfies readonly TicketStatus[]
 
 const STATUS_LABELS: Record<string, string> = {
   ouvert: 'Ouvert',
@@ -69,10 +40,15 @@ function statusLabel(status: string): string {
   return STATUS_LABELS[status] ?? status
 }
 
-const statusValue = ref(props.ticket.status)
+const statusValue = ref<TicketStatus>(props.ticket.status as TicketStatus)
 const comment = ref('')
 const isInternal = ref(false)
-const selectedProviderId = ref('')
+const selectedProviderId = ref<number | null>(props.ticket.provider?.id ?? null)
+const selectedAssigneeUserId = ref<number | null>(props.ticket.assignee?.id ?? null)
+
+const canSubmitAssign = computed(() => {
+  return Boolean(selectedAssigneeUserId.value)
+})
 
 function submitStatus(ticketId: number) {
   if (!statusValue.value) return
@@ -80,16 +56,30 @@ function submitStatus(ticketId: number) {
 }
 
 function submitAssign(ticketId: number) {
-  if (!selectedProviderId.value) return
-  router.post(`/tickets/${ticketId}/assign`, { providerId: selectedProviderId.value })
+  if (!selectedAssigneeUserId.value) return
+
+  router.post(`/tickets/${ticketId}/assign`, {
+    assigneeUserId: selectedAssigneeUserId.value,
+    providerId: selectedProviderId.value ?? undefined,
+  })
 }
 
 function submitComment(ticketId: number) {
   if (!comment.value.trim()) return
-  router.post(`/tickets/${ticketId}/comments`, {
-    content: comment.value,
-    isInternal: isInternal.value,
-  })
+  router.post(
+    `/tickets/${ticketId}/comments`,
+    {
+      content: comment.value,
+      isInternal: isInternal.value,
+    },
+    {
+      preserveScroll: true,
+      onSuccess: () => {
+        comment.value = ''
+        isInternal.value = false
+      },
+    }
+  )
 }
 
 const uploadingFiles = ref(false)
@@ -116,7 +106,7 @@ const isSubmitDisabled = computed(() => {
 })
 
 const currentIndex = computed(() => {
-  const idx = workflowStatuses.indexOf(props.ticket.status as any)
+  const idx = workflowStatuses.indexOf(props.ticket.status)
   return idx === -1 ? 0 : idx
 })
 
@@ -125,111 +115,211 @@ function stepDotClass(status: string) {
   const isSelected = status === statusValue.value
   const isNextAllowed = isAllowedStatus(status) && !isCurrent
 
-  if (isCurrent) return 'bg-gray-900 border-gray-900'
-  if (isSelected) return 'bg-green-900 border-green-900'
-  if (isNextAllowed) return 'bg-green-100 border-green-200'
-  return 'bg-white border-gray-200'
+  if (isCurrent) return 'bg-primary border-primary'
+  if (isSelected) return 'bg-success border-success'
+  if (isNextAllowed) return 'bg-success/10 border-success/20'
+  return 'bg-base-100 border-base-300'
 }
 
 function stepLabelClass(status: string) {
-  if (status === props.ticket.status) return 'text-gray-900 font-semibold'
-  if (status === statusValue.value) return 'text-green-900 font-semibold'
-  if (isAllowedStatus(status)) return 'text-green-800 font-medium'
-  return 'text-gray-500'
+  if (status === props.ticket.status) return 'text-base-content font-semibold'
+  if (status === statusValue.value) return 'text-success font-semibold'
+  if (isAllowedStatus(status)) return 'text-success font-medium'
+  return 'text-muted'
 }
 
 function resetStatusSelection() {
   statusValue.value = props.ticket.status
 }
+
+const createdAtLabel = computed(() => {
+  const value = props.ticket.createdAt
+  if (!value) return '—'
+  const date = new Date(String(value))
+  if (Number.isNaN(date.getTime())) return '—'
+  return date.toLocaleString('fr-CH', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+})
+
+const unitBuildingName = computed(() => {
+  const unit = props.ticket.unit as UnitWithBuilding | null | undefined
+  return unit?.building?.name ?? '—'
+})
 </script>
 
 <template>
   <Head :title="ticket.reference ?? 'Ticket'" />
   <div class="space-y-8">
     <div>
-      <Link href="/tickets" class="text-sm text-gray-500 hover:text-gray-900"
-        >&larr; Retour aux tickets</Link
-      >
+      <BaseButton
+        route="tickets.index"
+        label="Retour aux tickets"
+        variant="ghost"
+        class="btn-sm -ml-2"
+      />
       <div class="mt-2 flex items-start justify-between">
         <div>
-          <h1 class="text-2xl font-bold tracking-tight text-gray-900">
-            {{ ticket.reference }} - {{ ticket.title }}
-          </h1>
-          <p class="mt-1 text-sm text-gray-500">
-            {{ ticket.unit.building.name }} / {{ ticket.unit.label }} - {{ ticket.category }} -
-            {{ ticket.priority }}
+          <div class="flex items-center gap-3">
+            <h1 class="text-2xl font-bold tracking-tight text-base-content">
+              {{ ticket.reference }} - {{ ticket.title }}
+            </h1>
+            <span class="text-sm">
+              <span class="badge badge-primary badge-outline">{{ ticket.status }}</span>
+            </span>
+          </div>
+          <p class="mt-1 text-sm text-muted">
+            {{ unitBuildingName }} / {{ ticket.unit?.label }} - {{ ticket.category }} -
+            <span :class="ticketPriorityBadgeClass(ticket.priority)">{{ ticket.priority }}</span>
           </p>
+          <div class="mt-2">
+            <span class="inline-flex items-center gap-2 rounded-md bg-base-200/60 px-2.5 py-1 text-sm text-base-content">
+              <span class="text-xs uppercase tracking-wide text-muted">Créé le</span>
+              <span class="font-semibold">{{ createdAtLabel }}</span>
+            </span>
+          </div>
         </div>
-        <Link
+        <BaseButton
           v-if="canEditFields"
-          :href="`/tickets/${ticket.id}/edit`"
-          class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          Modifier
-        </Link>
+          route="tickets.edit"
+          :params="{ id: ticket.id }"
+          label="Modifier"
+          variant="outline"
+        />
       </div>
     </div>
 
-    <div class="rounded-lg border border-gray-200 bg-white p-6">
-      <div class="mb-3 text-xs uppercase tracking-wide text-gray-500">Description</div>
-      <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.description }}</p>
-    </div>
+    <BaseCard title="Description">
+      <p class="whitespace-pre-wrap text-sm text-base-content">{{ ticket.description }}</p>
+    </BaseCard>
 
-    <div class="grid w-full grid-flow-col grid-cols-3 gap-4">
-      <div class="col-span-2 rounded-lg border border-gray-200 bg-white p-6">
-        <div class="mb-3 text-xs uppercase tracking-wide text-gray-500">Demandeur</div>
-        <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.user.fullName }}</p>
-        <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.user.email }}</p>
-        <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.user.phone }}</p>
-        <p class="whitespace-pre-wrap text-sm text-gray-800">
-          {{ ticket.user.notificationPreference }}
-        </p>
-      </div>
+    <div class="grid w-full grid-cols-1 gap-4 lg:grid-cols-12">
+      <BaseCard title="Demandeur" bodyClass="p-6" class="lg:col-span-4">
+        <div class="space-y-4">
+          <div>
+            <div class="text-xs uppercase tracking-wide text-secondary">Identité</div>
+            <p class="mt-1 text-sm font-medium text-base-content">
+              {{ ticket.user?.fullName ?? '—' }}
+            </p>
+          </div>
 
-      <div class="rounded-lg border border-gray-200 bg-white p-6">
-        <div class="mb-3 text-xs uppercase tracking-wide text-gray-500">Prestataire</div>
-        <template v-if="ticket.provider">
-          <p class="whitespace-pre-wrap text-sm text-gray-800">
-            {{ ticket.provider.companyName }}
+          <div class="grid gap-3">
+            <div>
+              <div class="text-xs uppercase tracking-wide text-secondary">Email</div>
+              <a
+                v-if="ticket.user?.email"
+                class="mt-1 block text-sm font-medium link link-hover"
+                :href="`mailto:${ticket.user.email}`"
+              >
+                {{ ticket.user.email }}
+              </a>
+              <p v-else class="mt-1 text-sm text-muted">—</p>
+            </div>
+
+            <div>
+              <div class="text-xs uppercase tracking-wide text-secondary">Téléphone</div>
+              <a
+                v-if="ticket.user?.phone"
+                class="mt-1 block text-sm font-medium link link-hover"
+                :href="`tel:${ticket.user.phone}`"
+              >
+                {{ ticket.user.phone }}
+              </a>
+              <p v-else class="mt-1 text-sm text-muted">—</p>
+            </div>
+          </div>
+
+          <div>
+            <div class="text-xs uppercase tracking-wide text-secondary">Notifications</div>
+            <p class="mt-1 text-sm text-base-content">
+              {{ ticket.user?.notificationPreference ?? '—' }}
+            </p>
+          </div>
+        </div>
+      </BaseCard>
+
+      <BaseCard title="Assignation" bodyClass="p-6" class="lg:col-span-8">
+        <div class="flex flex-col gap-4">
+          <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <div class="rounded-md border border-base-200 bg-base-200/30 p-4">
+              <div class="text-xs uppercase tracking-wide text-secondary">Suivi interne</div>
+              <p class="mt-1 text-sm font-medium text-base-content">
+                {{ ticket.assignee?.fullName ?? '—' }}
+              </p>
+            </div>
+
+            <div class="rounded-md border border-base-200 bg-base-200/30 p-4">
+              <div class="text-xs uppercase tracking-wide text-secondary">Prestataire</div>
+              <p class="mt-1 text-sm font-medium text-base-content">
+                {{ ticket.provider?.companyName ?? '—' }}
+              </p>
+              <p v-if="ticket.provider?.speciality" class="mt-0.5 text-sm text-muted">
+                {{ ticket.provider.speciality }}
+              </p>
+              <p v-if="ticket.provider?.phone" class="mt-2 text-sm">
+                <a class="link link-hover" :href="`tel:${ticket.provider.phone}`">
+                  {{ ticket.provider.phone }}
+                </a>
+              </p>
+            </div>
+          </div>
+
+          <p v-if="!ticket.provider && !ticket.assignee && !canAssign" class="text-sm text-muted italic">
+            Pas encore assigné
           </p>
-          <p class="whitespace-pre-wrap text-sm text-gray-800">
-            {{ ticket.provider.speciality }}
-          </p>
-          <p class="whitespace-pre-wrap text-sm text-gray-800">{{ ticket.provider.phone }}</p>
-        </template>
-        <p v-else-if="!canAssign" class="text-sm text-gray-400 italic">Pas encore assigné</p>
 
-        <form
-          v-if="canAssign"
-          class="mt-3 flex items-center gap-2"
-          :class="{ 'border-t border-gray-100 pt-3': ticket.provider }"
-          @submit.prevent="submitAssign(ticket.id)"
-        >
-          <select
-            v-model="selectedProviderId"
-            class="block w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm"
+          <form
+            v-if="canAssign"
+            class="space-y-3"
+            :class="{ 'border-t border-base-200 pt-4': ticket.provider || ticket.assignee }"
+            @submit.prevent="submitAssign(ticket.id)"
           >
-            <option value="">{{ ticket.provider ? 'Réassigner…' : 'Sélectionner…' }}</option>
-            <option v-for="provider in providers" :key="provider.id" :value="provider.id">
-              {{ provider.companyName }} — {{ provider.speciality }}
-            </option>
-          </select>
-          <button
-            type="submit"
-            :disabled="!selectedProviderId"
-            class="shrink-0 rounded-md bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
-          >
-            {{ ticket.provider ? 'Réassigner' : 'Assigner' }}
-          </button>
-        </form>
-      </div>
+            <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <FormField id="assigneeUserId" label="Suivi interne (obligatoire)">
+                <select v-model="selectedAssigneeUserId" class="select select-bordered w-full">
+                  <option :value="null">{{ ticket.assignee ? 'Réassigner…' : 'Sélectionner…' }}</option>
+                  <option v-for="a in assignees" :key="a.id" :value="a.id">
+                    {{ a.fullName ?? `#${a.id}` }}
+                  </option>
+                </select>
+              </FormField>
+
+              <FormField id="providerId" label="Prestataire">
+                <select v-model="selectedProviderId" class="select select-bordered w-full">
+                  <option :value="null">{{ ticket.provider ? 'Réassigner…' : 'Aucun prestataire' }}</option>
+                  <option
+                    v-for="provider in providers"
+                    :key="provider.id"
+                    :value="provider.id"
+                  >
+                    {{ provider.companyName }} — {{ provider.speciality }}
+                  </option>
+                </select>
+              </FormField>
+            </div>
+
+            <div class="flex items-center justify-end">
+              <BaseButton
+                type="submit"
+                :disabled="!canSubmitAssign"
+                label="Enregistrer"
+                class="min-w-44"
+              />
+            </div>
+          </form>
+        </div>
+      </BaseCard>
     </div>
 
-    <div v-if="canChangeStatus" class="rounded-lg border border-gray-200 bg-white p-6">
-      <div class="mb-3 text-xs uppercase tracking-wide text-gray-500">Statut</div>
+    <div v-if="canChangeStatus" class="rounded-lg border border-base-300 bg-base-100 p-6">
+      <div class="mb-3 text-xs uppercase tracking-wide text-secondary">Statut</div>
 
       <form class="space-y-4" @submit.prevent="submitStatus(ticket.id)">
-        <div class="rounded-md bg-gray-50 p-4">
+        <div class="rounded-md bg-base-200/40 p-4">
           <div class="mt-4 flex items-center gap-2">
             <template v-for="(status, idx) in workflowStatuses" :key="status">
               <button
@@ -244,10 +334,10 @@ function resetStatusSelection() {
                   v-if="status === ticket.status"
                   class="mb-1 flex items-center justify-center"
                 >
-                  <ChevronDownIcon class="h-4 w-4 text-gray-900" />
+                  <ChevronDownIcon class="h-4 w-4 text-base-content" />
                 </span>
                 <span class="flex h-4 w-4 items-center justify-center rounded-full border" :class="stepDotClass(status)">
-                  <span v-if="status === ticket.status" class="h-1.5 w-1.5 rounded-full bg-white"></span>
+                  <span v-if="status === ticket.status" class="h-1.5 w-1.5 rounded-full bg-base-100"></span>
                 </span>
                 <span class="mt-1 text-[11px] text-center leading-tight" :class="stepLabelClass(status)">
                   {{ statusLabel(status) }}
@@ -266,13 +356,13 @@ function resetStatusSelection() {
               <div
                 v-if="idx < workflowStatuses.length - 1"
                 class="h-0.5 flex-1"
-                :class="idx < currentIndex ? 'bg-gray-900' : 'bg-gray-200'"
+                :class="idx < currentIndex ? 'bg-primary' : 'bg-base-300'"
               ></div>
             </template>
           </div>
 
           <div v-if="allowedStatusTransitions.length" class="mt-5">
-            <div class="mb-2 text-xs uppercase tracking-wide text-gray-500">
+            <div class="mb-2 text-xs uppercase tracking-wide text-secondary">
               Prochaines étapes possibles
             </div>
             <div class="flex flex-wrap gap-2">
@@ -280,20 +370,20 @@ function resetStatusSelection() {
                 v-for="nextStatus in allowedStatusTransitions"
                 :key="nextStatus"
                 type="button"
-                class="rounded-md border px-3 py-1.5 text-sm font-medium transition-colors"
+                class="rounded-md border px-3 py-1.5 text-sm font-medium transition-colors border-base-300"
                 :class="
                   statusValue === nextStatus
-                    ? 'border-gray-900 bg-gray-900 text-white'
-                    : 'border-green-200 bg-white text-green-800 hover:bg-green-50'
+                    ? 'border-primary bg-primary text-primary-content'
+                    : 'bg-base-100 text-success hover:bg-success/10'
                 "
-                @click="statusValue = nextStatus"
+                @click="statusValue = isTicketStatus(nextStatus) ? nextStatus : statusValue"
               >
                 {{ statusLabel(nextStatus) }}
               </button>
             </div>
           </div>
 
-          <p v-if="allowedStatusTransitions.length === 0" class="mt-3 text-sm italic text-gray-500">
+          <p v-if="allowedStatusTransitions.length === 0" class="mt-3 text-sm italic text-muted">
             Aucune transition autorisée depuis {{ statusLabel(ticket.status) }}.
           </p>
         </div>
@@ -302,7 +392,7 @@ function resetStatusSelection() {
           <button
             type="submit"
             :disabled="isSubmitDisabled"
-            class="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+            class="btn btn-primary"
           >
             Mettre à jour
           </button>
@@ -311,7 +401,7 @@ function resetStatusSelection() {
             v-if="isSelectionChanged"
             type="button"
             @click="resetStatusSelection"
-            class="rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            class="btn btn-outline"
           >
             Annuler
           </button>
@@ -319,58 +409,56 @@ function resetStatusSelection() {
       </form>
     </div>
 
-    <div class="rounded-lg border border-gray-200 bg-white p-6">
-      <div class="mb-3 text-xs uppercase tracking-wide text-gray-500">Commentaires</div>
+    <BaseCard title="Commentaires">
       <div class="space-y-3">
-        <div v-for="c in comments" :key="c.id" class="rounded-md bg-gray-50 p-3">
-          <div class="mb-1 text-xs text-gray-500">
-            {{ c.user.fullName ?? c.user.email }}
+        <div v-for="c in comments" :key="c.id" class="rounded-md bg-base-200/40 p-3">
+          <div class="mb-1 text-xs text-muted">
+            {{ c.user?.fullName ?? c.user?.email }}
             <span
               v-if="c.isInternal"
-              class="ml-2 rounded bg-amber-100 px-2 py-0.5 text-amber-800"
+              class="ml-2 rounded bg-warning/20 px-2 py-0.5 text-warning"
               >interne</span
             >
           </div>
-          <p class="text-sm text-gray-800">{{ c.content }}</p>
+          <p class="text-sm text-base-content">{{ c.content }}</p>
         </div>
       </div>
 
       <form class="mt-4 space-y-3" @submit.prevent="submitComment(ticket.id)">
-        <textarea
-          v-model="comment"
-          rows="3"
-          class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-          placeholder="Ajouter un commentaire..."
-        />
+        <FormField id="comment" label="Nouveau commentaire">
+          <textarea
+            v-model="comment"
+            rows="3"
+            class="textarea textarea-bordered w-full"
+            placeholder="Ajouter un commentaire..."
+          />
+        </FormField>
         <div class="flex items-center gap-3">
           <label
             v-if="canSeeInternal"
-            class="inline-flex items-center gap-2 text-sm text-gray-700"
+            class="inline-flex items-center gap-2 text-sm text-base-content"
           >
             <input v-model="isInternal" type="checkbox" />
             Commentaire interne (visible gérance uniquement)
           </label>
-          <button type="submit" class="rounded-md bg-gray-900 px-4 py-2 text-sm text-white">
-            Publier
-          </button>
+          <BaseButton type="submit" label="Publier" />
         </div>
       </form>
-    </div>
+    </BaseCard>
 
-    <div class="rounded-lg border border-gray-200 bg-white p-6">
-      <div class="mb-3 text-xs uppercase tracking-wide text-gray-500">Pièces jointes</div>
+    <BaseCard title="Pièces jointes">
 
       <ul v-if="attachments.length" class="space-y-2">
-        <li v-for="attachment in attachments" :key="attachment.id" class="text-sm text-gray-700">
-          <a :href="attachment.filePath" target="_blank" class="text-gray-900 underline">{{
+        <li v-for="attachment in attachments" :key="attachment.id" class="text-sm text-base-content">
+          <a :href="attachment.filePath" target="_blank" class="link link-hover">{{
             attachment.originalName
           }}</a>
-          <span class="ml-2 text-xs text-gray-500"
+          <span class="ml-2 text-xs text-muted"
             >({{ Math.ceil(attachment.sizeBytes / 1024) }} KB)</span
           >
         </li>
       </ul>
-      <p v-else class="text-sm italic text-gray-400">Aucune pièce jointe</p>
+      <p v-else class="text-sm italic text-muted">Aucune pièce jointe</p>
 
       <form
         class="mt-4 flex items-center gap-3"
@@ -381,16 +469,15 @@ function resetStatusSelection() {
           type="file"
           multiple
           accept="image/*,.pdf"
-          class="block w-full text-sm text-gray-500 file:mr-3 file:rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200"
+          class="file-input file-input-bordered w-full"
         />
-        <button
+        <BaseButton
           type="submit"
           :disabled="uploadingFiles"
-          class="shrink-0 rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
-        >
-          Envoyer
-        </button>
+          label="Envoyer"
+          class="shrink-0"
+        />
       </form>
-    </div>
+    </BaseCard>
   </div>
 </template>

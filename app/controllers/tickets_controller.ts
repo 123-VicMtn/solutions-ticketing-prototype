@@ -3,8 +3,14 @@ import Ticket, { PROVIDER_ALLOWED_TRANSITIONS, VALID_TRANSITIONS } from '#models
 import Unit from '#models/unit'
 import UserUnit from '#models/user_unit'
 import Provider from '#models/provider'
+import User from '#models/user'
 import TicketComment from '#models/ticket_comment'
 import TicketAttachment from '#models/ticket_attachment'
+import ProviderTransformer from '#transformers/provider_transformer'
+import TicketAttachmentTransformer from '#transformers/ticket_attachment_transformer'
+import TicketCommentTransformer from '#transformers/ticket_comment_transformer'
+import TicketTransformer from '#transformers/ticket_transformer'
+import UnitTransformer from '#transformers/unit_transformer'
 import {
   commentTicketValidator,
   createTicketValidator,
@@ -15,6 +21,7 @@ import {
 import TicketNotifications from '#services/ticket_notification_service'
 import type { HttpContext } from '@adonisjs/core/http'
 import type { UserRole } from '#models/user'
+import type { TicketStatus } from '#models/ticket'
 import { DateTime } from 'luxon'
 import { randomUUID } from 'node:crypto'
 
@@ -24,11 +31,23 @@ export default class TicketsController {
     const filters = {
       status: request.input('status') as string | undefined,
       priority: request.input('priority') as string | undefined,
+      category: request.input('category') as string | undefined,
+      assignedTo: request.input('assignedTo') as string | undefined,
     }
+
+    const canAssign = user.hasAtLeastRole('manager')
+    const assignees = canAssign
+      ? await User.query()
+          .whereIn('role', ['manager', 'admin'])
+          .where('status', 'active')
+          .orderBy('first_name')
+          .orderBy('last_name')
+      : []
 
     const query = Ticket.query()
       .preload('unit', (q) => q.preload('building'))
       .preload('user')
+      .preload('assignee')
       .orderBy('id', 'desc')
 
     switch (user.role) {
@@ -37,7 +56,7 @@ export default class TicketsController {
         break
 
       case 'provider':
-        query.where('assignedTo', user.id)
+        query.whereHas('provider', (q) => q.where('userId', user.id))
         break
 
       case 'owner': {
@@ -60,34 +79,28 @@ export default class TicketsController {
 
     if (filters.status) query.where('status', filters.status)
     if (filters.priority) query.where('priority', filters.priority)
+    if (filters.category) query.where('category', filters.category)
+    if (filters.assignedTo) {
+      if (filters.assignedTo === 'me') {
+        query.where('assignedTo', user.id)
+      } else if (user.hasAtLeastRole('manager')) {
+        const maybeId = Number(filters.assignedTo)
+        if (!Number.isNaN(maybeId) && Number.isFinite(maybeId)) {
+          query.where('assignedTo', maybeId)
+        }
+      }
+    }
 
     const tickets = await query
 
-    return inertia.render('tickets/index', {
-      tickets: tickets.map((ticket) => ({
-        id: ticket.id,
-        reference: ticket.reference,
-        category: ticket.category,
-        priority: ticket.priority,
-        status: ticket.status,
-        title: ticket.title,
-        createdAt: ticket.createdAt.toISO() ?? '',
-        unit: {
-          id: ticket.unit.id,
-          label: ticket.unit.label,
-          building: {
-            id: ticket.unit.building.id,
-            name: ticket.unit.building.name,
-          },
-        },
-        user: {
-          id: ticket.user.id,
-          fullName: ticket.user.fullName,
-          email: ticket.user.email ?? '-',
-        },
-      })),
-      filters,
-    })
+    return inertia.render(
+      'tickets/index',
+      {
+        tickets: TicketTransformer.transform(tickets),
+        filters,
+        assignees: assignees.map((u) => ({ id: u.id, fullName: u.fullName })),
+      } as any
+    )
   }
 
   async create({ inertia, auth }: HttpContext) {
@@ -109,15 +122,7 @@ export default class TicketsController {
 
     return inertia.render('tickets/create', {
       canModifyPriority,
-      units: units.map((unit) => ({
-        id: unit.id,
-        label: unit.label,
-        type: unit.type,
-        building: {
-          id: unit.building.id,
-          name: unit.building.name,
-        },
-      })),
+      units: UnitTransformer.transform(units),
     })
   }
 
@@ -173,92 +178,50 @@ export default class TicketsController {
     const canChangeStatus = user.hasAtLeastRole('manager') || user.role === 'provider'
     const canAssign = user.hasAtLeastRole('manager')
 
-    // Autorise uniquement les transitions correspondant au workflow, et restreint
-    // celles autorisées au rôle "provider".
     const workflowNextStatuses = VALID_TRANSITIONS[ticket.status] ?? []
-    const hasAssignedProvider = Boolean(ticket.providerId && ticket.assignedTo)
+    const hasAssignee = Boolean(ticket.assignedTo)
 
     const allowedStatusTransitions = canChangeStatus
       ? user.role === 'provider'
-        ? workflowNextStatuses.filter((s) => PROVIDER_ALLOWED_TRANSITIONS.includes(s))
+        ? (() => {
+            const next: TicketStatus[] = []
+            if (ticket.status === 'assigné') next.push('en cours')
+            if (ticket.status === 'en cours') next.push('terminé')
+            return next
+          })().filter((s) => PROVIDER_ALLOWED_TRANSITIONS.includes(s))
         : workflowNextStatuses.filter((s) => {
-            if (s === 'assigné' && !hasAssignedProvider) return false
+            if (s === 'assigné' && !hasAssignee) return false
             return true
           })
       : []
 
-    const providerRows = canAssign
+    const providers = canAssign
       ? await Provider.query().where('isActive', true).orderBy('companyName')
       : []
 
-    const providers = providerRows.map((p) => ({
-      id: p.id,
-      companyName: p.companyName,
-      speciality: p.speciality,
-    }))
+    const internalAssignees = canAssign
+      ? await User.query()
+          .whereIn('role', ['manager', 'admin'])
+          .where('status', 'active')
+          .orderBy('first_name')
+          .orderBy('last_name')
+      : []
 
-    return inertia.render('tickets/show', {
-      ticket: {
-        id: ticket.id,
-        reference: ticket.reference,
-        category: ticket.category,
-        priority: ticket.priority,
-        status: ticket.status,
-        title: ticket.title,
-        description: ticket.description,
-        unit: {
-          label: ticket.unit.label,
-          building: { name: ticket.unit.building.name },
-        },
-        user: {
-          id: ticket.user.id,
-          fullName: ticket.user.fullName,
-          email: ticket.user.email ?? '-',
-          phone: ticket.user.phone ?? '-',
-          role: ticket.user.role,
-          notificationPreference: ticket.user.notificationPreference,
-        },
-        provider: ticket.provider
-          ? {
-              companyName: ticket.provider.companyName,
-              phone: ticket.provider.phone ?? '',
-              speciality: ticket.provider.speciality,
-            }
-          : null,
-        assignee: ticket.assignee
-          ? {
-              id: ticket.assignee.id,
-              fullName: ticket.assignee.fullName,
-            }
-          : null,
-      },
-      comments: visibleComments.map((comment) => ({
-        id: comment.id,
-        userId: comment.userId,
-        content: comment.content,
-        isInternal: comment.isInternal,
-        createdAt: comment.createdAt.toISO() ?? '',
-        user: {
-          id: comment.user.id,
-          fullName: comment.user.fullName,
-          email: comment.user.email ?? '-',
-        },
-      })),
-      attachments: ticket.attachments.map((attachment) => ({
-        id: attachment.id,
-        originalName: attachment.originalName,
-        mimeType: attachment.mimeType,
-        sizeBytes: attachment.sizeBytes,
-        filePath: attachment.filePath,
-        createdAt: attachment.createdAt.toISO() ?? '',
-      })),
+    return inertia.render(
+      'tickets/show',
+      {
+      ticket: TicketTransformer.transform(ticket),
+      comments: TicketCommentTransformer.transform(visibleComments),
+      attachments: TicketAttachmentTransformer.transform(ticket.attachments),
       canSeeInternal,
       canEditFields,
       canChangeStatus,
       allowedStatusTransitions,
       canAssign,
-      providers,
-    })
+      providers: ProviderTransformer.transform(providers),
+      assignees: internalAssignees.map((u) => ({ id: u.id, fullName: u.fullName })),
+      } as any
+    )
   }
 
   async edit({ inertia, params, auth, response }: HttpContext) {
@@ -280,18 +243,7 @@ export default class TicketsController {
     }
 
     return inertia.render('tickets/edit', {
-      ticket: {
-        id: ticket.id,
-        reference: ticket.reference,
-        title: ticket.title,
-        description: ticket.description,
-        priority: ticket.priority,
-        category: ticket.category,
-        unit: {
-          label: ticket.unit.label,
-          building: { name: ticket.unit.building.name },
-        },
-      },
+      ticket: TicketTransformer.transform(ticket),
       canModifyPriority: isManagerOrAbove,
     })
   }
@@ -327,16 +279,20 @@ export default class TicketsController {
     const user = auth.user!
     const payload = await request.validateUsing(statusTicketValidator)
     const ticket = await Ticket.findOrFail(params.id)
+    const previousStatus = ticket.status
 
     if (!(await this.canAccessTicket(user.id, user.role, ticket))) {
       return response.abort('Non autorisé', 403)
     }
 
     if (user.role === 'provider') {
-      if (ticket.assignedTo !== user.id) {
-        return response.abort('Non autorisé', 403)
-      }
-      if (!PROVIDER_ALLOWED_TRANSITIONS.includes(payload.status)) {
+      const current = ticket.status
+      const next = payload.status
+
+      const isAllowedProviderTransition =
+        (current === 'assigné' && next === 'en cours') || (current === 'en cours' && next === 'terminé')
+
+      if (!isAllowedProviderTransition || !PROVIDER_ALLOWED_TRANSITIONS.includes(next)) {
         session.flash('error', 'Transition non autorisée pour un prestataire')
         return response.redirect().toPath(`/tickets/${ticket.id}`)
       }
@@ -345,18 +301,30 @@ export default class TicketsController {
     }
 
     if (payload.status === 'assigné') {
-      const hasAssignedProvider = Boolean(ticket.providerId && ticket.assignedTo)
-      if (!hasAssignedProvider) {
+      const hasAssignee = Boolean(ticket.assignedTo)
+      if (!hasAssignee) {
         session.flash(
           'error',
-          'Impossible de passer à "assigné" : aucun prestataire n\'est assigné.'
+          'Impossible de passer à "assigné" : aucune assignation (interne ou prestataire) n\'est définie.'
         )
         return response.redirect().toPath(`/tickets/${ticket.id}`)
       }
     }
 
     ticket.status = payload.status
-    await ticket.save()
+    try {
+      await ticket.save()
+    } catch (error) {
+      session.flash(
+        'error',
+        error instanceof Error ? error.message : 'Transition non autorisée'
+      )
+      return response.redirect().toPath(`/tickets/${ticket.id}`)
+    }
+
+    if (user.role === 'provider' && previousStatus === 'en cours' && ticket.status === 'terminé') {
+      await TicketNotifications.notifyInternalAssigneeTicketCompleted(ticket)
+    }
 
     session.flash('success', 'Statut mis à jour')
     return response.redirect().toPath(`/tickets/${ticket.id}`)
@@ -370,17 +338,40 @@ export default class TicketsController {
     }
 
     const payload = await request.validateUsing(assignTicketValidator)
-    const provider = await Provider.findOrFail(payload.providerId)
-
-    if (!provider.isActive) {
-      session.flash('error', "Ce prestataire n'est pas actif")
-      return response.redirect().toPath(`/tickets/${params.id}`)
-    }
 
     const ticket = await Ticket.findOrFail(params.id)
 
-    ticket.providerId = provider.id
-    ticket.assignedTo = provider.userId
+    const assignee = await User.findOrFail(payload.assigneeUserId)
+
+    if (!assignee.isActive) {
+      session.flash('error', "Cet utilisateur n'est pas actif")
+      return response.redirect().toPath(`/tickets/${params.id}`)
+    }
+
+    if (assignee.role === 'provider') {
+      session.flash('error', "Impossible d'assigner le suivi interne à un compte prestataire")
+      return response.redirect().toPath(`/tickets/${params.id}`)
+    }
+
+    if (!assignee.hasAtLeastRole('manager')) {
+      session.flash('error', "Seuls les comptes gérance peuvent être assignés au suivi interne")
+      return response.redirect().toPath(`/tickets/${params.id}`)
+    }
+
+    ticket.assignedTo = assignee.id
+
+    let assignedProvider: Provider | null = null
+    if (payload.providerId) {
+      const provider = await Provider.findOrFail(payload.providerId)
+      if (!provider.isActive) {
+        session.flash('error', "Ce prestataire n'est pas actif")
+        return response.redirect().toPath(`/tickets/${params.id}`)
+      }
+      ticket.providerId = provider.id
+      assignedProvider = provider
+    } else {
+      ticket.providerId = null
+    }
 
     if (ticket.status === 'ouvert') {
       ticket.status = 'assigné'
@@ -388,9 +379,16 @@ export default class TicketsController {
 
     await ticket.save()
 
-    await TicketNotifications.notifyProviderAssigned(ticket, provider)
+    if (assignedProvider) {
+      await TicketNotifications.notifyProviderAssigned(ticket, assignedProvider)
+    }
 
-    session.flash('success', `Ticket assigné à ${provider.companyName}`)
+    session.flash(
+      'success',
+      assignedProvider
+        ? `Ticket assigné (suivi interne: ${assignee.fullName ?? '—'}) et prestataire: ${assignedProvider.companyName}`
+        : `Ticket assigné (suivi interne: ${assignee.fullName ?? '—'}) sans prestataire`
+    )
     return response.redirect().toPath(`/tickets/${ticket.id}`)
   }
 
@@ -434,7 +432,11 @@ export default class TicketsController {
 
   private async canAccessTicket(userId: number, role: UserRole, ticket: Ticket): Promise<boolean> {
     if (role === 'admin' || role === 'manager') return true
-    if (role === 'provider') return ticket.assignedTo === userId
+    if (role === 'provider') {
+      const provider = await Provider.query().where('userId', userId).select(['id']).first()
+      if (!provider) return false
+      return ticket.providerId === provider.id
+    }
     if (ticket.userId === userId) return true
 
     const userUnit = await UserUnit.query()

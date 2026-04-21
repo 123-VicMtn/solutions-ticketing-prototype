@@ -1,5 +1,7 @@
 import Unit from '#models/unit'
 import Building from '#models/building'
+import BuildingTransformer from '#transformers/building_transformer'
+import UnitTransformer from '#transformers/unit_transformer'
 import { createUnitValidator, updateUnitValidator } from '#validators/unit'
 import type { HttpContext } from '@adonisjs/core/http'
 
@@ -16,12 +18,19 @@ export default class UnitsController {
     const units = await query.preload('userUnits', (q) => q.preload('user'))
     const buildings = await Building.query().orderBy('name')
 
-    return inertia.render('admin/units/index', { units, buildings, filters: { buildingId } })
+    return inertia.render('admin/units/index', {
+      units: UnitTransformer.transform(units),
+      buildings: BuildingTransformer.transform(buildings).useVariant('forSummary'),
+      filters: { buildingId },
+    })
   }
 
   async create({ inertia }: HttpContext) {
     const buildings = await Building.query().orderBy('name')
-    return inertia.render('admin/units/create', { buildings })
+
+    return inertia.render('admin/units/create', {
+      buildings: BuildingTransformer.transform(buildings).useVariant('forSummary'),
+    })
   }
 
   async store({ request, response, session }: HttpContext) {
@@ -35,7 +44,11 @@ export default class UnitsController {
     const unit = await Unit.findOrFail(params.id)
     await unit.load('building')
     const buildings = await Building.query().orderBy('name')
-    return inertia.render('admin/units/edit', { unit, buildings })
+
+    return inertia.render('admin/units/edit', {
+      unit: UnitTransformer.transform(unit),
+      buildings: BuildingTransformer.transform(buildings).useVariant('forSummary'),
+    })
   }
 
   async update({ request, response, params, session }: HttpContext) {

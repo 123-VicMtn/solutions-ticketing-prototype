@@ -1,118 +1,126 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3'
-import { Form } from '@adonisjs/inertia/vue'
+import { Head } from '@inertiajs/vue3'
+import { Form, Link } from '@adonisjs/inertia/vue'
+import BaseCard from '~/components/common/cards/BaseCard.vue'
+import CenteredContent from '~/components/common/layouts/CenteredContent.vue'
+import FormField from '~/components/common/forms/FormField.vue'
+import BaseButton from '~/components/common/buttons/BaseButton.vue'
 </script>
 
 <template>
-  <Head title="Demander un acces" />
+  <Head title="Demander un accès" />
 
-  <div class="flex min-h-[calc(100vh-12rem)] items-center justify-center">
-    <div class="w-full max-w-xl">
-      <div class="mb-8">
-        <h1 class="text-2xl font-bold tracking-tight text-gray-900">Demande d'acces</h1>
-        <p class="mt-1 text-sm text-gray-500">
-          Envoyez votre demande, un gestionnaire la validera.
-        </p>
-      </div>
-
-      <Form route="request_access.store" #default="{ processing, errors }" class="space-y-5">
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label for="firstName" class="mb-1.5 block text-sm font-medium text-gray-700">Prenom</label>
-            <input
-              id="firstName"
-              name="firstName"
-              type="text"
-              class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-              :class="{ 'border-red-500': errors.firstName }"
-            />
-            <p v-if="errors.firstName" class="mt-1 text-sm text-red-600">{{ errors.firstName }}</p>
+  <CenteredContent maxWidthClass="max-w-xl">
+    <div class="mb-8 flex justify-center">
+      <div class="group inline-flex items-center gap-3">
+        <div class="avatar">
+          <div class="w-32 transition sm:w-20">
+            <img src="/resources/assets/images/logo.png" alt="Logo" class="rounded" />
           </div>
-          <div>
-            <label for="lastName" class="mb-1.5 block text-sm font-medium text-gray-700">Nom</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold tracking-tight text-base-content">Demande d'accès</h1>
+      <p class="mt-1 text-sm text-muted">
+        Envoyez votre demande, un gestionnaire la validera.
+      </p>
+    </div>
+
+    <BaseCard bodyClass="p-6 sm:p-8">
+      <Form route="request_access.store" #default="{ processing, errors }" class="space-y-5">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+          <FormField id="lastName" label="Nom" :error="errors.lastName">
             <input
               id="lastName"
               name="lastName"
               type="text"
-              class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-              :class="{ 'border-red-500': errors.lastName }"
+              autocomplete="family-name"
+              class="input input-bordered w-full placeholder-muted"
+              :class="{ 'input-error': errors.lastName }"
             />
-            <p v-if="errors.lastName" class="mt-1 text-sm text-red-600">{{ errors.lastName }}</p>
-          </div>
+          </FormField>
+
+          <FormField id="firstName" label="Prénom" :error="errors.firstName">
+            <input
+              id="firstName"
+              name="firstName"
+              type="text"
+              autocomplete="given-name"
+              class="input input-bordered w-full placeholder-muted"
+              :class="{ 'input-error': errors.firstName }"
+            />
+          </FormField>
         </div>
 
-        <div>
-          <label for="email" class="mb-1.5 block text-sm font-medium text-gray-700">Email</label>
+        <FormField id="email" label="Email" :error="errors.email">
           <input
             id="email"
             name="email"
             type="email"
-            class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-            :class="{ 'border-red-500': errors.email }"
+            autocomplete="email"
+            class="input input-bordered w-full placeholder-muted"
+            :class="{ 'input-error': errors.email }"
           />
-          <p v-if="errors.email" class="mt-1 text-sm text-red-600">{{ errors.email }}</p>
-        </div>
+        </FormField>
 
-        <div>
-          <label for="phone" class="mb-1.5 block text-sm font-medium text-gray-700">Telephone</label>
+        <FormField id="phone" label="Téléphone" :error="errors.phone">
           <input
             id="phone"
             name="phone"
             type="text"
-            class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-            :class="{ 'border-red-500': errors.phone }"
+            autocomplete="tel"
+            class="input input-bordered w-full placeholder-muted"
+            :class="{ 'input-error': errors.phone }"
           />
-          <p v-if="errors.phone" class="mt-1 text-sm text-red-600">{{ errors.phone }}</p>
-        </div>
+        </FormField>
 
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label for="role" class="mb-1.5 block text-sm font-medium text-gray-700">Role</label>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <FormField id="role" label="Rôle" :error="errors.role">
             <select
               id="role"
               name="role"
-              class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-              :class="{ 'border-red-500': errors.role }"
+              class="select select-bordered w-full"
+              :class="{ 'select-error': errors.role }"
             >
               <option value="tenant">Locataire</option>
-              <option value="owner">Proprietaire</option>
+              <option value="owner">Propriétaire</option>
             </select>
-            <p v-if="errors.role" class="mt-1 text-sm text-red-600">{{ errors.role }}</p>
-          </div>
-          <div>
-            <label for="notificationPreference" class="mb-1.5 block text-sm font-medium text-gray-700">
-              Notification
-            </label>
+          </FormField>
+
+          <FormField
+            id="notificationPreference"
+            label="Préférence de notification"
+            :error="errors.notificationPreference"
+          >
             <select
               id="notificationPreference"
               name="notificationPreference"
-              class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-              :class="{ 'border-red-500': errors.notificationPreference }"
+              class="select select-bordered w-full"
+              :class="{ 'select-error': errors.notificationPreference }"
             >
               <option value="email">Email</option>
               <option value="sms">SMS</option>
             </select>
-            <p v-if="errors.notificationPreference" class="mt-1 text-sm text-red-600">
-              {{ errors.notificationPreference }}
-            </p>
-          </div>
+          </FormField>
         </div>
 
-        <button
+        <BaseButton
           type="submit"
           :disabled="processing"
-          class="w-full rounded-md bg-gray-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
-        >
-          Envoyer la demande
-        </button>
+          label="Envoyer la demande"
+          class="w-full"
+        />
 
-        <p class="text-center text-sm text-gray-500">
-          Deja un compte ?
-          <Link route="session.create" class="font-medium text-gray-900 hover:underline">
+        <p class="text-center text-sm text-muted">
+          Déjà un accès ?
+          <Link route="session.create" class="font-medium text-base-content hover:underline">
             Se connecter
           </Link>
         </p>
       </Form>
-    </div>
-  </div>
+    </BaseCard>
+  </CenteredContent>
 </template>

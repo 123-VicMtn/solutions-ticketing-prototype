@@ -1,22 +1,23 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3'
-import { Link } from '@adonisjs/inertia/vue'
+import { Head } from '@inertiajs/vue3'
+import ZebraTable from '~/components/common/zebraTable.vue'
+import BaseButton from '~/components/common/buttons/BaseButton.vue'
+import ActionButton from '~/components/common/buttons/ActionButton.vue'
+import { PencilSquareIcon, PlusCircleIcon, Square3Stack3DIcon } from '@heroicons/vue/24/outline'
+import type { Data } from '@generated/data'
 
-defineProps<{
-  buildings: Array<{
-    id: number
-    name: string
-    address: string
-    city: string
-    postalCode: string
-    unitsCount: number
-  }>
+const props = defineProps<{
+  buildings: Data.Building.Variants['forListing'][]
 }>()
 
-function deleteBuilding(id: number) {
-  if (!globalThis.confirm('Supprimer cet immeuble et tous ses lots ?')) return
-  router.delete(`/admin/buildings/${id}`)
-}
+const tableHeaders = [
+  { key: 'name', label: 'Nom' },
+  { key: 'address', label: 'Adresse' },
+  { key: 'city', label: 'Ville' },
+  { key: 'postalCode', label: 'NPA' },
+  { key: 'unitsCount', label: 'Lots' },
+  { key: 'actions', label: 'Actions', thClass: 'text-right', tdClass: 'text-right' },
+]
 </script>
 
 <template>
@@ -25,65 +26,75 @@ function deleteBuilding(id: number) {
   <div>
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-bold tracking-tight text-gray-900">Immeubles</h1>
-        <p class="mt-1 text-sm text-gray-500">Gérez les immeubles et leurs lots</p>
+        <h1 class="text-2xl font-bold tracking-tight text-base-content">Immeubles</h1>
+        <p class="mt-1 text-sm text-muted">Gérez les immeubles et leurs lots</p>
       </div>
-      <Link
+      <BaseButton
         route="admin.buildings.create"
-        class="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
-      >
-        Ajouter un immeuble
-      </Link>
+        label="Ajouter un immeuble"
+        :icon="PlusCircleIcon"
+        type="button"
+        class="ml-auto"
+      />
     </div>
 
-    <div v-if="buildings.length === 0" class="mt-8 rounded-lg border border-dashed border-gray-300 p-12 text-center">
-      <p class="text-sm text-gray-500">Aucun immeuble pour le moment</p>
-      <Link
-        route="admin.buildings.create"
-        class="mt-4 inline-block text-sm font-medium text-gray-900 hover:underline"
-      >
-        Créer le premier immeuble
-      </Link>
+    <div
+      v-if="buildings.length === 0"
+      class="mt-8 rounded-lg border border-dashed border-base-300 p-12 text-center"
+    >
+        <p class="text-sm text-muted">Aucun immeuble pour le moment</p>
+        <BaseButton
+          route="admin.buildings.create"
+          label="Créer le premier immeuble"
+          :icon="PlusCircleIcon"
+          type="button"
+          class="mt-4"
+        />
     </div>
 
-    <div v-else class="mt-6 overflow-hidden rounded-lg border border-gray-200 bg-white">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Nom</th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Adresse</th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Ville</th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">NPA</th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Lots</th>
-            <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200">
-          <tr v-for="building in buildings" :key="building.id">
-            <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">{{ building.name }}</td>
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ building.address }}</td>
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ building.city }}</td>
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ building.postalCode }}</td>
-            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ building.unitsCount }}</td>
-            <td class="whitespace-nowrap px-6 py-4 text-right text-sm">
-              <Link
-                route="admin.buildings.edit"
-                :params="{ id: building.id }"
-                class="font-medium text-gray-600 hover:text-gray-900"
-              >
-                Modifier
-              </Link>
-              <button
-                type="button"
-                class="ml-4 cursor-pointer font-medium text-red-600 hover:text-red-800"
-                @click="deleteBuilding(building.id)"
-              >
-                Supprimer
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div v-else class="mt-6">
+      <ZebraTable :headers="tableHeaders" :rows="props.buildings" :rowKey="(b) => b.id">
+        <template #cell:name="{ row: building }">
+          <span class="font-medium text-base-content">{{ building.name }}</span>
+        </template>
+
+        <template #cell:address="{ row: building }">
+          <span>{{ building.address }}</span>
+        </template>
+
+        <template #cell:city="{ row: building }">
+          <span>{{ building.city }}</span>
+        </template>
+
+        <template #cell:postalCode="{ row: building }">
+          <span>{{ building.postalCode }}</span>
+        </template>
+
+        <template #cell:unitsCount="{ row: building }">
+          <span>{{ building.unitsCount }}</span>
+        </template>
+
+        <template #cell:actions="{ row: building }">
+          <div class="flex justify-end gap-1">
+            <ActionButton
+              v-if="building.unitsCount > 0"
+              route="admin.buildings.units.index"
+              :params="{ id: building.id }"
+              :icon="Square3Stack3DIcon"
+              ariaLabel="Voir les lots"
+              title="Lots"
+            />
+            <ActionButton
+              route="admin.buildings.edit"
+              :params="{ id: building.id }"
+              :icon="PencilSquareIcon"
+              ariaLabel="Editer"
+              title="Editer"
+            />
+    
+          </div>
+        </template>
+      </ZebraTable>
     </div>
   </div>
 </template>

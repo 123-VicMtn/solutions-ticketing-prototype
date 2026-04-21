@@ -6,6 +6,7 @@ tmp/*
 
 # AdonisJS build
 .adonisjs/
+tsconfig.inertia.tsbuildinfo
 
 # Secrets
 .env
@@ -29,3 +30,6 @@ yarn-error.log
 
 # Platform specific
 .DS_Store
+
+# Documentation
+docs/

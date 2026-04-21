@@ -33,5 +33,6 @@ export const commentTicketValidator = vine.create({
 })
 
 export const assignTicketValidator = vine.create({
-  providerId: vine.number().positive().exists({ table: 'providers', column: 'id' }),
+  assigneeUserId: vine.number().positive().exists({ table: 'users', column: 'id' }),
+  providerId: vine.number().positive().exists({ table: 'providers', column: 'id' }).optional(),
 })
