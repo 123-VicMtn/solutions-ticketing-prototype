@@ -27,6 +27,13 @@ function getRowKey(row: any, index: number) {
         </tr>
       </thead>
       <tbody>
+        <tr v-if="!rows.length">
+          <td :colspan="headers.length" class="py-8 text-center text-sm text-muted">
+            <slot name="empty">
+              Aucun élément à afficher.
+            </slot>
+          </td>
+        </tr>
         <tr v-for="(row, index) in rows" :key="getRowKey(row, index)">
           <td v-for="header in headers" :key="header.key" :class="header.tdClass">
             <slot
