@@ -21,6 +21,7 @@ import {
 import TicketNotifications from '#services/ticket_notification_service'
 import type { HttpContext } from '@adonisjs/core/http'
 import type { UserRole } from '#models/user'
+import type { TicketStatus } from '#models/ticket'
 import { DateTime } from 'luxon'
 import { randomUUID } from 'node:crypto'
 
@@ -177,14 +178,17 @@ export default class TicketsController {
     const canChangeStatus = user.hasAtLeastRole('manager') || user.role === 'provider'
     const canAssign = user.hasAtLeastRole('manager')
 
-    // Autorise uniquement les transitions correspondant au workflow, et restreint
-    // celles autorisées au rôle "provider".
     const workflowNextStatuses = VALID_TRANSITIONS[ticket.status] ?? []
     const hasAssignee = Boolean(ticket.assignedTo)
 
     const allowedStatusTransitions = canChangeStatus
       ? user.role === 'provider'
-        ? workflowNextStatuses.filter((s) => PROVIDER_ALLOWED_TRANSITIONS.includes(s))
+        ? (() => {
+            const next: TicketStatus[] = []
+            if (ticket.status === 'assigné') next.push('en cours')
+            if (ticket.status === 'en cours') next.push('terminé')
+            return next
+          })().filter((s) => PROVIDER_ALLOWED_TRANSITIONS.includes(s))
         : workflowNextStatuses.filter((s) => {
             if (s === 'assigné' && !hasAssignee) return false
             return true
@@ -281,7 +285,13 @@ export default class TicketsController {
     }
 
     if (user.role === 'provider') {
-      if (!PROVIDER_ALLOWED_TRANSITIONS.includes(payload.status)) {
+      const current = ticket.status
+      const next = payload.status
+
+      const isAllowedProviderTransition =
+        (current === 'assigné' && next === 'en cours') || (current === 'en cours' && next === 'terminé')
+
+      if (!isAllowedProviderTransition || !PROVIDER_ALLOWED_TRANSITIONS.includes(next)) {
         session.flash('error', 'Transition non autorisée pour un prestataire')
         return response.redirect().toPath(`/tickets/${ticket.id}`)
       }
@@ -301,7 +311,15 @@ export default class TicketsController {
     }
 
     ticket.status = payload.status
-    await ticket.save()
+    try {
+      await ticket.save()
+    } catch (error) {
+      session.flash(
+        'error',
+        error instanceof Error ? error.message : 'Transition non autorisée'
+      )
+      return response.redirect().toPath(`/tickets/${ticket.id}`)
+    }
 
     session.flash('success', 'Statut mis à jour')
     return response.redirect().toPath(`/tickets/${ticket.id}`)
