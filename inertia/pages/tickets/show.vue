@@ -152,12 +152,15 @@ const createdAtLabel = computed(() => {
             </span>
           </div>
           <p class="mt-1 text-sm text-muted">
-            {{ ticket.unit?.building?.name }} / {{ ticket.unit?.label }} - {{ ticket.category }} -
+            {{ (ticket as any)?.unit?.building?.name }} / {{ ticket.unit?.label }} - {{ ticket.category }} -
             <span :class="ticketPriorityBadgeClass(ticket.priority)">{{ ticket.priority }}</span>
           </p>
-          <p class="mt-1 text-sm text-muted">
-            Créé le {{ createdAtLabel }}
-          </p>
+          <div class="mt-2">
+            <span class="inline-flex items-center gap-2 rounded-md bg-base-200/60 px-2.5 py-1 text-sm text-base-content">
+              <span class="text-xs uppercase tracking-wide text-muted">Créé le</span>
+              <span class="font-semibold">{{ createdAtLabel }}</span>
+            </span>
+          </div>
         </div>
         <BaseButton
           v-if="canEditFields"
@@ -173,73 +176,121 @@ const createdAtLabel = computed(() => {
       <p class="whitespace-pre-wrap text-sm text-base-content">{{ ticket.description }}</p>
     </BaseCard>
 
-    <div class="grid w-full grid-flow-col grid-cols-3 gap-4">
-      <BaseCard title="Demandeur" bodyClass="p-6" class="col-span-2">
-        <div class="space-y-1">
-          <p class="text-sm text-base-content">{{ ticket.user?.fullName }}</p>
-          <p class="text-sm text-base-content">{{ ticket.user?.email }}</p>
-          <p class="text-sm text-base-content">{{ ticket.user?.phone }}</p>
-          <p class="text-sm text-base-content">
-            {{ ticket.user?.notificationPreference }}
-          </p>
+    <div class="grid w-full grid-cols-1 gap-4 lg:grid-cols-12">
+      <BaseCard title="Demandeur" bodyClass="p-6" class="lg:col-span-4">
+        <div class="space-y-4">
+          <div>
+            <div class="text-xs uppercase tracking-wide text-secondary">Identité</div>
+            <p class="mt-1 text-sm font-medium text-base-content">
+              {{ ticket.user?.fullName ?? '—' }}
+            </p>
+          </div>
+
+          <div class="grid gap-3">
+            <div>
+              <div class="text-xs uppercase tracking-wide text-secondary">Email</div>
+              <a
+                v-if="ticket.user?.email"
+                class="mt-1 block text-sm font-medium link link-hover"
+                :href="`mailto:${ticket.user.email}`"
+              >
+                {{ ticket.user.email }}
+              </a>
+              <p v-else class="mt-1 text-sm text-muted">—</p>
+            </div>
+
+            <div>
+              <div class="text-xs uppercase tracking-wide text-secondary">Téléphone</div>
+              <a
+                v-if="ticket.user?.phone"
+                class="mt-1 block text-sm font-medium link link-hover"
+                :href="`tel:${ticket.user.phone}`"
+              >
+                {{ ticket.user.phone }}
+              </a>
+              <p v-else class="mt-1 text-sm text-muted">—</p>
+            </div>
+          </div>
+
+          <div>
+            <div class="text-xs uppercase tracking-wide text-secondary">Notifications</div>
+            <p class="mt-1 text-sm text-base-content">
+              {{ ticket.user?.notificationPreference ?? '—' }}
+            </p>
+          </div>
         </div>
       </BaseCard>
 
-      <BaseCard title="Assignation" bodyClass="p-6">
+      <BaseCard title="Assignation" bodyClass="p-6" class="lg:col-span-8">
+        <div class="flex flex-col gap-4">
+          <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <div class="rounded-md border border-base-200 bg-base-200/30 p-4">
+              <div class="text-xs uppercase tracking-wide text-secondary">Suivi interne</div>
+              <p class="mt-1 text-sm font-medium text-base-content">
+                {{ ticket.assignee?.fullName ?? '—' }}
+              </p>
+            </div>
 
-        <template v-if="ticket.provider">
-          <div class="text-xs uppercase tracking-wide text-secondary">Prestataire</div>
-          <p class="whitespace-pre-wrap text-sm text-base-content">{{ ticket.provider.companyName }}</p>
-          <p class="whitespace-pre-wrap text-sm text-base-content">{{ ticket.provider.speciality }}</p>
-          <p class="whitespace-pre-wrap text-sm text-base-content">{{ ticket.provider.phone }}</p>
-        </template>
+            <div class="rounded-md border border-base-200 bg-base-200/30 p-4">
+              <div class="text-xs uppercase tracking-wide text-secondary">Prestataire</div>
+              <p class="mt-1 text-sm font-medium text-base-content">
+                {{ ticket.provider?.companyName ?? '—' }}
+              </p>
+              <p v-if="ticket.provider?.speciality" class="mt-0.5 text-sm text-muted">
+                {{ ticket.provider.speciality }}
+              </p>
+              <p v-if="ticket.provider?.phone" class="mt-2 text-sm">
+                <a class="link link-hover" :href="`tel:${ticket.provider.phone}`">
+                  {{ ticket.provider.phone }}
+                </a>
+              </p>
+            </div>
+          </div>
 
-        <template v-else-if="ticket.assignee">
-          <div class="text-xs uppercase tracking-wide text-secondary">Interne</div>
-          <p class="whitespace-pre-wrap text-sm text-base-content">
-            {{ ticket.assignee.fullName ?? '—' }}
+          <p v-if="!ticket.provider && !ticket.assignee && !canAssign" class="text-sm text-muted italic">
+            Pas encore assigné
           </p>
-        </template>
 
-        <p v-else-if="!canAssign" class="text-sm text-muted italic">Pas encore assigné</p>
+          <form
+            v-if="canAssign"
+            class="space-y-3"
+            :class="{ 'border-t border-base-200 pt-4': ticket.provider || ticket.assignee }"
+            @submit.prevent="submitAssign(ticket.id)"
+          >
+            <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <FormField id="assigneeUserId" label="Suivi interne (obligatoire)">
+                <select v-model="selectedAssigneeUserId" class="select select-bordered w-full">
+                  <option value="">{{ ticket.assignee ? 'Réassigner…' : 'Sélectionner…' }}</option>
+                  <option v-for="a in assignees" :key="a.id" :value="a.id">
+                    {{ a.fullName ?? `#${a.id}` }}
+                  </option>
+                </select>
+              </FormField>
 
-        <form
-          v-if="canAssign"
-          class="mt-3 space-y-3"
-          :class="{ 'border-t border-base-200 pt-3': ticket.provider || ticket.assignee }"
-          @submit.prevent="submitAssign(ticket.id)"
-        >
-          <FormField id="assigneeUserId" label="Suivi interne (obligatoire)">
-            <select
-              v-model="selectedAssigneeUserId"
-              class="select select-bordered w-full"
-            >
-              <option value="">{{ ticket.assignee ? 'Réassigner…' : 'Sélectionner…' }}</option>
-              <option v-for="a in assignees" :key="a.id" :value="a.id">
-                {{ a.fullName ?? `#${a.id}` }}
-              </option>
-            </select>
-          </FormField>
+              <FormField id="providerId" label="Prestataire">
+                <select v-model="selectedProviderId" class="select select-bordered w-full">
+                  <option value="">{{ ticket.provider ? 'Réassigner…' : 'Aucun prestataire' }}</option>
+                  <option
+                    v-for="provider in providers"
+                    :key="(provider as any).id"
+                    :value="(provider as any).id"
+                  >
+                    {{ provider.companyName }} — {{ provider.speciality }}
+                  </option>
+                </select>
+              </FormField>
+            </div>
 
-          <FormField id="providerId" label="Prestataire">
-            <select
-              v-model="selectedProviderId"
-              class="select select-bordered w-full"
-            >
-              <option value="">{{ ticket.provider ? 'Réassigner…' : 'Aucun prestataire' }}</option>
-              <option v-for="provider in providers" :key="provider.id" :value="provider.id">
-                {{ provider.companyName }} — {{ provider.speciality }}
-              </option>
-            </select>
-          </FormField>
-
-          <BaseButton
-            type="submit"
-            :disabled="!selectedAssigneeUserId"
-            label="Enregistrer l’assignation"
-            class="w-full"
-          />
-        </form>
+            <div class="flex items-center justify-end">
+              <BaseButton
+                type="submit"
+                :disabled="!selectedAssigneeUserId"
+                label="Enregistrer"
+                class="min-w-44"
+              />
+            </div>
+          </form>
+        </div>
       </BaseCard>
     </div>
 
