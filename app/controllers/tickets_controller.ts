@@ -279,6 +279,7 @@ export default class TicketsController {
     const user = auth.user!
     const payload = await request.validateUsing(statusTicketValidator)
     const ticket = await Ticket.findOrFail(params.id)
+    const previousStatus = ticket.status
 
     if (!(await this.canAccessTicket(user.id, user.role, ticket))) {
       return response.abort('Non autorisé', 403)
@@ -319,6 +320,10 @@ export default class TicketsController {
         error instanceof Error ? error.message : 'Transition non autorisée'
       )
       return response.redirect().toPath(`/tickets/${ticket.id}`)
+    }
+
+    if (user.role === 'provider' && previousStatus === 'en cours' && ticket.status === 'terminé') {
+      await TicketNotifications.notifyInternalAssigneeTicketCompleted(ticket)
     }
 
     session.flash('success', 'Statut mis à jour')
