@@ -8,9 +8,9 @@ import BaseButton from '~/components/common/buttons/BaseButton.vue'
 import { EyeIcon, PlusCircleIcon } from '@heroicons/vue/24/outline'
 import { ticketPriorityBadgeClass } from '~/utils/ticketPriority'
 import type { Data } from '@generated/data'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
-const { isProvider, user } = useAuth()
+const { isProvider } = useAuth()
 
 const props = defineProps<{
   tickets: Data.Ticket[]
@@ -26,6 +26,15 @@ const selectedStatus = ref(props.filters.status ?? '')
 const selectedPriority = ref(props.filters.priority ?? '')
 const selectedCategory = ref(props.filters.category ?? '')
 const selectedAssignedTo = ref(props.filters.assignedTo ?? '')
+
+const hasActiveFilters = computed(() => {
+  return Boolean(
+    selectedStatus.value ||
+      selectedPriority.value ||
+      selectedCategory.value ||
+      selectedAssignedTo.value
+  )
+})
 
 const tableHeaders = [
   { key: 'reference', label: 'Réf' },
@@ -115,6 +124,10 @@ function applyFilters() {
 
     <div class="mt-6">
       <ZebraTable :headers="tableHeaders" :rows="props.tickets" :rowKey="(t) => t.id">
+        <template #empty>
+          <span v-if="hasActiveFilters">Aucun ticket ne correspond aux filtres sélectionnés.</span>
+          <span v-else>Aucun ticket à afficher.</span>
+        </template>
         <template #cell:reference="{ row: ticket }">
           {{ ticket.reference ?? '-' }}
         </template>
