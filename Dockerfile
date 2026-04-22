@@ -23,5 +23,8 @@ RUN npm ci --omit=dev && npm cache clean --force
 
 COPY --from=build --chown=app:app /app/build ./
 
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD node -e "require('http').get('http://127.0.0.1:3333/health/live', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
+
 EXPOSE 3333
 CMD ["node", "bin/server.js"]
