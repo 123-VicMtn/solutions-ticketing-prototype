@@ -15,8 +15,13 @@ RUN node ace build
 # --- Production ---
 FROM base AS production
 ENV NODE_ENV=production
-COPY --from=build /app/build ./
-RUN npm ci --omit=dev
+RUN addgroup -S app && adduser -S app -G app && chown -R app:app /app
+USER app
+
+COPY --chown=app:app package.json package-lock.json ./
+RUN npm ci --omit=dev && npm cache clean --force
+
+COPY --from=build --chown=app:app /app/build ./
 
 EXPOSE 3333
 CMD ["node", "bin/server.js"]
