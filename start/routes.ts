@@ -4,12 +4,8 @@ const AccessRequestsController = () => import('#controllers/access_requests_cont
 const ManagerAccessController = () => import('#controllers/manager_access_controller')
 import router from '@adonisjs/core/services/router'
 
-router.get('/health', async ({ response }) => {
-  return response.ok({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    })
-})
+router.get('/health/live', [controllers.HealthChecks, 'live'])
+router.get('/health/ready', [controllers.HealthChecks, 'ready'])
 
 router.on('/').renderInertia('home', {}).as('home')
 
