@@ -24,6 +24,7 @@
     "#services/*": "./app/services/*.js",
     "#listeners/*": "./app/listeners/*.js",
     "#events/*": "./app/events/*.js",
+    "#health_checks/*": "./app/health_checks/*.js",
     "#generated/*": "./.adonisjs/server/*.js",
     "#middleware/*": "./app/middleware/*.js",
     "#transformers/*": "./app/transformers/*.js",
