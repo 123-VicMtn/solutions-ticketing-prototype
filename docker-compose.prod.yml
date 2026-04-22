@@ -18,6 +18,17 @@ services:
         condition: service_healthy
     volumes:
       - uploads:/app/tmp/uploads
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "require('http').get('http://127.0.0.1:3333/health/live', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   postgres:
     image: postgres:17-alpine
