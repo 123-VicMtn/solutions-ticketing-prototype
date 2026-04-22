@@ -3,9 +3,27 @@ import { controllers } from '#generated/controllers'
 const AccessRequestsController = () => import('#controllers/access_requests_controller')
 const ManagerAccessController = () => import('#controllers/manager_access_controller')
 import router from '@adonisjs/core/services/router'
+import HealthChecksController from '#controllers/health_checks_controller'
 
-router.get('/health/live', [controllers.HealthChecks, 'live'])
-router.get('/health/ready', [controllers.HealthChecks, 'ready'])
+/**
+ * Health check routes for Orchestrator
+ * - /health/live : Liveness probe (the process is responding ?)
+ * - /health/ready : Readiness probe (the app can receive traffic ?)
+ */
+router.get('/health/live', [HealthChecksController, 'live'])
+
+router
+  .get('/health/ready', [HealthChecksController, 'ready'])
+  .use(({ request, response }, next) => {
+    const monitoringSecret = request.header('x-monitoring-secret')
+    const expectedSecret = process.env.HEALTH_CHECK_SECRET
+
+    if (expectedSecret && monitoringSecret !== expectedSecret) {
+      return response.unauthorized({ message: 'Unauthorized access' })
+    }
+
+  return next()
+})
 
 router.on('/').renderInertia('home', {}).as('home')
 
