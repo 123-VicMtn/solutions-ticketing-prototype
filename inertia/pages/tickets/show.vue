@@ -25,7 +25,7 @@ const props = defineProps<{
   assignees: { id: number; fullName: string | null }[]
 }>()
 
-const workflowStatuses = ['ouvert', 'assigné', 'en cours', 'terminé', 'résolu', 'fermé'] as const satisfies readonly TicketStatus[]
+const workflowStatuses = ['ouvert', 'assigné', 'en cours', 'terminé', 'résolu', 'facturé', 'fermé'] as const satisfies readonly TicketStatus[]
 
 const STATUS_LABELS: Record<string, string> = {
   ouvert: 'Ouvert',
@@ -33,6 +33,7 @@ const STATUS_LABELS: Record<string, string> = {
   'en cours': 'En cours',
   terminé: 'Terminé',
   résolu: 'Résolu',
+  facturé: 'Facturé',
   fermé: 'Fermé',
 }
 
