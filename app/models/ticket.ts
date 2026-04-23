@@ -7,7 +7,7 @@ import Provider from '#models/provider'
 import TicketComment from '#models/ticket_comment'
 import TicketAttachment from '#models/ticket_attachment'
 
-export type TicketStatus = 'ouvert' | 'assigné' | 'en cours' | 'terminé' | 'résolu' | 'fermé'
+export type TicketStatus = 'ouvert' | 'assigné' | 'en cours' | 'terminé' | 'résolu' | 'facturé' | 'fermé'
 
 export type TicketCategory =
   | 'Technique & Maintenance'
@@ -24,9 +24,10 @@ export type TicketPriority = 'basse' | 'moyenne' | 'élevée' | 'urgente'
 export const VALID_TRANSITIONS: Record<TicketStatus, TicketStatus[]> = {
   'ouvert': ['assigné', 'en cours', 'fermé'],
   'assigné': ['en cours', 'fermé'],
-  'en cours': ['ouvert', 'terminé', 'fermé'],
-  'terminé': ['en cours', 'résolu', 'fermé'],
-  'résolu': ['en cours', 'fermé'],
+  'en cours': ['terminé', 'fermé'],
+  'terminé': ['en cours', 'résolu', 'facturé'],
+  'résolu': ['en cours', 'facturé'],
+  'facturé': ['fermé'],
   'fermé': [],
 }
 
