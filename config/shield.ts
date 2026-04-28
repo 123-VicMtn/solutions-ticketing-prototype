@@ -1,4 +1,5 @@
 import { defineConfig } from '@adonisjs/shield'
+import app from '@adonisjs/core/services/app'
 
 const shieldConfig = defineConfig({
   /**
@@ -9,17 +10,28 @@ const shieldConfig = defineConfig({
     /**
      * Enable the Content-Security-Policy header.
      */
-    enabled: false,
+    enabled: app.inProduction,
 
     /**
      * Per-resource CSP directives.
      */
-    directives: {},
+    directives: {
+      defaultSrc: ["'self'"],
+      baseUri: ["'self'"],
+      objectSrc: ["'none'"],
+      frameAncestors: ["'none'"],
+      formAction: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+      fontSrc: ["'self'", 'data:'],
+      connectSrc: ["'self'", 'ws:', 'wss:'],
+    },
 
     /**
      * Report violations without blocking resources.
      */
-    reportOnly: false,
+    reportOnly: app.inProduction,
   },
 
   /**
@@ -72,7 +84,7 @@ const shieldConfig = defineConfig({
     /**
      * Enable the Strict-Transport-Security header.
      */
-    enabled: true,
+    enabled: app.inProduction,
 
     /**
      * HSTS policy duration remembered by browsers.
