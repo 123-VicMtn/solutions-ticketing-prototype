@@ -89,7 +89,7 @@ const shieldConfig = defineConfig({
     /**
      * HSTS policy duration remembered by browsers.
      */
-    maxAge: '180 days',
+    maxAge: '365 days',
   },
 
   /**
