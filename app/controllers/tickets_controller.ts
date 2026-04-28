@@ -20,6 +20,7 @@ import {
 } from '#validators/ticket'
 import TicketNotifications from '#services/ticket_notification_service'
 import type { HttpContext } from '@adonisjs/core/http'
+import type { MultipartFile } from '@adonisjs/bodyparser/types'
 import type { UserRole } from '#models/user'
 import type { TicketStatus } from '#models/ticket'
 import { DateTime } from 'luxon'
@@ -133,6 +134,11 @@ export default class TicketsController {
     }
 
     const payload = await request.validateUsing(createTicketValidator)
+    const attachments = request.files('attachments')
+    const attachmentsError = this.validateAttachments(attachments, { required: false })
+    if (attachmentsError) {
+      return response.unprocessableEntity({ errors: { attachments: attachmentsError } })
+    }
 
     const ticket = await Ticket.create({
       userId: user.id,
@@ -147,7 +153,7 @@ export default class TicketsController {
     ticket.reference = `TK-${DateTime.now().year}-${String(ticket.id).padStart(4, '0')}`
     await ticket.save()
 
-    await this.processAttachments(request, ticket.id, user.id)
+    await this.processAttachments(attachments, ticket.id, user.id)
 
     session.flash('success', 'Ticket créé avec succès')
     return response.redirect().toPath(`/tickets/${ticket.id}`)
@@ -420,7 +426,13 @@ export default class TicketsController {
       return response.abort('Non autorisé', 403)
     }
 
-    const count = await this.processAttachments(request, ticket.id, user.id)
+    const attachments = request.files('attachments')
+    const attachmentsError = this.validateAttachments(attachments, { required: true })
+    if (attachmentsError) {
+      return response.unprocessableEntity({ errors: { attachments: attachmentsError } })
+    }
+
+    const count = await this.processAttachments(attachments, ticket.id, user.id)
     if (count === 0) {
       session.flash('error', 'Aucun fichier valide envoyé')
     } else {
@@ -447,15 +459,13 @@ export default class TicketsController {
   }
 
   private async processAttachments(
-    request: HttpContext['request'],
+    attachments: MultipartFile[],
     ticketId: number,
     userId: number
   ): Promise<number> {
-    const attachments = request.files('attachments')
     let count = 0
 
     for (const attachment of attachments) {
-      if (!attachment.isValid) continue
       const filename = `${randomUUID()}.${attachment.extname ?? 'bin'}`
       await attachment.move(app.makePath('public/uploads/tickets'), { name: filename })
       await TicketAttachment.create({
@@ -470,6 +480,33 @@ export default class TicketsController {
     }
 
     return count
+  }
+
+  private validateAttachments(
+    attachments: MultipartFile[],
+    options: { required: boolean }
+  ): string | null {
+    if (options.required && attachments.length === 0) {
+      return 'Veuillez sélectionner au moins un fichier.'
+    }
+
+    if (attachments.length > 5) {
+      return 'Vous pouvez envoyer au maximum 5 fichiers.'
+    }
+
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf']
+
+    for (const attachment of attachments) {
+      attachment.sizeLimit = '10mb'
+      attachment.allowedExtensions = allowedExtensions
+      attachment.validate()
+
+      if (!attachment.isValid) {
+        return attachment.errors[0]?.message ?? `Le fichier ${attachment.clientName} est invalide.`
+      }
+    }
+
+    return null
   }
 
   private canCreateTickets(role: UserRole): boolean {
