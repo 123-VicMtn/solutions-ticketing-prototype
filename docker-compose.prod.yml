@@ -35,13 +35,17 @@ services:
     container_name: ticketing-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${DB_USER:-ticketing}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-ticketing}
-      POSTGRES_DB: ${DB_DATABASE:-ticketing_prod}
+      POSTGRES_USER: ${DB_USER:?DB_USER is required in production}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required in production}
+      POSTGRES_DB: ${DB_DATABASE:?DB_DATABASE is required in production}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-ticketing} -d ${DB_DATABASE:-ticketing_prod}']
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${DB_USER:?DB_USER is required in production} -d ${DB_DATABASE:?DB_DATABASE is required in production}',
+        ]
       interval: 5s
       timeout: 5s
       retries: 5
