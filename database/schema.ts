@@ -49,6 +49,17 @@ export class ProviderSchema extends BaseModel {
   declare userId: number
 }
 
+export class RateLimitSchema extends BaseModel {
+  static $columns = ['expire', 'key', 'points'] as const
+  $columns = RateLimitSchema.$columns
+  @column()
+  declare expire: bigint | number | null
+  @column()
+  declare key: string
+  @column()
+  declare points: number
+}
+
 export class TicketAttachmentSchema extends BaseModel {
   static $columns = ['createdAt', 'filePath', 'id', 'mimeType', 'originalName', 'sizeBytes', 'ticketId', 'updatedAt', 'userId'] as const
   $columns = TicketAttachmentSchema.$columns
