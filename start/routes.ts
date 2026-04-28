@@ -1,4 +1,5 @@
 import { middleware } from '#start/kernel'
+import { loginThrottle, onboardingThrottle } from '#start/limiter'
 import { controllers } from '#generated/controllers'
 const AccessRequestsController = () => import('#controllers/access_requests_controller')
 const ManagerAccessController = () => import('#controllers/manager_access_controller')
@@ -30,15 +31,19 @@ router.on('/').renderInertia('home', {}).as('home')
 router
   .group(() => {
     router.get('login', [controllers.Session, 'create']).as('session.create')
-    router.post('login', [controllers.Session, 'store']).as('session.store')
+    router.post('login', [controllers.Session, 'store']).use(loginThrottle).as('session.store')
 
     router.get('request-access', [AccessRequestsController, 'create']).as('request_access.create')
-    router.post('request-access', [AccessRequestsController, 'store']).as('request_access.store')
+    router
+      .post('request-access', [AccessRequestsController, 'store'])
+      .use(onboardingThrottle)
+      .as('request_access.store')
     router
       .get('set-password/:token', [AccessRequestsController, 'setPasswordPage'])
       .as('set_password.create')
     router
       .post('set-password/:token', [AccessRequestsController, 'setPassword'])
+      .use(onboardingThrottle)
       .as('set_password.store')
   })
   .use(middleware.guest())
