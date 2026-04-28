@@ -23,13 +23,21 @@ const corsConfig = defineConfig({
   /**
    * HTTP methods accepted for cross-origin requests.
    */
-  methods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE'],
 
   /**
    * Reflect request headers by default. Use a string array to restrict
    * allowed headers.
    */
-  headers: true,
+  headers: [
+    'Accept',
+    'Authorization',
+    'Content-Type',
+    'Origin',
+    'X-Requested-With',
+    'X-CSRF-TOKEN',
+    'X-XSRF-TOKEN',
+  ],
 
   /**
    * Response headers exposed to the browser.
