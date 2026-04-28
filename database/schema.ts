@@ -60,6 +60,19 @@ export class RateLimitSchema extends BaseModel {
   declare points: number
 }
 
+export class SessionSchema extends BaseModel {
+  static $columns = ['data', 'expiresAt', 'id', 'userId'] as const
+  $columns = SessionSchema.$columns
+  @column()
+  declare data: string
+  @column.dateTime()
+  declare expiresAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare userId: string | null
+}
+
 export class TicketAttachmentSchema extends BaseModel {
   static $columns = ['createdAt', 'filePath', 'id', 'mimeType', 'originalName', 'sizeBytes', 'ticketId', 'updatedAt', 'userId'] as const
   $columns = TicketAttachmentSchema.$columns
