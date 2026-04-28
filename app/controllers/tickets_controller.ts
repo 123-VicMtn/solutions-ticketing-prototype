@@ -18,6 +18,7 @@ import {
   updateTicketValidator,
   assignTicketValidator,
 } from '#validators/ticket'
+import { TicketAttachmentValidationService } from '#services/ticket_attachment_validation_service'
 import TicketNotifications from '#services/ticket_notification_service'
 import type { HttpContext } from '@adonisjs/core/http'
 import type { MultipartFile } from '@adonisjs/bodyparser/types'
@@ -25,6 +26,8 @@ import type { UserRole } from '#models/user'
 import type { TicketStatus } from '#models/ticket'
 import { DateTime } from 'luxon'
 import { randomUUID } from 'node:crypto'
+
+const ticketAttachmentValidationService = new TicketAttachmentValidationService()
 
 export default class TicketsController {
   async index({ inertia, auth, request }: HttpContext) {
@@ -135,7 +138,7 @@ export default class TicketsController {
 
     const payload = await request.validateUsing(createTicketValidator)
     const attachments = request.files('attachments')
-    const attachmentsError = this.validateAttachments(attachments, { required: false })
+    const attachmentsError = ticketAttachmentValidationService.validate(attachments, { required: false })
     if (attachmentsError) {
       return response.unprocessableEntity({ errors: { attachments: attachmentsError } })
     }
@@ -427,7 +430,7 @@ export default class TicketsController {
     }
 
     const attachments = request.files('attachments')
-    const attachmentsError = this.validateAttachments(attachments, { required: true })
+    const attachmentsError = ticketAttachmentValidationService.validate(attachments, { required: true })
     if (attachmentsError) {
       return response.unprocessableEntity({ errors: { attachments: attachmentsError } })
     }
@@ -480,33 +483,6 @@ export default class TicketsController {
     }
 
     return count
-  }
-
-  private validateAttachments(
-    attachments: MultipartFile[],
-    options: { required: boolean }
-  ): string | null {
-    if (options.required && attachments.length === 0) {
-      return 'Veuillez sélectionner au moins un fichier.'
-    }
-
-    if (attachments.length > 5) {
-      return 'Vous pouvez envoyer au maximum 5 fichiers.'
-    }
-
-    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf']
-
-    for (const attachment of attachments) {
-      attachment.sizeLimit = '10mb'
-      attachment.allowedExtensions = allowedExtensions
-      attachment.validate()
-
-      if (!attachment.isValid) {
-        return attachment.errors[0]?.message ?? `Le fichier ${attachment.clientName} est invalide.`
-      }
-    }
-
-    return null
   }
 
   private canCreateTickets(role: UserRole): boolean {
