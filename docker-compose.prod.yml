@@ -3,6 +3,9 @@ services:
     image: nginx:1.27-alpine
     container_name: ticketing-reverse-proxy
     restart: unless-stopped
+    cpus: 0.50
+    mem_limit: 256m
+    pids_limit: 100
     depends_on:
       app:
         condition: service_healthy
@@ -15,6 +18,11 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '5'
 
   app:
     build:
@@ -22,6 +30,9 @@ services:
       dockerfile: Dockerfile
     container_name: ticketing-app
     restart: unless-stopped
+    cpus: 1.50
+    mem_limit: 1024m
+    pids_limit: 300
     env_file:
       - .env
     environment:
@@ -46,11 +57,19 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: '20m'
+        max-file: '5'
 
   postgres:
     image: postgres:17-alpine
     container_name: ticketing-postgres
     restart: unless-stopped
+    cpus: 1.00
+    mem_limit: 768m
+    pids_limit: 200
     environment:
       POSTGRES_USER: ${DB_USER:?DB_USER is required in production}
       POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required in production}
@@ -66,6 +85,11 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: '20m'
+        max-file: '5'
 
 volumes:
   pgdata:
