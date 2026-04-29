@@ -29,6 +29,7 @@ services:
       HOST: 0.0.0.0
       DB_HOST: postgres
       SESSION_DRIVER: database
+      HEALTH_CHECK_SECRET: ${HEALTH_CHECK_SECRET:?HEALTH_CHECK_SECRET is required in production}
     depends_on:
       postgres:
         condition: service_healthy

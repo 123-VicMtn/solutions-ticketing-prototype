@@ -47,6 +47,7 @@ export default await Env.create(new URL('../', import.meta.url), {
 
   // Session
   SESSION_DRIVER: Env.schema.enum(['cookie', 'memory', 'database'] as const),
+  HEALTH_CHECK_SECRET: Env.schema.string.optional(),
 
   /*
   |----------------------------------------------------------

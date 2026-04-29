@@ -3,8 +3,16 @@ import { loginThrottle, onboardingThrottle } from '#start/limiter'
 import { controllers } from '#generated/controllers'
 const AccessRequestsController = () => import('#controllers/access_requests_controller')
 const ManagerAccessController = () => import('#controllers/manager_access_controller')
+import app from '@adonisjs/core/services/app'
+import env from '#start/env'
 import router from '@adonisjs/core/services/router'
 import HealthChecksController from '#controllers/health_checks_controller'
+
+const healthCheckSecret = env.get('HEALTH_CHECK_SECRET')
+
+if (app.inProduction && !healthCheckSecret) {
+  throw new Error('HEALTH_CHECK_SECRET is required in production')
+}
 
 /**
  * Health check routes for Orchestrator
@@ -17,14 +25,12 @@ router
   .get('/health/ready', [HealthChecksController, 'ready'])
   .use(({ request, response }, next) => {
     const monitoringSecret = request.header('x-monitoring-secret')
-    const expectedSecret = process.env.HEALTH_CHECK_SECRET
-
-    if (expectedSecret && monitoringSecret !== expectedSecret) {
+    if (healthCheckSecret && monitoringSecret !== healthCheckSecret) {
       return response.unauthorized({ message: 'Unauthorized access' })
     }
 
-  return next()
-})
+    return next()
+  })
 
 router.on('/').renderInertia('home', {}).as('home')
 
