@@ -5,6 +5,10 @@ import { Link } from '@adonisjs/inertia/vue'
 import { ticketPriorityBadgeClass } from '~/utils/ticket_priority'
 import type { Data } from '@generated/data'
 
+type UserUnitWithBuilding = Data.UserUnit & {
+  unit: Data.Unit & { building: Data.Building }
+}
+
 const ROLE_LABELS: Record<string, string> = {
   admin: 'Administrateur',
   manager: 'Gestionnaire',
@@ -15,7 +19,7 @@ const ROLE_LABELS: Record<string, string> = {
 
 const props = defineProps<{
   profileUser: Data.User
-  userUnits: Data.UserUnit[]
+  userUnits: UserUnitWithBuilding[]
   tickets: Data.Ticket[]
 }>()
 
@@ -70,7 +74,7 @@ const notificationLabel = computed(() =>
           class="rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-800"
         >
           <div class="flex items-center justify-between transition">
-            <div>{{ userUnit.unit?.building?.name }} / {{ userUnit.unit?.label }}</div>
+            <div>{{ userUnit.unit.building.name }} / {{ userUnit.unit.label }}</div>
             <div class="ml-2 text-xs text-gray-500">({{ roleLabel }})</div>
           </div>
         </li>
