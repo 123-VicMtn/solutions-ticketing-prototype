@@ -2,7 +2,7 @@
 import { Head } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import { Link } from '@adonisjs/inertia/vue'
-import { ticketPriorityBadgeClass } from '~/utils/ticketPriority'
+import { ticketPriorityBadgeClass } from '~/utils/ticket_priority'
 import type { Data } from '@generated/data'
 
 const ROLE_LABELS: Record<string, string> = {

@@ -6,7 +6,7 @@ import ZebraTable from '~/components/common/zebraTable.vue'
 import DropdownFilter from '~/components/common/dropdowns/DropdownFilter.vue'
 import BaseButton from '~/components/common/buttons/BaseButton.vue'
 import { EyeIcon, PlusCircleIcon } from '@heroicons/vue/24/outline'
-import { ticketPriorityBadgeClass } from '~/utils/ticketPriority'
+import { ticketPriorityBadgeClass } from '~/utils/ticket_priority'
 import type { Data } from '@generated/data'
 import { computed, ref } from 'vue'
 
@@ -20,7 +20,16 @@ const props = defineProps<{
 
 const statuses = ['ouvert', 'assigné', 'en cours', 'terminé', 'résolu', 'fermé']
 const priorities = ['basse', 'moyenne', 'élevée', 'urgente']
-const categories = ['Technique & Maintenance', 'Entretien & Nettoyage', 'Administratifs & Contrats', 'Finance & Facturation', 'Relations & Conflits', 'Gestion des accès', 'Déménagement', 'Urgences']
+const categories = [
+  'Technique & Maintenance',
+  'Entretien & Nettoyage',
+  'Administratifs & Contrats',
+  'Finance & Facturation',
+  'Relations & Conflits',
+  'Gestion des accès',
+  'Déménagement',
+  'Urgences',
+]
 
 const selectedStatus = ref(props.filters.status ?? '')
 const selectedPriority = ref(props.filters.priority ?? '')
@@ -30,9 +39,9 @@ const selectedAssignedTo = ref(props.filters.assignedTo ?? '')
 const hasActiveFilters = computed(() => {
   return Boolean(
     selectedStatus.value ||
-      selectedPriority.value ||
-      selectedCategory.value ||
-      selectedAssignedTo.value
+    selectedPriority.value ||
+    selectedCategory.value ||
+    selectedAssignedTo.value
   )
 })
 
@@ -79,7 +88,6 @@ function applyFilters() {
         <h1 class="text-2xl font-bold tracking-tight text-base-content">Tickets</h1>
         <p class="mt-1 text-sm text-muted">Suivez les demandes d'intervention</p>
       </div>
-
     </div>
 
     <div class="mt-6 flex w-full gap-3">
@@ -172,7 +180,8 @@ function applyFilters() {
             :params="{ id: ticket.id }"
             :icon="EyeIcon"
             ariaLabel="Voir"
-            title="Voir"/>
+            title="Voir"
+          />
         </template>
       </ZebraTable>
     </div>

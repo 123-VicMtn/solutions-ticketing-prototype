@@ -51,9 +51,7 @@ export default class BuildingsController {
 
   async units({ inertia, params }: HttpContext) {
     const building = await Building.findOrFail(params.id)
-    const units = await Unit.query()
-      .where('buildingId', building.id)
-      .orderBy('label')
+    const units = await Unit.query().where('buildingId', building.id).orderBy('label')
 
     return inertia.render('admin/buildings/units', {
       building: BuildingTransformer.transform(building).useVariant('forSummary'),

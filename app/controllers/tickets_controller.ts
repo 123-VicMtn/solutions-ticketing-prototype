@@ -97,14 +97,11 @@ export default class TicketsController {
 
     const tickets = await query
 
-    return inertia.render(
-      'tickets/index',
-      {
-        tickets: TicketTransformer.transform(tickets),
-        filters,
-        assignees: assignees.map((u) => ({ id: u.id, fullName: u.fullName })),
-      } as any
-    )
+    return inertia.render('tickets/index', {
+      tickets: TicketTransformer.transform(tickets),
+      filters,
+      assignees: assignees.map((u) => ({ id: u.id, fullName: u.fullName })),
+    } as any)
   }
 
   async create({ inertia, auth }: HttpContext) {
@@ -138,7 +135,9 @@ export default class TicketsController {
 
     const payload = await request.validateUsing(createTicketValidator)
     const attachments = request.files('attachments')
-    const attachmentsError = ticketAttachmentValidationService.validate(attachments, { required: false })
+    const attachmentsError = ticketAttachmentValidationService.validate(attachments, {
+      required: false,
+    })
     if (attachmentsError) {
       return response.unprocessableEntity({ errors: { attachments: attachmentsError } })
     }
@@ -216,9 +215,7 @@ export default class TicketsController {
           .orderBy('last_name')
       : []
 
-    return inertia.render(
-      'tickets/show',
-      {
+    return inertia.render('tickets/show', {
       ticket: TicketTransformer.transform(ticket),
       comments: TicketCommentTransformer.transform(visibleComments),
       attachments: TicketAttachmentTransformer.transform(ticket.attachments),
@@ -229,8 +226,7 @@ export default class TicketsController {
       canAssign,
       providers: ProviderTransformer.transform(providers),
       assignees: internalAssignees.map((u) => ({ id: u.id, fullName: u.fullName })),
-      } as any
-    )
+    } as any)
   }
 
   async edit({ inertia, params, auth, response }: HttpContext) {
@@ -299,7 +295,8 @@ export default class TicketsController {
       const next = payload.status
 
       const isAllowedProviderTransition =
-        (current === 'assigné' && next === 'en cours') || (current === 'en cours' && next === 'terminé')
+        (current === 'assigné' && next === 'en cours') ||
+        (current === 'en cours' && next === 'terminé')
 
       if (!isAllowedProviderTransition || !PROVIDER_ALLOWED_TRANSITIONS.includes(next)) {
         session.flash('error', 'Transition non autorisée pour un prestataire')
@@ -324,10 +321,7 @@ export default class TicketsController {
     try {
       await ticket.save()
     } catch (error) {
-      session.flash(
-        'error',
-        error instanceof Error ? error.message : 'Transition non autorisée'
-      )
+      session.flash('error', error instanceof Error ? error.message : 'Transition non autorisée')
       return response.redirect().toPath(`/tickets/${ticket.id}`)
     }
 
@@ -363,7 +357,7 @@ export default class TicketsController {
     }
 
     if (!assignee.hasAtLeastRole('manager')) {
-      session.flash('error', "Seuls les comptes gérance peuvent être assignés au suivi interne")
+      session.flash('error', 'Seuls les comptes gérance peuvent être assignés au suivi interne')
       return response.redirect().toPath(`/tickets/${params.id}`)
     }
 
@@ -430,7 +424,9 @@ export default class TicketsController {
     }
 
     const attachments = request.files('attachments')
-    const attachmentsError = ticketAttachmentValidationService.validate(attachments, { required: true })
+    const attachmentsError = ticketAttachmentValidationService.validate(attachments, {
+      required: true,
+    })
     if (attachmentsError) {
       return response.unprocessableEntity({ errors: { attachments: attachmentsError } })
     }

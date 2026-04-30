@@ -2,7 +2,7 @@
 import { Head } from '@inertiajs/vue3'
 import SummaryWidget from '~/components/widgets/SummaryWidget.vue'
 import LatestTicketsWidgets from '~/components/widgets/LatestTicketsWidgets.vue'
-import { isTicketStatus, type TicketStatus } from '~/utils/ticketStatus'
+import { isTicketStatus, type TicketStatus } from '~/utils/ticket_status'
 import type { Data } from '@generated/data'
 
 const props = defineProps<{

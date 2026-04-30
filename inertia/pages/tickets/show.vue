@@ -2,10 +2,10 @@
 import { Head, router } from '@inertiajs/vue3'
 import { ChevronDownIcon } from '@heroicons/vue/24/outline'
 import { computed, ref } from 'vue'
-import { ticketPriorityBadgeClass } from '~/utils/ticketPriority'
-import { TicketStatus } from '#models/ticket';
+import { ticketPriorityBadgeClass } from '~/utils/ticket_priority'
+import { TicketStatus } from '#models/ticket'
 import type { Data } from '@generated/data'
-import { isTicketStatus } from '~/utils/ticketStatus'
+import { isTicketStatus } from '~/utils/ticket_status'
 import BaseCard from '~/components/common/cards/BaseCard.vue'
 import BaseButton from '~/components/common/buttons/BaseButton.vue'
 import FormField from '~/components/common/forms/FormField.vue'
@@ -25,16 +25,24 @@ const props = defineProps<{
   assignees: { id: number; fullName: string | null }[]
 }>()
 
-const workflowStatuses = ['ouvert', 'assigné', 'en cours', 'terminé', 'résolu', 'facturé', 'fermé'] as const satisfies readonly TicketStatus[]
+const workflowStatuses = [
+  'ouvert',
+  'assigné',
+  'en cours',
+  'terminé',
+  'résolu',
+  'facturé',
+  'fermé',
+] as const satisfies readonly TicketStatus[]
 
 const STATUS_LABELS: Record<string, string> = {
-  ouvert: 'Ouvert',
-  assigné: 'Assigné',
+  'ouvert': 'Ouvert',
+  'assigné': 'Assigné',
   'en cours': 'En cours',
-  terminé: 'Terminé',
-  résolu: 'Résolu',
-  facturé: 'Facturé',
-  fermé: 'Fermé',
+  'terminé': 'Terminé',
+  'résolu': 'Résolu',
+  'facturé': 'Facturé',
+  'fermé': 'Fermé',
 }
 
 function statusLabel(status: string): string {
@@ -188,7 +196,9 @@ const unitBuildingName = computed(() => {
             <span :class="ticketPriorityBadgeClass(ticket.priority)">{{ ticket.priority }}</span>
           </p>
           <div class="mt-2">
-            <span class="inline-flex items-center gap-2 rounded-md bg-base-200/60 px-2.5 py-1 text-sm text-base-content">
+            <span
+              class="inline-flex items-center gap-2 rounded-md bg-base-200/60 px-2.5 py-1 text-sm text-base-content"
+            >
               <span class="text-xs uppercase tracking-wide text-muted">Créé le</span>
               <span class="font-semibold">{{ createdAtLabel }}</span>
             </span>
@@ -279,7 +289,10 @@ const unitBuildingName = computed(() => {
             </div>
           </div>
 
-          <p v-if="!ticket.provider && !ticket.assignee && !canAssign" class="text-sm text-muted italic">
+          <p
+            v-if="!ticket.provider && !ticket.assignee && !canAssign"
+            class="text-sm text-muted italic"
+          >
             Pas encore assigné
           </p>
 
@@ -292,7 +305,9 @@ const unitBuildingName = computed(() => {
             <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
               <FormField id="assigneeUserId" label="Suivi interne (obligatoire)">
                 <select v-model="selectedAssigneeUserId" class="select select-bordered w-full">
-                  <option :value="null">{{ ticket.assignee ? 'Réassigner…' : 'Sélectionner…' }}</option>
+                  <option :value="null">
+                    {{ ticket.assignee ? 'Réassigner…' : 'Sélectionner…' }}
+                  </option>
                   <option v-for="a in assignees" :key="a.id" :value="a.id">
                     {{ a.fullName ?? `#${a.id}` }}
                   </option>
@@ -301,12 +316,10 @@ const unitBuildingName = computed(() => {
 
               <FormField id="providerId" label="Prestataire">
                 <select v-model="selectedProviderId" class="select select-bordered w-full">
-                  <option :value="null">{{ ticket.provider ? 'Réassigner…' : 'Aucun prestataire' }}</option>
-                  <option
-                    v-for="provider in providers"
-                    :key="provider.id"
-                    :value="provider.id"
-                  >
+                  <option :value="null">
+                    {{ ticket.provider ? 'Réassigner…' : 'Aucun prestataire' }}
+                  </option>
+                  <option v-for="provider in providers" :key="provider.id" :value="provider.id">
                     {{ provider.companyName }} — {{ provider.speciality }}
                   </option>
                 </select>
@@ -341,25 +354,37 @@ const unitBuildingName = computed(() => {
                 :disabled="status === ticket.status"
                 @click="statusValue = status"
               >
-                <span
-                  v-if="status === ticket.status"
-                  class="mb-1 flex items-center justify-center"
-                >
+                <span v-if="status === ticket.status" class="mb-1 flex items-center justify-center">
                   <ChevronDownIcon class="h-4 w-4 text-base-content" />
                 </span>
-                <span class="flex h-4 w-4 items-center justify-center rounded-full border" :class="stepDotClass(status)">
-                  <span v-if="status === ticket.status" class="h-1.5 w-1.5 rounded-full bg-base-100"></span>
+                <span
+                  class="flex h-4 w-4 items-center justify-center rounded-full border"
+                  :class="stepDotClass(status)"
+                >
+                  <span
+                    v-if="status === ticket.status"
+                    class="h-1.5 w-1.5 rounded-full bg-base-100"
+                  ></span>
                 </span>
-                <span class="mt-1 text-[11px] text-center leading-tight" :class="stepLabelClass(status)">
+                <span
+                  class="mt-1 text-[11px] text-center leading-tight"
+                  :class="stepLabelClass(status)"
+                >
                   {{ statusLabel(status) }}
                 </span>
               </button>
 
               <div v-else class="flex flex-col items-center">
-                <span class="flex h-4 w-4 items-center justify-center rounded-full border" :class="stepDotClass(status)">
+                <span
+                  class="flex h-4 w-4 items-center justify-center rounded-full border"
+                  :class="stepDotClass(status)"
+                >
                   <span class="h-1.5 w-1.5 rounded-full bg-transparent"></span>
                 </span>
-                <span class="mt-1 text-[11px] text-center leading-tight" :class="stepLabelClass(status)">
+                <span
+                  class="mt-1 text-[11px] text-center leading-tight"
+                  :class="stepLabelClass(status)"
+                >
                   {{ statusLabel(status) }}
                 </span>
               </div>
@@ -400,11 +425,7 @@ const unitBuildingName = computed(() => {
         </div>
 
         <div class="flex items-center justify-between gap-3">
-          <button
-            type="submit"
-            :disabled="isSubmitDisabled"
-            class="btn btn-primary"
-          >
+          <button type="submit" :disabled="isSubmitDisabled" class="btn btn-primary">
             Mettre à jour
           </button>
 
@@ -425,9 +446,7 @@ const unitBuildingName = computed(() => {
         <div v-for="c in comments" :key="c.id" class="rounded-md bg-base-200/40 p-3">
           <div class="mb-1 text-xs text-muted">
             {{ c.user?.fullName ?? c.user?.email }}
-            <span
-              v-if="c.isInternal"
-              class="ml-2 rounded bg-warning/20 px-2 py-0.5 text-warning"
+            <span v-if="c.isInternal" class="ml-2 rounded bg-warning/20 px-2 py-0.5 text-warning"
               >interne</span
             >
           </div>
@@ -458,12 +477,18 @@ const unitBuildingName = computed(() => {
     </BaseCard>
 
     <BaseCard title="Pièces jointes">
-
       <ul v-if="attachments.length" class="space-y-2">
-        <li v-for="attachment in attachments" :key="attachment.id" class="text-sm text-base-content">
-          <a :href="attachmentReadUrl(ticket.id, attachment.id)" target="_blank" class="link link-hover">{{
-            attachment.originalName
-          }}</a>
+        <li
+          v-for="attachment in attachments"
+          :key="attachment.id"
+          class="text-sm text-base-content"
+        >
+          <a
+            :href="attachmentReadUrl(ticket.id, attachment.id)"
+            target="_blank"
+            class="link link-hover"
+            >{{ attachment.originalName }}</a
+          >
           <span class="ml-2 text-xs text-muted"
             >({{ Math.ceil(attachment.sizeBytes / 1024) }} KB)</span
           >
@@ -482,12 +507,7 @@ const unitBuildingName = computed(() => {
           accept=".jpg,.jpeg,.png,.gif,.webp,.pdf"
           class="file-input file-input-bordered w-full"
         />
-        <BaseButton
-          type="submit"
-          :disabled="uploadingFiles"
-          label="Envoyer"
-          class="shrink-0"
-        />
+        <BaseButton type="submit" :disabled="uploadingFiles" label="Envoyer" class="shrink-0" />
       </form>
       <p class="mt-2 text-xs text-muted">
         Max 5 fichiers, 10MB par fichier. Formats: JPG, JPEG, PNG, GIF, WEBP, PDF.

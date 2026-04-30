@@ -3,7 +3,7 @@ import { ArrowRightIcon, EyeIcon } from '@heroicons/vue/24/outline'
 import { Link } from '@adonisjs/inertia/vue'
 import ZebraTable from '~/components/common/zebraTable.vue'
 import type { Data } from '@generated/data'
-import type { TicketStatus } from '~/utils/ticketStatus'
+import type { TicketStatus } from '~/utils/ticket_status'
 
 const { recentTickets } = defineProps<{
   recentTickets: Array<Data.Ticket & { status: TicketStatus }>
