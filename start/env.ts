@@ -40,7 +40,19 @@ export default await Env.create(new URL('../', import.meta.url), {
   DB_USER: Env.schema.string(),
   DB_PASSWORD: Env.schema.string.optional(),
   DB_DATABASE: Env.schema.string(),
+  DB_POOL_MIN: Env.schema.number.optional(),
+  DB_POOL_MAX: Env.schema.number.optional(),
+  DB_USE_SSL: Env.schema.boolean.optional(),
+  DB_SSL_REJECT_UNAUTHORIZED: Env.schema.boolean.optional(),
 
   // Session
   SESSION_DRIVER: Env.schema.enum(['cookie', 'memory', 'database'] as const),
+  HEALTH_CHECK_SECRET: Env.schema.string.optional(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring the limiter package
+  |----------------------------------------------------------
+  */
+  LIMITER_STORE: Env.schema.enum(['database', 'memory'] as const)
 })

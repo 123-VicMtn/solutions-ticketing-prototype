@@ -18,12 +18,16 @@ import {
   updateTicketValidator,
   assignTicketValidator,
 } from '#validators/ticket'
+import { TicketAttachmentValidationService } from '#services/ticket_attachment_validation_service'
 import TicketNotifications from '#services/ticket_notification_service'
 import type { HttpContext } from '@adonisjs/core/http'
+import type { MultipartFile } from '@adonisjs/bodyparser/types'
 import type { UserRole } from '#models/user'
 import type { TicketStatus } from '#models/ticket'
 import { DateTime } from 'luxon'
 import { randomUUID } from 'node:crypto'
+
+const ticketAttachmentValidationService = new TicketAttachmentValidationService()
 
 export default class TicketsController {
   async index({ inertia, auth, request }: HttpContext) {
@@ -133,6 +137,11 @@ export default class TicketsController {
     }
 
     const payload = await request.validateUsing(createTicketValidator)
+    const attachments = request.files('attachments')
+    const attachmentsError = ticketAttachmentValidationService.validate(attachments, { required: false })
+    if (attachmentsError) {
+      return response.unprocessableEntity({ errors: { attachments: attachmentsError } })
+    }
 
     const ticket = await Ticket.create({
       userId: user.id,
@@ -147,7 +156,7 @@ export default class TicketsController {
     ticket.reference = `TK-${DateTime.now().year}-${String(ticket.id).padStart(4, '0')}`
     await ticket.save()
 
-    await this.processAttachments(request, ticket.id, user.id)
+    await this.processAttachments(attachments, ticket.id, user.id)
 
     session.flash('success', 'Ticket créé avec succès')
     return response.redirect().toPath(`/tickets/${ticket.id}`)
@@ -420,7 +429,13 @@ export default class TicketsController {
       return response.abort('Non autorisé', 403)
     }
 
-    const count = await this.processAttachments(request, ticket.id, user.id)
+    const attachments = request.files('attachments')
+    const attachmentsError = ticketAttachmentValidationService.validate(attachments, { required: true })
+    if (attachmentsError) {
+      return response.unprocessableEntity({ errors: { attachments: attachmentsError } })
+    }
+
+    const count = await this.processAttachments(attachments, ticket.id, user.id)
     if (count === 0) {
       session.flash('error', 'Aucun fichier valide envoyé')
     } else {
@@ -447,15 +462,13 @@ export default class TicketsController {
   }
 
   private async processAttachments(
-    request: HttpContext['request'],
+    attachments: MultipartFile[],
     ticketId: number,
     userId: number
   ): Promise<number> {
-    const attachments = request.files('attachments')
     let count = 0
 
     for (const attachment of attachments) {
-      if (!attachment.isValid) continue
       const filename = `${randomUUID()}.${attachment.extname ?? 'bin'}`
       await attachment.move(app.makePath('public/uploads/tickets'), { name: filename })
       await TicketAttachment.create({

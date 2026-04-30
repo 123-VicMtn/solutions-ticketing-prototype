@@ -26,6 +26,12 @@ vine.messagesProvider = new SimpleMessagesProvider(
     'enum': 'La valeur sélectionnée pour {{ field }} est invalide',
     'number': 'Le champ {{ field }} doit être un nombre',
     'positive': 'Le champ {{ field }} doit être un nombre positif',
+    'array': 'Le champ {{ field }} doit être une liste',
+    'minLength.array': 'Le champ {{ field }} doit contenir au moins {{ min }} élément(s)',
+    'maxLength.array': 'Le champ {{ field }} ne doit pas dépasser {{ max }} élément(s)',
+    'file': 'Le champ {{ field }} doit être un fichier valide',
+    'file.size': 'Le fichier {{ field }} dépasse la taille maximale autorisée',
+    'file.extname': 'Le fichier {{ field }} a un format non autorisé',
     'database.unique': 'Cette valeur est déjà utilisée',
     'database.exists': "Cette valeur n'existe pas",
 
@@ -46,6 +52,7 @@ vine.messagesProvider = new SimpleMessagesProvider(
     passwordConfirmation: 'confirmation du mot de passe',
     unitId: 'unité',
     reason: 'raison',
+    attachments: 'pièces jointes',
   }
 )
 

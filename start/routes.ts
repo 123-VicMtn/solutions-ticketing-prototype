@@ -1,9 +1,18 @@
 import { middleware } from '#start/kernel'
+import { loginThrottle, onboardingThrottle } from '#start/limiter'
 import { controllers } from '#generated/controllers'
 const AccessRequestsController = () => import('#controllers/access_requests_controller')
 const ManagerAccessController = () => import('#controllers/manager_access_controller')
+import app from '@adonisjs/core/services/app'
+import env from '#start/env'
 import router from '@adonisjs/core/services/router'
 import HealthChecksController from '#controllers/health_checks_controller'
+
+const healthCheckSecret = env.get('HEALTH_CHECK_SECRET')
+
+if (app.inProduction && !healthCheckSecret) {
+  throw new Error('HEALTH_CHECK_SECRET is required in production')
+}
 
 /**
  * Health check routes for Orchestrator
@@ -16,32 +25,31 @@ router
   .get('/health/ready', [HealthChecksController, 'ready'])
   .use(({ request, response }, next) => {
     const monitoringSecret = request.header('x-monitoring-secret')
-    const expectedSecret = process.env.HEALTH_CHECK_SECRET
-
-    if (expectedSecret && monitoringSecret !== expectedSecret) {
+    if (healthCheckSecret && monitoringSecret !== healthCheckSecret) {
       return response.unauthorized({ message: 'Unauthorized access' })
     }
 
-  return next()
-})
+    return next()
+  })
 
 router.on('/').renderInertia('home', {}).as('home')
 
 router
   .group(() => {
-    router.get('signup', [controllers.NewAccount, 'create']).as('new_account.create')
-    router.post('signup', [controllers.NewAccount, 'store']).as('new_account.store')
-
     router.get('login', [controllers.Session, 'create']).as('session.create')
-    router.post('login', [controllers.Session, 'store']).as('session.store')
+    router.post('login', [controllers.Session, 'store']).use(loginThrottle).as('session.store')
 
     router.get('request-access', [AccessRequestsController, 'create']).as('request_access.create')
-    router.post('request-access', [AccessRequestsController, 'store']).as('request_access.store')
+    router
+      .post('request-access', [AccessRequestsController, 'store'])
+      .use(onboardingThrottle)
+      .as('request_access.store')
     router
       .get('set-password/:token', [AccessRequestsController, 'setPasswordPage'])
       .as('set_password.create')
     router
       .post('set-password/:token', [AccessRequestsController, 'setPassword'])
+      .use(onboardingThrottle)
       .as('set_password.store')
   })
   .use(middleware.guest())

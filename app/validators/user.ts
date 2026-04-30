@@ -12,8 +12,6 @@ export const createUserValidator = vine.create({
   }),
 })
 
-export const signupValidator = createUserValidator
-
 export const updateUserValidator = vine.create({
   firstName: vine.string().trim().maxLength(100),
   lastName: vine.string().trim().maxLength(100),

@@ -84,15 +84,22 @@ function submitComment(ticketId: number) {
 }
 
 const uploadingFiles = ref(false)
+const attachmentErrors = ref<Record<string, string>>({})
 
 function submitAttachments(ticketId: number, event: Event) {
   const form = event.target as HTMLFormElement
   const data = new FormData(form)
+  attachmentErrors.value = {}
   uploadingFiles.value = true
   router.post(`/tickets/${ticketId}/attachments`, data, {
     forceFormData: true,
+    onError: (errors) => {
+      attachmentErrors.value = errors as Record<string, string>
+    },
     onFinish: () => {
       uploadingFiles.value = false
+    },
+    onSuccess: () => {
       form.reset()
     },
   })
@@ -469,7 +476,7 @@ const unitBuildingName = computed(() => {
           name="attachments"
           type="file"
           multiple
-          accept="image/*,.pdf"
+          accept=".jpg,.jpeg,.png,.gif,.webp,.pdf"
           class="file-input file-input-bordered w-full"
         />
         <BaseButton
@@ -479,6 +486,12 @@ const unitBuildingName = computed(() => {
           class="shrink-0"
         />
       </form>
+      <p class="mt-2 text-xs text-muted">
+        Max 5 fichiers, 10MB par fichier. Formats: JPG, JPEG, PNG, GIF, WEBP, PDF.
+      </p>
+      <p v-if="attachmentErrors.attachments" class="mt-1 text-sm text-error">
+        {{ attachmentErrors.attachments }}
+      </p>
     </BaseCard>
   </div>
 </template>

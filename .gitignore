@@ -33,3 +33,9 @@ yarn-error.log
 
 # Documentation
 docs/
+
+# Backups and restore artifacts
+backups/
+*.dump
+*.sql
+backup.log

@@ -133,11 +133,11 @@ async function submitTicket(event: Event) {
             id="attachments"
             type="file"
             multiple
-            accept="image/*"
+            accept=".jpg,.jpeg,.png,.gif,.webp,.pdf"
             class="file-input file-input-bordered w-full"
           />
           <p class="mt-1 text-xs text-muted">
-            Formats acceptés: JPG, PNG, GIF — Taille maximale: 10MB
+            Max 5 fichiers, 10MB par fichier. Formats: JPG, JPEG, PNG, GIF, WEBP, PDF.
           </p>
         </FormField>
 
