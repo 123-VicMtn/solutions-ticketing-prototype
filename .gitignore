@@ -39,3 +39,6 @@ backups/
 *.dump
 *.sql
 backup.log
+
+# Test results
+test-results/
