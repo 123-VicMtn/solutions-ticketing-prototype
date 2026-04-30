@@ -20,7 +20,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: sh -c "npm install && node ace serve --hmr --node-args='--inspect=0.0.0.0:9229'"
+    command: sh -c "npm install && node --inspect=0.0.0.0:9229 ace serve --hmr"
 
   postgres:
     image: postgres:17-alpine
