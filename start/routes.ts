@@ -75,6 +75,9 @@ router
     router
       .post('tickets/:id/attachments', [controllers.Tickets, 'addAttachments'])
       .as('tickets.attachments.store')
+      router
+      .get('tickets/:id/attachments/:attachmentId/read', [controllers.Tickets, 'readAttachment'])
+      .as('tickets.attachments.read')
     router.post('tickets/:id/assign', [controllers.Tickets, 'assign']).as('tickets.assign')
   })
   .use([middleware.auth(), middleware.requireActiveUser()])
