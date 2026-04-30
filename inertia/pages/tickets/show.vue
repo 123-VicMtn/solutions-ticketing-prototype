@@ -104,6 +104,9 @@ function submitAttachments(ticketId: number, event: Event) {
     },
   })
 }
+function attachmentReadUrl(ticketId: number, attachmentId: number): string {
+  return `/tickets/${ticketId}/attachments/${attachmentId}/read`
+}
 
 const isSelectionChanged = computed(() => statusValue.value !== props.ticket.status)
 const isAllowedStatus = (status: string) => props.allowedStatusTransitions.includes(status)
@@ -458,7 +461,7 @@ const unitBuildingName = computed(() => {
 
       <ul v-if="attachments.length" class="space-y-2">
         <li v-for="attachment in attachments" :key="attachment.id" class="text-sm text-base-content">
-          <a :href="attachment.filePath" target="_blank" class="link link-hover">{{
+          <a :href="attachmentReadUrl(ticket.id, attachment.id)" target="_blank" class="link link-hover">{{
             attachment.originalName
           }}</a>
           <span class="ml-2 text-xs text-muted"
