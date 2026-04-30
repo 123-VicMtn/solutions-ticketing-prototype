@@ -445,6 +445,29 @@ export default class TicketsController {
     return response.redirect().toPath(`/tickets/${ticket.id}`)
   }
 
+  async readAttachment({ params, auth, response }: HttpContext) {
+    const ticketId = Number(params.id)
+    const attachmentId = Number(params.attachmentId)
+    if (!Number.isFinite(ticketId) || !Number.isFinite(attachmentId)) {
+      return response.notFound()
+    }
+    const ticket = await Ticket.findOrFail(ticketId)
+    const user = auth.user!
+    if (!(await this.canAccessTicket(user.id, user.role, ticket))) {
+      return response.abort('Non autorisé', 403)
+    }
+    const attachment = await TicketAttachment.query()
+      .where('ticketId', ticket.id)
+      .where('id', attachmentId)
+      .firstOrFail()
+    try {
+      const readUrl = attachmentStorageService.getReadUrlFromPublicPath(attachment.filePath)
+      return response.redirect().toPath(readUrl)
+    } catch {
+      return response.notFound()
+    }
+  }
+
   private async canAccessTicket(userId: number, role: UserRole, ticket: Ticket): Promise<boolean> {
     if (role === 'admin' || role === 'manager') return true
     if (role === 'provider') {
