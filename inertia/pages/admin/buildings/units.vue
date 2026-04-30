@@ -3,7 +3,8 @@ import { Head } from '@inertiajs/vue3'
 import { Link } from '@adonisjs/inertia/vue'
 import type { Data } from '@generated/data'
 import ZebraTable from '~/components/common/zebraTable.vue'
-import { ArrowLeftIcon } from '@heroicons/vue/24/outline'
+import { ArrowLeftIcon, PencilSquareIcon } from '@heroicons/vue/24/outline'
+import ActionButton from '~/components/common/buttons/ActionButton.vue'
 
 const props = defineProps<{
   building: Data.Building.Variants['forSummary']
@@ -14,6 +15,7 @@ const tableHeaders = [
   { key: 'label', label: 'Lot' },
   { key: 'type', label: 'Type' },
   { key: 'floor', label: 'Étage' },
+  { key: 'actions', label: 'Actions', thClass: 'text-right', tdClass: 'text-right' },
 ]
 </script>
 
@@ -46,6 +48,18 @@ const tableHeaders = [
 
         <template #cell:floor="{ row: unit }">
           <span>{{ unit.floor }}</span>
+        </template>
+
+        <template #cell:actions="{ row: unit }">
+          <div class="flex justify-end gap-1">
+            <ActionButton
+              route="admin.units.edit"
+              :params="{ id: unit.id }"
+              :icon="PencilSquareIcon"
+              ariaLabel="Editer"
+              title="Editer"
+            />
+          </div>
         </template>
       </ZebraTable>
     </div>
