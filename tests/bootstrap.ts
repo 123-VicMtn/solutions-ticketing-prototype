@@ -4,6 +4,7 @@ import app from '@adonisjs/core/services/app'
 import type { Config } from '@japa/runner/types'
 import { pluginAdonisJS } from '@japa/plugin-adonisjs'
 import testUtils from '@adonisjs/core/services/test_utils'
+import { htmlReporter } from '#tests/reporters/html_reporter'
 
 /**
  * This file is imported by the "bin/test.ts" entrypoint file
@@ -14,6 +15,15 @@ import testUtils from '@adonisjs/core/services/test_utils'
  * Learn more - https://japa.dev/docs/runner-config#plugins-optional
  */
 export const plugins: Config['plugins'] = [assert(), apiClient(), pluginAdonisJS(app)]
+
+/**
+ *  * Register available reporters. The HTML reporter can be activated via:
+ * node ace test --reporters=html
+ */
+export const reporters: Config['reporters'] = {
+  activated: [],
+  list: [htmlReporter()],
+}
 
 /**
  * Configure lifecycle function to run before and after all the
