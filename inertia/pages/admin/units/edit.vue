@@ -2,9 +2,13 @@
 import { Head } from '@inertiajs/vue3'
 import { Form, Link } from '@adonisjs/inertia/vue'
 import type { Data } from '@generated/data'
+import BaseButton from '~/components/common/buttons/BaseButton.vue'
+import { ArrowLeftIcon } from '@heroicons/vue/24/outline'
+import BaseCard from '~/components/common/cards/BaseCard.vue'
+import FormField from '~/components/common/forms/FormField.vue'
 
 defineProps<{
-  unit: Data.Unit
+  unit: Data.Unit & { building?: Data.Building.Variants['forSummary'] | null }
   buildings: Data.Building.Variants['forSummary'][]
 }>()
 </script>
@@ -12,81 +16,76 @@ defineProps<{
 <template>
   <Head :title="`Modifier ${unit.label}`" />
 
-  <div class="mx-auto max-w-lg">
+  <div class="mx-auto w-full max-w-lg">
     <div class="mb-6">
-      <Link route="admin.units.index" class="text-sm text-gray-500 hover:text-gray-900">
-        &larr; Retour aux lots
+      <Link route="admin.units.index" class="text-sm text-muted">
+        <span class="inline-flex items-center gap-2">
+          <ArrowLeftIcon class="size-4" />
+          Retour aux lots
+        </span>
       </Link>
     </div>
 
-    <h1 class="text-2xl font-bold tracking-tight text-gray-900">Modifier le lot</h1>
-    <p class="mt-1 text-sm text-gray-500">{{ unit.label }} — {{ unit.building.name }}</p>
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold tracking-tight text-base-content">Modifier le lot</h1>
+      <p class="mt-1 text-sm text-muted">
+        {{ unit.label }} — {{ unit.building?.name ?? 'Immeuble inconnu' }}
+      </p>
+    </div>
 
-    <Form
-      route="admin.units.update"
-      :params="{ id: unit.id }"
-      method="put"
-      #default="{ processing, errors }"
-      class="mt-8 space-y-5"
-    >
-      <div>
-        <label for="label" class="mb-1.5 block text-sm font-medium text-gray-700">Label</label>
-        <input
-          type="text"
-          name="label"
-          id="label"
-          :value="unit.label"
-          class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none"
-          :class="{ 'border-red-500': errors.label }"
-        />
-        <p v-if="errors.label" class="mt-1 text-sm text-red-600">{{ errors.label }}</p>
-      </div>
-
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label for="floor" class="mb-1.5 block text-sm font-medium text-gray-700">Étage</label>
+    <BaseCard bodyClass="p-6 sm:p-8">
+      <Form
+        route="admin.units.update"
+        :params="{ id: unit.id }"
+        method="put"
+        #default="{ processing, errors }"
+        class="space-y-5"
+      >
+        <FormField id="label" label="Label" :error="errors.label">
           <input
-            type="number"
-            name="floor"
-            id="floor"
-            :value="unit.floor"
-            class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none"
-            :class="{ 'border-red-500': errors.floor }"
+            id="label"
+            name="label"
+            type="text"
+            :value="unit.label"
+            class="input input-bordered w-full text-base-content"
+            :class="{ 'input-error': errors.label }"
           />
-          <p v-if="errors.floor" class="mt-1 text-sm text-red-600">{{ errors.floor }}</p>
-        </div>
-        <div>
-          <label for="type" class="mb-1.5 block text-sm font-medium text-gray-700">Type</label>
-          <select
-            name="type"
-            id="type"
-            class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none"
-            :class="{ 'border-red-500': errors.type }"
-          >
-            <option value="apartment" :selected="unit.type === 'apartment'">Appartement</option>
-            <option value="commercial" :selected="unit.type === 'commercial'">Commercial</option>
-            <option value="parking" :selected="unit.type === 'parking'">Parking</option>
-            <option value="storage" :selected="unit.type === 'storage'">Cave</option>
-          </select>
-          <p v-if="errors.type" class="mt-1 text-sm text-red-600">{{ errors.type }}</p>
-        </div>
-      </div>
+        </FormField>
 
-      <div class="flex justify-end gap-3 pt-4">
-        <Link
-          route="admin.units.index"
-          class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          Annuler
-        </Link>
-        <button
-          type="submit"
-          :disabled="processing"
-          class="cursor-pointer rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
-        >
-          Enregistrer
-        </button>
-      </div>
-    </Form>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <FormField id="floor" label="Étage" :error="errors.floor">
+            <input
+              id="floor"
+              name="floor"
+              type="number"
+              :value="unit.floor"
+              class="input input-bordered w-full text-base-content"
+              :class="{ 'input-error': errors.floor }"
+            />
+          </FormField>
+
+          <FormField id="type" label="Type" :error="errors.type">
+            <select
+              id="type"
+              name="type"
+              class="select select-bordered w-full text-base-content"
+              :class="{ 'select-error': errors.type }"
+            >
+              <option value="apartment" :selected="unit.type === 'apartment'">Appartement</option>
+              <option value="commercial" :selected="unit.type === 'commercial'">Commercial</option>
+              <option value="parking" :selected="unit.type === 'parking'">Parking</option>
+              <option value="storage" :selected="unit.type === 'storage'">Cave</option>
+            </select>
+          </FormField>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <Link route="admin.units.index" class="btn btn-ghost">
+            Annuler
+          </Link>
+          <BaseButton type="submit" :disabled="processing" label="Enregistrer" class="m-0" />
+        </div>
+      </Form>
+    </BaseCard>
   </div>
 </template>
