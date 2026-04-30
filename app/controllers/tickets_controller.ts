@@ -1,4 +1,3 @@
-import app from '@adonisjs/core/services/app'
 import Ticket, { PROVIDER_ALLOWED_TRANSITIONS, VALID_TRANSITIONS } from '#models/ticket'
 import Unit from '#models/unit'
 import UserUnit from '#models/user_unit'
@@ -19,15 +18,16 @@ import {
   assignTicketValidator,
 } from '#validators/ticket'
 import { TicketAttachmentValidationService } from '#services/ticket_attachment_validation_service'
+import { AttachmentStorageService } from '#services/attachment_storage_service'
 import TicketNotifications from '#services/ticket_notification_service'
 import type { HttpContext } from '@adonisjs/core/http'
 import type { MultipartFile } from '@adonisjs/bodyparser/types'
 import type { UserRole } from '#models/user'
 import type { TicketStatus } from '#models/ticket'
 import { DateTime } from 'luxon'
-import { randomUUID } from 'node:crypto'
 
 const ticketAttachmentValidationService = new TicketAttachmentValidationService()
+const attachmentStorageService = new AttachmentStorageService()
 
 export default class TicketsController {
   async index({ inertia, auth, request }: HttpContext) {
@@ -469,12 +469,11 @@ export default class TicketsController {
     let count = 0
 
     for (const attachment of attachments) {
-      const filename = `${randomUUID()}.${attachment.extname ?? 'bin'}`
-      await attachment.move(app.makePath('public/uploads/tickets'), { name: filename })
+      const storedAttachment = await attachmentStorageService.upload(attachment)
       await TicketAttachment.create({
         ticketId,
         userId,
-        filePath: `/uploads/tickets/${filename}`,
+        filePath: storedAttachment.publicPath,
         originalName: attachment.clientName,
         mimeType: attachment.type ?? 'application/octet-stream',
         sizeBytes: attachment.size,
