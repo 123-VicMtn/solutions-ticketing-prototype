@@ -14,9 +14,7 @@ export class PropertyAccessCheck extends BaseCheck {
       const startTime = Date.now()
       const warnQueryTimeMs = 750
 
-      const unitsCount = await db
-        .from('units')
-        .count('* as total')
+      const unitsCount = await db.from('units').count('* as total')
 
       const totalUnits = Number(unitsCount[0].total)
 
@@ -37,7 +35,9 @@ export class PropertyAccessCheck extends BaseCheck {
 
       const queryTime = Date.now() - startTime
       if (queryTime > warnQueryTimeMs) {
-        return Result.warning('Database is slow for units↔tickets query (monitoring)').mergeMetaData({
+        return Result.warning(
+          'Database is slow for units↔tickets query (monitoring)'
+        ).mergeMetaData({
           queryTimeMs: queryTime,
           warnQueryTimeMs,
           totalUnits,
@@ -51,7 +51,6 @@ export class PropertyAccessCheck extends BaseCheck {
         queryTimeMs: queryTime,
         warnQueryTimeMs,
       })
-
     } catch (error) {
       return Result.warning('Unable to compute units↔tickets metrics (monitoring)').mergeMetaData({
         error: error instanceof Error ? error.message : String(error),

@@ -6,7 +6,7 @@ const ManagerAccessController = () => import('#controllers/manager_access_contro
 import app from '@adonisjs/core/services/app'
 import env from '#start/env'
 import router from '@adonisjs/core/services/router'
-import HealthChecksController from '#controllers/health_checks_controller'
+const HealthChecksController = () => import('#controllers/health_checks_controller')
 
 const healthCheckSecret = env.get('HEALTH_CHECK_SECRET')
 
@@ -75,7 +75,7 @@ router
     router
       .post('tickets/:id/attachments', [controllers.Tickets, 'addAttachments'])
       .as('tickets.attachments.store')
-      router
+    router
       .get('tickets/:id/attachments/:attachmentId/read', [controllers.Tickets, 'readAttachment'])
       .as('tickets.attachments.read')
     router.post('tickets/:id/assign', [controllers.Tickets, 'assign']).as('tickets.assign')
@@ -112,9 +112,7 @@ router
     router.get('buildings/create', [controllers.Buildings, 'create']).as('buildings.create')
     router.post('buildings', [controllers.Buildings, 'store']).as('buildings.store')
     router.get('buildings/:id/edit', [controllers.Buildings, 'edit']).as('buildings.edit')
-    router
-      .get('buildings/:id/units', [controllers.Buildings, 'units'])
-      .as('buildings.units.index')
+    router.get('buildings/:id/units', [controllers.Buildings, 'units']).as('buildings.units.index')
     router.put('buildings/:id', [controllers.Buildings, 'update']).as('buildings.update')
     router.delete('buildings/:id', [controllers.Buildings, 'destroy']).as('buildings.destroy')
 

@@ -9,4 +9,3 @@ export default class ProviderTransformer extends BaseTransformer<Provider> {
     }
   }
 }
-

@@ -7,7 +7,14 @@ import Provider from '#models/provider'
 import TicketComment from '#models/ticket_comment'
 import TicketAttachment from '#models/ticket_attachment'
 
-export type TicketStatus = 'ouvert' | 'assigné' | 'en cours' | 'terminé' | 'résolu' | 'facturé' | 'fermé'
+export type TicketStatus =
+  | 'ouvert'
+  | 'assigné'
+  | 'en cours'
+  | 'terminé'
+  | 'résolu'
+  | 'facturé'
+  | 'fermé'
 
 export type TicketCategory =
   | 'Technique & Maintenance'

@@ -19,11 +19,7 @@ export const loginThrottle = limiter.define('login', ({ request }) => {
   const email = String(request.input('email', '')).trim().toLowerCase()
   const key = email ? `login:${request.ip()}:${email}` : `login:${request.ip()}`
 
-  return limiter
-    .allowRequests(5)
-    .every('1 minute')
-    .blockFor('15 minutes')
-    .usingKey(key)
+  return limiter.allowRequests(5).every('1 minute').blockFor('15 minutes').usingKey(key)
 })
 
 export const onboardingThrottle = limiter.define('onboarding', ({ request, params }) => {
@@ -32,9 +28,5 @@ export const onboardingThrottle = limiter.define('onboarding', ({ request, param
   const identity = token || email || 'anonymous'
   const key = `onboarding:${request.ip()}:${identity}`
 
-  return limiter
-    .allowRequests(5)
-    .every('10 minutes')
-    .blockFor('30 minutes')
-    .usingKey(key)
+  return limiter.allowRequests(5).every('10 minutes').blockFor('30 minutes').usingKey(key)
 })

@@ -15,4 +15,3 @@ export default class TicketAttachmentTransformer extends BaseTransformer<TicketA
     ])
   }
 }
-

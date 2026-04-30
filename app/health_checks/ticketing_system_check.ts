@@ -3,7 +3,7 @@ import type { HealthCheckResult } from '@adonisjs/core/types/health'
 import db from '@adonisjs/lucid/services/db'
 
 /**
- * Vérifie l'état du système de ticketing 
+ * Vérifie l'état du système de ticketing
  * - Présence des tables critiques
  * - Nombre de tickets ouverts + non assignés
  * - Performance des requêtes
@@ -50,7 +50,10 @@ export class TicketingSystemCheck extends BaseCheck {
       const now = () => Date.now()
       const readQueryStartedAt = now()
 
-      const openTicketsResult = await db.from('tickets').where('status', 'ouvert').count('* as total')
+      const openTicketsResult = await db
+        .from('tickets')
+        .where('status', 'ouvert')
+        .count('* as total')
       const unassignedOpenTicketsResult = await db
         .from('tickets')
         .where('status', 'ouvert')
@@ -98,7 +101,6 @@ export class TicketingSystemCheck extends BaseCheck {
         readQueryTimeMs,
         warnQueryTimeMs,
       })
-
     } catch (error) {
       return Result.warning('Unable to compute ticketing metrics (monitoring)').mergeMetaData({
         error: error instanceof Error ? error.message : String(error),

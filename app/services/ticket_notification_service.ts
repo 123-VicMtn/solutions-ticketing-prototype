@@ -70,7 +70,10 @@ export default class TicketNotifications {
 
     const assignee = await User.find(ticket.assignedTo)
     if (!assignee) {
-      logger.warn({ ticketId: ticket.id, assignedTo: ticket.assignedTo }, 'Suivi interne introuvable')
+      logger.warn(
+        { ticketId: ticket.id, assignedTo: ticket.assignedTo },
+        'Suivi interne introuvable'
+      )
       return
     }
 
@@ -102,7 +105,10 @@ export default class TicketNotifications {
           })
       })
     } catch (error) {
-      logger.error({ err: error, ticketId: ticket.id }, 'Échec envoi email ticket terminé au suivi interne')
+      logger.error(
+        { err: error, ticketId: ticket.id },
+        'Échec envoi email ticket terminé au suivi interne'
+      )
     }
   }
 }

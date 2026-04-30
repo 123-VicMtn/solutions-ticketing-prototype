@@ -84,7 +84,9 @@ test.group('Role authorization matrix', (group) => {
 test.group('Onboarding flow', (group) => {
   group.each.setup(() => testUtils.db().wrapInGlobalTransaction())
 
-  test('request-access creates pending user and set-password activates account', async ({ client }: any) => {
+  test('request-access creates pending user and set-password activates account', async ({
+    client,
+  }: any) => {
     // Arrange
     const email = `onboarding.${Date.now()}.${Math.random()}@example.test`
 
@@ -116,12 +118,10 @@ test.group('Onboarding flow', (group) => {
     await applicant.save()
 
     // Act
-    const setPasswordResponse = await client
-      .post(`/set-password/${applicant.inviteToken}`)
-      .form({
-        password: 'NewPassword123!',
-        passwordConfirmation: 'NewPassword123!',
-      })
+    const setPasswordResponse = await client.post(`/set-password/${applicant.inviteToken}`).form({
+      password: 'NewPassword123!',
+      passwordConfirmation: 'NewPassword123!',
+    })
 
     // Assert
     setPasswordResponse.assertRedirectsTo('/')
