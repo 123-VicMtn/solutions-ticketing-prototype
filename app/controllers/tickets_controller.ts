@@ -502,7 +502,7 @@ export default class TicketsController {
       await TicketAttachment.create({
         ticketId,
         userId,
-        filePath: storedAttachment.publicPath,
+        filePath: null,
         storageDriver: storedAttachment.storageDriver,
         storageKey: storedAttachment.storageKey,
         checksumSha256,
