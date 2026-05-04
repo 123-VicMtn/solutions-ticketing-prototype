@@ -4,6 +4,13 @@ export class TicketAttachmentValidationService {
   private static readonly MAX_ATTACHMENTS = 5
 
   private static readonly ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf']
+  private static readonly ALLOWED_MIME_TYPES = [
+    'image/jpeg',
+    'image/png',
+    'image/gif',
+    'image/webp',
+    'application/pdf',
+  ]
 
   validate(attachments: MultipartFile[], options: { required: boolean }): string | null {
     if (options.required && attachments.length === 0) {
@@ -21,6 +28,11 @@ export class TicketAttachmentValidationService {
 
       if (!attachment.isValid) {
         return attachment.errors[0]?.message ?? `Le fichier ${attachment.clientName} est invalide.`
+      }
+
+      const mimeType = attachment.type ?? ''
+      if (!TicketAttachmentValidationService.ALLOWED_MIME_TYPES.includes(mimeType)) {
+        return `Le type MIME ${mimeType || 'inconnu'} n'est pas autorisé pour ${attachment.clientName}.`
       }
     }
 
