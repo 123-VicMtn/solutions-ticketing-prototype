@@ -458,15 +458,13 @@ export default class TicketsController {
       .where('ticketId', ticket.id)
       .where('id', attachmentId)
       .firstOrFail()
+
+    if (!attachment.storageKey) {
+      return response.notFound()
+    }
+
     try {
-      const readUrl = attachment.storageKey
-        ? await attachmentStorageService.getReadUrl(attachment.storageKey)
-        : attachment.filePath
-          ? await attachmentStorageService.getReadUrlFromPublicPath(attachment.filePath)
-          : null
-      if (!readUrl) {
-        return response.notFound()
-      }
+      const readUrl = await attachmentStorageService.getReadUrl(attachment.storageKey)
       return response.redirect().toPath(readUrl)
     } catch {
       return response.notFound()

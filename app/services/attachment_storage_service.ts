@@ -20,7 +20,6 @@ export type AttachmentStorageDriver = 'local' | 's3'
 export type StoredAttachment = {
   storageDriver: AttachmentStorageDriver
   storageKey: string
-  publicPath: string
 }
 
 interface AttachmentStorageDriverContract {
@@ -49,7 +48,6 @@ class LocalAttachmentStorageDriver implements AttachmentStorageDriverContract {
     return {
       storageDriver: this.driver,
       storageKey,
-      publicPath: this.buildPublicPath(storageKey),
     }
   }
 
@@ -148,7 +146,6 @@ class S3AttachmentStorageDriver implements AttachmentStorageDriverContract {
     return {
       storageDriver: this.driver,
       storageKey,
-      publicPath: '',
     }
   }
 
@@ -246,26 +243,6 @@ export class AttachmentStorageService {
 
   healthcheck(): Promise<boolean> {
     return this.driver.healthcheck()
-  }
-
-  toStorageKey(publicPath: string): string {
-    const prefix = `${attachmentStorageConfig.local.publicBasePath}/`
-    if (!publicPath.startsWith(prefix)) {
-      throw new Error('Attachment path does not match storage prefix')
-    }
-
-    const storageKey = publicPath.slice(prefix.length)
-    const isSafe = /^[a-zA-Z0-9._-]+$/.test(storageKey)
-    if (!storageKey || !isSafe) {
-      throw new Error('Attachment path resolved to an invalid storage key')
-    }
-
-    return storageKey
-  }
-
-  async getReadUrlFromPublicPath(publicPath: string): Promise<string> {
-    const key = this.toStorageKey(publicPath)
-    return this.getReadUrl(key)
   }
 
   private resolveDriver(): AttachmentStorageDriverContract {
