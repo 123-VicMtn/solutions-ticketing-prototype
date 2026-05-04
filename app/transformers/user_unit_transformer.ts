@@ -10,7 +10,7 @@ export default class UserUnitTransformer extends BaseTransformer<UserUnit> {
       user: UserTransformer.transform(this.whenLoaded(this.resource.user))?.useVariant(
         'forUserUnitUser'
       ),
-      unit: UnitTransformer.transform(this.whenLoaded(this.resource.unit)),
+      unit: UnitTransformer.transform(this.whenLoaded(this.resource.unit))?.depth(2),
     }
   }
 

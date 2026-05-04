@@ -24,7 +24,7 @@ export default class TicketTransformer extends BaseTransformer<Ticket> {
         'createdAt',
       ]),
 
-      unit: UnitTransformer.transform(this.whenLoaded(this.resource.unit)),
+      unit: UnitTransformer.transform(this.whenLoaded(this.resource.unit))?.depth(2),
 
       user: UserTransformer.transform(this.whenLoaded(this.resource.user))?.useVariant(
         'forTicketUser'
