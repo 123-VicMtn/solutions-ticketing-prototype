@@ -149,7 +149,7 @@ function applyFilters() {
         </template>
 
         <template #cell:unit="{ row: ticket }">
-          {{ ticket.unit?.building?.name }} / {{ ticket.unit?.label }}
+          {{ ticket.unit?.building?.name ?? '—' }} / {{ ticket.unit?.label ?? '—' }}
         </template>
 
         <template #cell:user="{ row: ticket }">
