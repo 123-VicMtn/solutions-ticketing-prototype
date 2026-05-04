@@ -10,8 +10,6 @@ import BaseCard from '~/components/common/cards/BaseCard.vue'
 import BaseButton from '~/components/common/buttons/BaseButton.vue'
 import FormField from '~/components/common/forms/FormField.vue'
 
-type UnitWithBuilding = Data.Unit & { building?: { name?: string | null } | null }
-
 const props = defineProps<{
   ticket: Data.Ticket
   comments: Data.TicketComment[]
@@ -165,10 +163,7 @@ const createdAtLabel = computed(() => {
   })
 })
 
-const unitBuildingName = computed(() => {
-  const unit = props.ticket.unit as UnitWithBuilding | null | undefined
-  return unit?.building?.name ?? '—'
-})
+const unitBuildingName = computed(() => props.ticket.unit?.building?.name ?? '—')
 </script>
 
 <template>
