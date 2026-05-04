@@ -144,7 +144,8 @@ export default class TicketsController {
       required: false,
     })
     if (attachmentsError) {
-      return response.unprocessableEntity({ errors: { attachments: attachmentsError } })
+      session.flash('inputErrorsBag', { attachments: [attachmentsError] })
+      return response.redirect().back()
     }
 
     const ticket = await Ticket.create({
@@ -445,7 +446,8 @@ export default class TicketsController {
       required: true,
     })
     if (attachmentsError) {
-      return response.unprocessableEntity({ errors: { attachments: attachmentsError } })
+      session.flash('inputErrorsBag', { attachments: [attachmentsError] })
+      return response.redirect().toPath(`/tickets/${ticket.id}`)
     }
 
     let count = 0
