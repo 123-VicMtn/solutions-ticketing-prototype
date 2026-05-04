@@ -3,15 +3,19 @@ import { BaseTransformer } from '@adonisjs/core/transformers'
 
 export default class TicketAttachmentTransformer extends BaseTransformer<TicketAttachment> {
   toObject() {
-    return this.pick(this.resource, [
+    const payload = this.pick(this.resource, [
       'id',
       'ticketId',
       'userId',
-      'filePath',
       'originalName',
       'mimeType',
       'sizeBytes',
       'createdAt',
     ])
+
+    return {
+      ...payload,
+      readUrl: `/tickets/${this.resource.ticketId}/attachments/${this.resource.id}/read`,
+    }
   }
 }
