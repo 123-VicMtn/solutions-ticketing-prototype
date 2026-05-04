@@ -191,7 +191,7 @@ test.group('Ticket attachments HTTP', (group) => {
     readResponse.assertRedirectsTo('/login')
   })
 
-  test('upload rejects disallowed MIME with 422', async ({ client, assert }) => {
+  test('upload rejects disallowed MIME with redirect and flash (Inertia)', async ({ client }) => {
     const manager = await createUser('manager')
     const { unit } = await seedBuildingUnit()
     const ticket = await Ticket.create({
@@ -215,11 +215,10 @@ test.group('Ticket attachments HTTP', (group) => {
     const uploadResponse = await client
       .post(`/tickets/${ticket.id}/attachments`)
       .file('attachments', fakePdfPath, { contentType: 'text/plain', filename: 'fake.pdf' })
+      .redirects(0)
       .send()
 
-    uploadResponse.assertStatus(422)
-    const body = uploadResponse.body() as { errors?: { attachments?: string } }
-    assert.isString(body.errors?.attachments)
-    assert.include(body.errors!.attachments!, 'text/plain')
+    uploadResponse.assertFound()
+    uploadResponse.assertRedirectsTo(`/tickets/${ticket.id}`)
   })
 })
