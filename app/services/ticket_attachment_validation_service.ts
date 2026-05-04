@@ -30,9 +30,10 @@ export class TicketAttachmentValidationService {
         return attachment.errors[0]?.message ?? `Le fichier ${attachment.clientName} est invalide.`
       }
 
-      const mimeType = attachment.type ?? ''
+      const mimeType = (attachment.type ?? '').trim().toLowerCase()
       if (!TicketAttachmentValidationService.ALLOWED_MIME_TYPES.includes(mimeType)) {
-        return `Le type MIME ${mimeType || 'inconnu'} n'est pas autorisé pour ${attachment.clientName}.`
+        const reported = attachment.type?.trim() || 'inconnu'
+        return `Le type MIME ${reported} n'est pas autorisé pour ${attachment.clientName}.`
       }
     }
 
