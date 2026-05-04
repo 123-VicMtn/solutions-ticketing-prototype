@@ -76,6 +76,8 @@
     "@adonisjs/shield": "^9.0.0",
     "@adonisjs/static": "^2.0.0",
     "@adonisjs/vite": "^5.1.0",
+    "@aws-sdk/client-s3": "^3.1041.0",
+    "@aws-sdk/s3-request-presigner": "^3.1041.0",
     "@heroicons/vue": "^2.2.0",
     "@inertiajs/vue3": "^2.3.17",
     "@tailwindcss/vite": "^4.2.1",
