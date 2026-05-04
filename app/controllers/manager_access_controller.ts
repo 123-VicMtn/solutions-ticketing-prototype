@@ -54,7 +54,7 @@ export default class ManagerAccessController {
         const token = randomUUID()
         const expiresAt = DateTime.now().plus({ days: 3 })
 
-        // Écritures atomiques : relation logement + token d'invitation
+        // atomic writes: relation unit + invitation token
         await UserUnit.firstOrCreate(
           { userId: user.id, unitId: payload.unitId },
           { relation: payload.relation },
@@ -74,7 +74,7 @@ export default class ManagerAccessController {
       return response.badRequest({ message })
     }
 
-    // DB commit ok : l'email doit être envoyé après (pour éviter des incohérences).
+    // email should be sent after the transaction is committed to avoid inconsistencies
     if (!approvedUser || !approvedToken) {
       return response.badRequest({ message: 'Cette demande ne peut pas être approuvée' })
     }

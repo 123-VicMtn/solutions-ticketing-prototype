@@ -53,7 +53,7 @@ export default class DashboardController {
       }
     })
 
-    // Prototype: on masque volontairement le statut "fermé" dans le dashboard.
+    // prototype: we deliberately hide the "closed" status in the dashboard
     const countsByStatusFiltered = countsByStatus.filter((row) => row.status !== 'fermé')
 
     const recentTicketsQuery = Ticket.query()

@@ -46,7 +46,6 @@ export class TicketingSystemCheck extends BaseCheck {
         })
       }
 
-      // Check if we can execute critical queries quickly
       const now = () => Date.now()
       const readQueryStartedAt = now()
 
