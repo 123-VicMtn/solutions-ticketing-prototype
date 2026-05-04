@@ -8,12 +8,8 @@ import CenteredContent from '~/components/common/layouts/CenteredContent.vue'
 import FormField from '~/components/common/forms/FormField.vue'
 import BaseButton from '~/components/common/buttons/BaseButton.vue'
 
-type TicketWithBuilding = Data.Ticket & {
-  unit: Data.Unit & { building: Data.Building }
-}
-
 const props = defineProps<{
-  ticket: TicketWithBuilding
+  ticket: Data.Ticket
   canModifyPriority: boolean
 }>()
 
@@ -60,7 +56,8 @@ function submit() {
         Modifier {{ ticket.reference }}
       </h1>
       <p class="mt-1 text-sm text-muted">
-        {{ ticket.unit.building.name }} / {{ ticket.unit.label }} — {{ ticket.category }}
+        {{ ticket.unit?.building?.name ?? '—' }} / {{ ticket.unit?.label ?? '—' }} —
+        {{ ticket.category }}
       </p>
     </div>
 
