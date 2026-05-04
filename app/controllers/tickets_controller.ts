@@ -18,7 +18,10 @@ import {
   assignTicketValidator,
 } from '#validators/ticket'
 import { TicketAttachmentValidationService } from '#services/ticket_attachment_validation_service'
-import { AttachmentStorageService } from '#services/attachment_storage_service'
+import {
+  AttachmentStorageProviderError,
+  AttachmentStorageService,
+} from '#services/attachment_storage_service'
 import TicketNotifications from '#services/ticket_notification_service'
 import type { HttpContext } from '@adonisjs/core/http'
 import type { MultipartFile } from '@adonisjs/bodyparser/types'
@@ -157,7 +160,19 @@ export default class TicketsController {
     ticket.reference = `TK-${DateTime.now().year}-${String(ticket.id).padStart(4, '0')}`
     await ticket.save()
 
-    await this.processAttachments(attachments, ticket.id, user.id)
+    try {
+      await this.processAttachments(attachments, ticket.id, user.id)
+    } catch (error) {
+      if (error instanceof AttachmentStorageProviderError) {
+        session.flash(
+          'error',
+          'Le service de stockage des pièces jointes est temporairement indisponible. Réessayez dans quelques instants.'
+        )
+        await ticket.delete()
+        return response.redirect().back()
+      }
+      throw error
+    }
 
     session.flash('success', 'Ticket créé avec succès')
     return response.redirect().toPath(`/tickets/${ticket.id}`)
@@ -433,7 +448,19 @@ export default class TicketsController {
       return response.unprocessableEntity({ errors: { attachments: attachmentsError } })
     }
 
-    const count = await this.processAttachments(attachments, ticket.id, user.id)
+    let count = 0
+    try {
+      count = await this.processAttachments(attachments, ticket.id, user.id)
+    } catch (error) {
+      if (error instanceof AttachmentStorageProviderError) {
+        session.flash(
+          'error',
+          'Le service de stockage des pièces jointes est temporairement indisponible. Réessayez dans quelques instants.'
+        )
+        return response.redirect().toPath(`/tickets/${ticket.id}`)
+      }
+      throw error
+    }
     if (count === 0) {
       session.flash('error', 'Aucun fichier valide envoyé')
     } else {
@@ -466,7 +493,13 @@ export default class TicketsController {
     try {
       const readUrl = await attachmentStorageService.getReadUrl(attachment.storageKey)
       return response.redirect().toPath(readUrl)
-    } catch {
+    } catch (error) {
+      if (error instanceof AttachmentStorageProviderError) {
+        return response.serviceUnavailable({
+          message:
+            'Le service de stockage est temporairement indisponible. Réessayez dans quelques instants.',
+        })
+      }
       return response.notFound()
     }
   }
