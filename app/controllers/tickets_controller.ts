@@ -25,6 +25,8 @@ import type { MultipartFile } from '@adonisjs/bodyparser/types'
 import type { UserRole } from '#models/user'
 import type { TicketStatus } from '#models/ticket'
 import { DateTime } from 'luxon'
+import { createHash } from 'node:crypto'
+import { readFile } from 'node:fs/promises'
 
 const ticketAttachmentValidationService = new TicketAttachmentValidationService()
 const attachmentStorageService = new AttachmentStorageService()
@@ -457,7 +459,14 @@ export default class TicketsController {
       .where('id', attachmentId)
       .firstOrFail()
     try {
-      const readUrl = attachmentStorageService.getReadUrlFromPublicPath(attachment.filePath)
+      const readUrl = attachment.storageKey
+        ? attachmentStorageService.getReadUrl(attachment.storageKey)
+        : attachment.filePath
+          ? attachmentStorageService.getReadUrlFromPublicPath(attachment.filePath)
+          : null
+      if (!readUrl) {
+        return response.notFound()
+      }
       return response.redirect().toPath(readUrl)
     } catch {
       return response.notFound()
@@ -488,11 +497,15 @@ export default class TicketsController {
     let count = 0
 
     for (const attachment of attachments) {
+      const checksumSha256 = await this.computeSha256(attachment)
       const storedAttachment = await attachmentStorageService.upload(attachment)
       await TicketAttachment.create({
         ticketId,
         userId,
         filePath: storedAttachment.publicPath,
+        storageDriver: storedAttachment.storageDriver,
+        storageKey: storedAttachment.storageKey,
+        checksumSha256,
         originalName: attachment.clientName,
         mimeType: attachment.type ?? 'application/octet-stream',
         sizeBytes: attachment.size,
@@ -505,5 +518,14 @@ export default class TicketsController {
 
   private canCreateTickets(role: UserRole): boolean {
     return role !== 'provider'
+  }
+
+  private async computeSha256(attachment: MultipartFile): Promise<string | null> {
+    if (!attachment.tmpPath) {
+      return null
+    }
+
+    const content = await readFile(attachment.tmpPath)
+    return createHash('sha256').update(content).digest('hex')
   }
 }

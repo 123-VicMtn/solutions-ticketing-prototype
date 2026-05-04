@@ -15,7 +15,16 @@ export default class TicketAttachment extends BaseModel {
   declare userId: number
 
   @column()
-  declare filePath: string
+  declare filePath: string | null
+
+  @column()
+  declare storageDriver: string | null
+
+  @column()
+  declare storageKey: string | null
+
+  @column()
+  declare checksumSha256: string | null
 
   @column()
   declare originalName: string
