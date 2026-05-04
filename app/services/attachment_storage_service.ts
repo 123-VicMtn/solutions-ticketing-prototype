@@ -22,6 +22,17 @@ export type StoredAttachment = {
   storageKey: string
 }
 
+export class AttachmentStorageProviderError extends Error {
+  constructor(
+    message: string,
+    public readonly operation: 'upload' | 'read' | 'delete' | 'exists' | 'healthcheck',
+    options?: { cause?: unknown }
+  ) {
+    super(message, options)
+    this.name = 'AttachmentStorageProviderError'
+  }
+}
+
 interface AttachmentStorageDriverContract {
   readonly driver: AttachmentStorageDriver
   upload(file: MultipartFile): Promise<StoredAttachment>
@@ -134,14 +145,24 @@ class S3AttachmentStorageDriver implements AttachmentStorageDriverContract {
     const storageKey = this.buildStorageKey(file.extname)
     const content = await fs.readFile(file.tmpPath)
 
-    await this.client.send(
-      new PutObjectCommand({
-        Bucket: this.config.bucket,
-        Key: storageKey,
-        Body: content,
-        ContentType: file.type ?? 'application/octet-stream',
-      })
-    )
+    try {
+      await this.client.send(
+        new PutObjectCommand({
+          Bucket: this.config.bucket,
+          Key: storageKey,
+          Body: content,
+          ContentType: file.type ?? 'application/octet-stream',
+        })
+      )
+    } catch (error) {
+      throw new AttachmentStorageProviderError(
+        'Failed to upload attachment to S3 provider',
+        'upload',
+        {
+          cause: error,
+        }
+      )
+    }
 
     return {
       storageDriver: this.driver,
@@ -156,19 +177,37 @@ class S3AttachmentStorageDriver implements AttachmentStorageDriverContract {
       Key: storageKey,
     })
 
-    return getSignedUrl(this.client, command, {
-      expiresIn: this.config.signedUrlTtlSeconds,
-    })
+    try {
+      return await getSignedUrl(this.client, command, {
+        expiresIn: this.config.signedUrlTtlSeconds,
+      })
+    } catch (error) {
+      throw new AttachmentStorageProviderError(
+        'Failed to generate signed URL from S3 provider',
+        'read',
+        { cause: error }
+      )
+    }
   }
 
   async delete(storageKey: string): Promise<void> {
     this.assertSafeStorageKey(storageKey)
-    await this.client.send(
-      new DeleteObjectCommand({
-        Bucket: this.config.bucket,
-        Key: storageKey,
-      })
-    )
+    try {
+      await this.client.send(
+        new DeleteObjectCommand({
+          Bucket: this.config.bucket,
+          Key: storageKey,
+        })
+      )
+    } catch (error) {
+      throw new AttachmentStorageProviderError(
+        'Failed to delete attachment from S3 provider',
+        'delete',
+        {
+          cause: error,
+        }
+      )
+    }
   }
 
   async exists(storageKey: string): Promise<boolean> {
@@ -188,7 +227,13 @@ class S3AttachmentStorageDriver implements AttachmentStorageDriverContract {
       ) {
         return false
       }
-      return false
+      throw new AttachmentStorageProviderError(
+        'Failed to check attachment existence on S3 provider',
+        'exists',
+        {
+          cause: error,
+        }
+      )
     }
   }
 
@@ -201,7 +246,7 @@ class S3AttachmentStorageDriver implements AttachmentStorageDriverContract {
       )
       return true
     } catch {
-      return false
+      throw new AttachmentStorageProviderError('S3 provider healthcheck failed', 'healthcheck')
     }
   }
 
@@ -219,6 +264,9 @@ class S3AttachmentStorageDriver implements AttachmentStorageDriverContract {
 }
 
 export class AttachmentStorageService {
+  private static readonly MIN_SIGNED_URL_TTL_SECONDS = 60
+  private static readonly MAX_SIGNED_URL_TTL_SECONDS = 900
+
   private readonly driver: AttachmentStorageDriverContract
 
   constructor() {
@@ -276,7 +324,7 @@ export class AttachmentStorageService {
       secretAccessKey: config.secretAccessKey,
       forcePathStyle: config.forcePathStyle ?? false,
       keyPrefix: this.normalizePrefix(config.keyPrefix),
-      signedUrlTtlSeconds: config.signedUrlTtlSeconds ?? 300,
+      signedUrlTtlSeconds: this.normalizeSignedUrlTtl(config.signedUrlTtlSeconds),
     }
   }
 
@@ -286,5 +334,13 @@ export class AttachmentStorageService {
     }
 
     return prefix.replace(/^\/+/, '').replace(/\/+$/, '')
+  }
+
+  private normalizeSignedUrlTtl(ttlSeconds: number | undefined): number {
+    const raw = ttlSeconds ?? 300
+    return Math.min(
+      AttachmentStorageService.MAX_SIGNED_URL_TTL_SECONDS,
+      Math.max(AttachmentStorageService.MIN_SIGNED_URL_TTL_SECONDS, raw)
+    )
   }
 }
