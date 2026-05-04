@@ -7,13 +7,16 @@ const service = new TicketAttachmentValidationService()
 function mockFile(partial: {
   clientName?: string
   type?: string | null
+  extname?: string
   size?: number
   isValid?: boolean
   errors?: { message: string }[]
 }): MultipartFile {
   const clientName = partial.clientName ?? 'file.png'
+  const extFromName = clientName.includes('.') ? (clientName.split('.').pop() ?? 'png') : 'png'
   const file = {
     clientName,
+    extname: partial.extname ?? extFromName,
     type: partial.type ?? 'image/png',
     size: partial.size ?? 100,
     sizeLimit: '10mb' as const,
@@ -64,6 +67,14 @@ test.group('TicketAttachmentValidationService', () => {
     const err = service.validate([mockFile({ clientName: 'a.pdf', type: 'application/pdf' })], {
       required: true,
     })
+    assert.isNull(err)
+  })
+
+  test('accepts incomplete image MIME when extension matches JPEG', ({ assert }) => {
+    const err = service.validate(
+      [mockFile({ clientName: 'axelor_mobile.jpg', type: 'image', extname: 'jpg' })],
+      { required: true }
+    )
     assert.isNull(err)
   })
 })
