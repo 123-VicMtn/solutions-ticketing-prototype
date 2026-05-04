@@ -460,9 +460,9 @@ export default class TicketsController {
       .firstOrFail()
     try {
       const readUrl = attachment.storageKey
-        ? attachmentStorageService.getReadUrl(attachment.storageKey)
+        ? await attachmentStorageService.getReadUrl(attachment.storageKey)
         : attachment.filePath
-          ? attachmentStorageService.getReadUrlFromPublicPath(attachment.filePath)
+          ? await attachmentStorageService.getReadUrlFromPublicPath(attachment.filePath)
           : null
       if (!readUrl) {
         return response.notFound()
