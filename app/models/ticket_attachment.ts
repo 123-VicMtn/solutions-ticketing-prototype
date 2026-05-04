@@ -23,7 +23,7 @@ export default class TicketAttachment extends BaseModel {
   @column()
   declare storageKey: string | null
 
-  @column()
+  @column({ columnName: 'checksum_sha256' })
   declare checksumSha256: string | null
 
   @column()
