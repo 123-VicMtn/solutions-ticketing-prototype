@@ -53,6 +53,7 @@ jobs:
       DB_PASSWORD: ticketing
       DB_DATABASE: ticketing_test
       SESSION_DRIVER: memory
+      ATTACHMENTS_DRIVER: local
 
     steps:
       - uses: actions/checkout@v4
