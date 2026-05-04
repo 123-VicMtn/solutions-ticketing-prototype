@@ -8,15 +8,7 @@ import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
 export class BuildingSchema extends BaseModel {
-  static $columns = [
-    'address',
-    'city',
-    'createdAt',
-    'id',
-    'name',
-    'postalCode',
-    'updatedAt',
-  ] as const
+  static $columns = ['address', 'city', 'createdAt', 'id', 'name', 'postalCode', 'updatedAt'] as const
   $columns = BuildingSchema.$columns
   @column()
   declare address: string
@@ -35,17 +27,7 @@ export class BuildingSchema extends BaseModel {
 }
 
 export class ProviderSchema extends BaseModel {
-  static $columns = [
-    'companyName',
-    'createdAt',
-    'geranceId',
-    'id',
-    'isActive',
-    'phone',
-    'speciality',
-    'updatedAt',
-    'userId',
-  ] as const
+  static $columns = ['companyName', 'createdAt', 'geranceId', 'id', 'isActive', 'phone', 'speciality', 'updatedAt', 'userId'] as const
   $columns = ProviderSchema.$columns
   @column()
   declare companyName: string
@@ -92,20 +74,7 @@ export class SessionSchema extends BaseModel {
 }
 
 export class TicketAttachmentSchema extends BaseModel {
-  static $columns = [
-    'checksumSha256',
-    'createdAt',
-    'filePath',
-    'id',
-    'mimeType',
-    'originalName',
-    'sizeBytes',
-    'storageDriver',
-    'storageKey',
-    'ticketId',
-    'updatedAt',
-    'userId',
-  ] as const
+  static $columns = ['checksumSha256', 'createdAt', 'filePath', 'id', 'mimeType', 'originalName', 'sizeBytes', 'storageDriver', 'storageKey', 'ticketId', 'updatedAt', 'userId'] as const
   $columns = TicketAttachmentSchema.$columns
   @column()
   declare checksumSha256: string | null
@@ -134,15 +103,7 @@ export class TicketAttachmentSchema extends BaseModel {
 }
 
 export class TicketCommentSchema extends BaseModel {
-  static $columns = [
-    'content',
-    'createdAt',
-    'id',
-    'isInternal',
-    'ticketId',
-    'updatedAt',
-    'userId',
-  ] as const
+  static $columns = ['content', 'createdAt', 'id', 'isInternal', 'ticketId', 'updatedAt', 'userId'] as const
   $columns = TicketCommentSchema.$columns
   @column()
   declare content: string
@@ -161,22 +122,7 @@ export class TicketCommentSchema extends BaseModel {
 }
 
 export class TicketSchema extends BaseModel {
-  static $columns = [
-    'assignedTo',
-    'category',
-    'createdAt',
-    'description',
-    'id',
-    'priority',
-    'providerId',
-    'reference',
-    'resolvedAt',
-    'status',
-    'title',
-    'unitId',
-    'updatedAt',
-    'userId',
-  ] as const
+  static $columns = ['assignedTo', 'category', 'createdAt', 'description', 'id', 'priority', 'providerId', 'reference', 'resolvedAt', 'status', 'title', 'unitId', 'updatedAt', 'userId'] as const
   $columns = TicketSchema.$columns
   @column()
   declare assignedTo: number | null
@@ -209,15 +155,7 @@ export class TicketSchema extends BaseModel {
 }
 
 export class UnitSchema extends BaseModel {
-  static $columns = [
-    'buildingId',
-    'createdAt',
-    'floor',
-    'id',
-    'label',
-    'type',
-    'updatedAt',
-  ] as const
+  static $columns = ['buildingId', 'createdAt', 'floor', 'id', 'label', 'type', 'updatedAt'] as const
   $columns = UnitSchema.$columns
   @column()
   declare buildingId: number
@@ -253,21 +191,7 @@ export class UserUnitSchema extends BaseModel {
 }
 
 export class UserSchema extends BaseModel {
-  static $columns = [
-    'createdAt',
-    'email',
-    'firstName',
-    'id',
-    'inviteToken',
-    'inviteTokenExpiresAt',
-    'lastName',
-    'notificationPreference',
-    'password',
-    'phone',
-    'role',
-    'status',
-    'updatedAt',
-  ] as const
+  static $columns = ['createdAt', 'email', 'firstName', 'id', 'inviteToken', 'inviteTokenExpiresAt', 'lastName', 'notificationPreference', 'password', 'phone', 'role', 'status', 'updatedAt'] as const
   $columns = UserSchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
