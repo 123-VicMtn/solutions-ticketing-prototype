@@ -49,6 +49,19 @@ export default await Env.create(new URL('../', import.meta.url), {
   SESSION_DRIVER: Env.schema.enum(['cookie', 'memory', 'database'] as const),
   HEALTH_CHECK_SECRET: Env.schema.string.optional(),
 
+  // Attachments storage
+  ATTACHMENTS_DRIVER: Env.schema.string.optional(),
+  ATTACHMENTS_LOCAL_TICKETS_DIR: Env.schema.string.optional(),
+  ATTACHMENTS_LOCAL_PUBLIC_BASE_PATH: Env.schema.string.optional(),
+  ATTACHMENTS_S3_ENDPOINT: Env.schema.string.optional(),
+  ATTACHMENTS_S3_REGION: Env.schema.string.optional(),
+  ATTACHMENTS_S3_BUCKET: Env.schema.string.optional(),
+  ATTACHMENTS_S3_ACCESS_KEY_ID: Env.schema.string.optional(),
+  ATTACHMENTS_S3_SECRET_ACCESS_KEY: Env.schema.string.optional(),
+  ATTACHMENTS_S3_FORCE_PATH_STYLE: Env.schema.boolean.optional(),
+  ATTACHMENTS_S3_KEY_PREFIX: Env.schema.string.optional(),
+  ATTACHMENTS_S3_SIGNED_URL_TTL_SECONDS: Env.schema.number.optional(),
+
   /*
   |----------------------------------------------------------
   | Variables for configuring the limiter package
