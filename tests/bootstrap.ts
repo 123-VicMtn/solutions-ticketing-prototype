@@ -5,6 +5,7 @@ import type { Config } from '@japa/runner/types'
 import { pluginAdonisJS } from '@japa/plugin-adonisjs'
 import testUtils from '@adonisjs/core/services/test_utils'
 import { htmlReporter } from '#tests/reporters/html_reporter'
+import { spawn } from 'node:child_process'
 
 /**
  * This file is imported by the "bin/test.ts" entrypoint file
@@ -33,7 +34,26 @@ export const reporters: Config['reporters'] = {
  * The teardown functions are executed after all the tests
  */
 export const runnerHooks: Required<Pick<Config, 'setup' | 'teardown'>> = {
-  setup: [],
+  setup: [
+    async () => {
+      /**
+       * Ensure DB schema exists for functional tests when running locally
+       * without relying on external orchestration (CI/Docker).
+       */
+      await new Promise<void>((resolve, reject) => {
+        const child = spawn(process.execPath, ['ace', 'migration:run'], {
+          stdio: 'inherit',
+          env: process.env,
+        })
+
+        child.on('exit', (code) => {
+          if (code === 0) resolve()
+          else reject(new Error(`migration:run failed with exit code ${code}`))
+        })
+        child.on('error', reject)
+      })
+    },
+  ],
   teardown: [],
 }
 
