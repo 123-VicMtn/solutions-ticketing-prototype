@@ -8,6 +8,7 @@ import { DbCheck, DbConnectionCountCheck } from '@adonisjs/lucid/database'
 import db from '@adonisjs/lucid/services/db'
 import { TicketingSystemCheck } from '#health_checks/ticketing_system_check'
 import { PropertyAccessCheck } from '#health_checks/property_access_check'
+import { AttachmentStorageCheck } from '#health_checks/attachment_storage_check'
 
 export const healthChecks = new HealthChecks().register([
   /**
@@ -49,4 +50,9 @@ export const healthChecks = new HealthChecks().register([
    * Custom check for property access
    */
   new PropertyAccessCheck().cacheFor('5 minutes'),
+
+  /**
+   * Attachments storage (local or S3 provider)
+   */
+  new AttachmentStorageCheck().cacheFor('5 minutes'),
 ])
