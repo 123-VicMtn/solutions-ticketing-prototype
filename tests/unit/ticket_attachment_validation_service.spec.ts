@@ -7,6 +7,7 @@ const service = new TicketAttachmentValidationService()
 function mockFile(partial: {
   clientName?: string
   type?: string | null
+  subtype?: string | null
   extname?: string
   size?: number
   isValid?: boolean
@@ -18,6 +19,7 @@ function mockFile(partial: {
     clientName,
     extname: partial.extname ?? extFromName,
     type: partial.type ?? 'image/png',
+    subtype: partial.subtype ?? null,
     size: partial.size ?? 100,
     sizeLimit: '10mb' as const,
     allowedExtensions: [] as string[],
@@ -70,11 +72,19 @@ test.group('TicketAttachmentValidationService', () => {
     assert.isNull(err)
   })
 
-  test('accepts incomplete image MIME when extension matches JPEG', ({ assert }) => {
+  test('rejects incomplete MIME (type without subtype)', ({ assert }) => {
     const err = service.validate(
       [mockFile({ clientName: 'axelor_mobile.jpg', type: 'image', extname: 'jpg' })],
       { required: true }
     )
+    assert.isString(err)
+    assert.include(err!, 'manquant')
+  })
+
+  test('accepts image/jpeg when provided as type+subtype', ({ assert }) => {
+    const err = service.validate([mockFile({ clientName: 'photo.jpg', type: 'image', subtype: 'jpeg' })], {
+      required: true,
+    })
     assert.isNull(err)
   })
 })
