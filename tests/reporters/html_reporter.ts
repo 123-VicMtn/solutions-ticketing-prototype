@@ -3,7 +3,9 @@ import path from 'node:path'
 import type { NamedReporterContract } from '@japa/runner/types'
 
 type TestResult = {
+  suitePath: string[]
   suite: string
+  suiteRoot: string
   title: string
   status: 'passed' | 'failed' | 'skipped' | 'todo'
   duration: number
@@ -21,6 +23,11 @@ function escapeHtml(value: string) {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;')
+}
+
+function toUtcPlus1ISOString(date: Date) {
+  const shifted = new Date(date.getTime() + 60 * 60 * 1000)
+  return shifted.toISOString().replace('Z', ' UTC+01:00')
 }
 
 export function htmlReporter(options: HtmlReporterOptions = {}): NamedReporterContract {
@@ -51,8 +58,13 @@ export function htmlReporter(options: HtmlReporterOptions = {}): NamedReporterCo
               : 'passed'
         const firstError = test.errors[0]?.error?.message ?? null
 
+        const suitePath = suiteStack.length ? [...suiteStack] : ['unknown']
+        const suiteRoot = suitePath[0] ?? 'unknown'
+
         tests.push({
-          suite: suiteStack[suiteStack.length - 1] ?? 'unknown',
+          suitePath,
+          suite: suitePath.join(' / '),
+          suiteRoot,
           title: test.title.expanded,
           status,
           duration: test.duration,
@@ -68,21 +80,31 @@ export function htmlReporter(options: HtmlReporterOptions = {}): NamedReporterCo
         const todo = tests.filter((t) => t.status === 'todo').length
         const duration = Math.max(Date.now() - startedAt.getTime(), 0)
 
-        const rows = tests
-          .map((test) => {
-            const error = test.errorMessage
-              ? `<pre class="error">${escapeHtml(test.errorMessage)}</pre>`
-              : ''
+        const longestTest = tests.reduce<TestResult | null>(
+          (acc, test) => (acc === null || test.duration > acc.duration ? test : acc),
+          null
+        )
 
-            return `<tr>
+        const renderRows = (items: TestResult[]) =>
+          items
+            .map((test) => {
+              const error = test.errorMessage
+                ? `<pre class="error">${escapeHtml(test.errorMessage)}</pre>`
+                : ''
+
+              return `<tr>
   <td>${escapeHtml(test.suite)}</td>
   <td>${escapeHtml(test.title)}</td>
   <td class="status ${test.status}">${test.status}</td>
   <td>${test.duration}ms</td>
   <td>${error}</td>
 </tr>`
-          })
-          .join('\n')
+            })
+            .join('\n')
+
+        const functionalTests = tests.filter((t) => t.suiteRoot === 'functional')
+        const unitTests = tests.filter((t) => t.suiteRoot === 'unit')
+        const otherTests = tests.filter((t) => !['functional', 'unit'].includes(t.suiteRoot))
 
         const html = `<!doctype html>
 <html lang="en">
@@ -94,6 +116,8 @@ export function htmlReporter(options: HtmlReporterOptions = {}): NamedReporterCo
     body { font-family: Inter, Arial, sans-serif; margin: 24px; color: #1f2937; }
     h1 { margin-bottom: 8px; }
     .meta { color: #6b7280; margin-bottom: 16px; }
+    .section { margin-top: 22px; }
+    .section h2 { margin: 0 0 10px; font-size: 16px; }
     .summary { display: flex; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
     .badge { padding: 8px 12px; border-radius: 8px; font-weight: 600; }
     .total { background: #e5e7eb; }
@@ -110,7 +134,12 @@ export function htmlReporter(options: HtmlReporterOptions = {}): NamedReporterCo
 </head>
 <body>
   <h1>Test Report</h1>
-  <div class="meta">Generated at ${new Date().toISOString()} - duration ${duration}ms</div>
+  <div class="meta">Generated at ${toUtcPlus1ISOString(new Date())} (timezone: UTC+01:00) - duration ${duration}ms</div>
+  ${
+    longestTest
+      ? `<div class="meta">Longest test: ${escapeHtml(longestTest.suite)} → ${escapeHtml(longestTest.title)} (${longestTest.duration}ms)</div>`
+      : ''
+  }
   <div class="summary">
     <div class="badge total">Total: ${total}</div>
     <div class="badge passed">Passed: ${passed}</div>
@@ -118,20 +147,63 @@ export function htmlReporter(options: HtmlReporterOptions = {}): NamedReporterCo
     <div class="badge skipped">Skipped: ${skipped}</div>
     <div class="badge todo">Todo: ${todo}</div>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Suite</th>
-        <th>Test</th>
-        <th>Status</th>
-        <th>Duration</th>
-        <th>Error</th>
-      </tr>
-    </thead>
-    <tbody>
-${rows}
-    </tbody>
-  </table>
+  <div class="section">
+    <h2>Functional (${functionalTests.length})</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Suite</th>
+          <th>Test</th>
+          <th>Status</th>
+          <th>Duration</th>
+          <th>Error</th>
+        </tr>
+      </thead>
+      <tbody>
+${renderRows(functionalTests)}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>Unit (${unitTests.length})</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Suite</th>
+          <th>Test</th>
+          <th>Status</th>
+          <th>Duration</th>
+          <th>Error</th>
+        </tr>
+      </thead>
+      <tbody>
+${renderRows(unitTests)}
+      </tbody>
+    </table>
+  </div>
+
+  ${
+    otherTests.length
+      ? `<div class="section">
+    <h2>Other (${otherTests.length})</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Suite</th>
+          <th>Test</th>
+          <th>Status</th>
+          <th>Duration</th>
+          <th>Error</th>
+        </tr>
+      </thead>
+      <tbody>
+${renderRows(otherTests)}
+      </tbody>
+    </table>
+  </div>`
+      : ''
+  }
 </body>
 </html>`
 
