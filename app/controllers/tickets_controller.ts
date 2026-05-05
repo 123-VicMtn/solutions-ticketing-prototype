@@ -532,6 +532,7 @@ export default class TicketsController {
     for (const attachment of attachments) {
       const checksumSha256 = await this.computeSha256(attachment)
       const storedAttachment = await attachmentStorageService.upload(attachment)
+      const mimeType = this.getFullMimeType(attachment) ?? 'application/octet-stream'
       await TicketAttachment.create({
         ticketId,
         userId,
@@ -540,7 +541,7 @@ export default class TicketsController {
         storageKey: storedAttachment.storageKey,
         checksumSha256,
         originalName: attachment.clientName,
-        mimeType: attachment.type ?? 'application/octet-stream',
+        mimeType,
         sizeBytes: attachment.size,
       })
       count++
@@ -560,5 +561,18 @@ export default class TicketsController {
 
     const content = await readFile(attachment.tmpPath)
     return createHash('sha256').update(content).digest('hex')
+  }
+
+  private getFullMimeType(attachment: MultipartFile): string | null {
+    const rawType = (attachment.type ?? '').trim().toLowerCase()
+    if (!rawType) return null
+
+    if (rawType.includes('/')) return rawType
+
+    const rawSubtype = (attachment as unknown as { subtype?: string | null }).subtype
+    const subtype = (rawSubtype ?? '').trim().toLowerCase()
+    if (!subtype) return null
+
+    return `${rawType}/${subtype}`
   }
 }
