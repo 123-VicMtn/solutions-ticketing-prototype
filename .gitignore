@@ -42,3 +42,9 @@ backup.log
 
 # Test results
 test-results/
+
+# Coverage
+coverage/
+
+# Files uploaded to the server
+public/uploads/tickets/*
