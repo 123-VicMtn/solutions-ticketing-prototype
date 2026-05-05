@@ -49,11 +49,24 @@ class LocalAttachmentStorageDriver implements AttachmentStorageDriverContract {
     const storageKey = `${randomUUID()}.${file.extname ?? 'bin'}`
     const destination = this.getAbsoluteTicketsDirectory()
 
-    await fs.mkdir(destination, { recursive: true })
-    await file.move(destination, { name: storageKey })
+    try {
+      await fs.mkdir(destination, { recursive: true })
+      await file.move(destination, { name: storageKey })
+    } catch (error) {
+      throw new AttachmentStorageProviderError(
+        'Failed to upload attachment to local storage',
+        'upload',
+        {
+          cause: error,
+        }
+      )
+    }
 
     if (!file.isValid || !file.fileName) {
-      throw new Error('Unable to persist attachment on local storage')
+      throw new AttachmentStorageProviderError(
+        'Unable to persist attachment on local storage',
+        'upload'
+      )
     }
 
     return {
@@ -70,7 +83,17 @@ class LocalAttachmentStorageDriver implements AttachmentStorageDriverContract {
   async delete(storageKey: string): Promise<void> {
     this.assertSafeStorageKey(storageKey)
     const absolutePath = join(this.getAbsoluteTicketsDirectory(), storageKey)
-    await fs.rm(absolutePath, { force: true })
+    try {
+      await fs.rm(absolutePath, { force: true })
+    } catch (error) {
+      throw new AttachmentStorageProviderError(
+        'Failed to delete attachment from local storage',
+        'delete',
+        {
+          cause: error,
+        }
+      )
+    }
   }
 
   async exists(storageKey: string): Promise<boolean> {
@@ -144,6 +167,7 @@ class S3AttachmentStorageDriver implements AttachmentStorageDriverContract {
 
     const storageKey = this.buildStorageKey(file.extname)
     const content = await fs.readFile(file.tmpPath)
+    const contentType = this.getFullMimeType(file) ?? 'application/octet-stream'
 
     try {
       await this.client.send(
@@ -151,7 +175,7 @@ class S3AttachmentStorageDriver implements AttachmentStorageDriverContract {
           Bucket: this.config.bucket,
           Key: storageKey,
           Body: content,
-          ContentType: file.type ?? 'application/octet-stream',
+          ContentType: contentType,
         })
       )
     } catch (error) {
@@ -261,11 +285,24 @@ class S3AttachmentStorageDriver implements AttachmentStorageDriverContract {
       throw new Error('Unsafe attachment storage key')
     }
   }
+
+  private getFullMimeType(file: MultipartFile): string | null {
+    const rawType = (file.type ?? '').trim().toLowerCase()
+    if (!rawType) return null
+
+    if (rawType.includes('/')) return rawType
+
+    const rawSubtype = (file as unknown as { subtype?: string | null }).subtype
+    const subtype = (rawSubtype ?? '').trim().toLowerCase()
+    if (!subtype) return null
+
+    return `${rawType}/${subtype}`
+  }
 }
 
 export class AttachmentStorageService {
   private static readonly MIN_SIGNED_URL_TTL_SECONDS = 60
-  private static readonly MAX_SIGNED_URL_TTL_SECONDS = 900
+  private static readonly MAX_SIGNED_URL_TTL_SECONDS = 300
 
   private readonly driver: AttachmentStorageDriverContract
 
@@ -337,7 +374,7 @@ export class AttachmentStorageService {
   }
 
   private normalizeSignedUrlTtl(ttlSeconds: number | undefined): number {
-    const raw = ttlSeconds ?? 300
+    const raw = ttlSeconds ?? 120
     return Math.min(
       AttachmentStorageService.MAX_SIGNED_URL_TTL_SECONDS,
       Math.max(AttachmentStorageService.MIN_SIGNED_URL_TTL_SECONDS, raw)
