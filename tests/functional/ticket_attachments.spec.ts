@@ -32,12 +32,15 @@ async function createUser(role: UserRole) {
   })
 }
 
-async function loginWithWebForm(
-  client: { post: (url: string) => { form: (v: object) => Promise<unknown> } },
-  email: string,
-  password: string
-) {
-  return client.post('/login').form({ email, password })
+async function loginWithWebForm(client: any, email: string, password: string) {
+  const response = await client.post('/login').redirects(0).form({ email, password })
+  response.assertFound()
+
+  const setCookie = response.header('set-cookie') as string | string[] | undefined
+  const cookies = (Array.isArray(setCookie) ? setCookie : setCookie ? [setCookie] : [])
+    .map((c) => c.split(';')[0])
+    .filter(Boolean)
+  return { response, cookieHeader: cookies.join('; ') }
 }
 
 async function seedBuildingUnit() {
@@ -77,15 +80,14 @@ test.group('Ticket attachments HTTP', (group) => {
     ticket.reference = `TK-${DateTime.now().year}-${String(ticket.id).padStart(4, '0')}`
     await ticket.save()
 
-    await loginWithWebForm(client, manager.email!, DEFAULT_PASSWORD)
+    const { cookieHeader } = await loginWithWebForm(client, manager.email!, DEFAULT_PASSWORD)
 
     const uploadResponse = await client
       .post(`/tickets/${ticket.id}/attachments`)
+      .header('cookie', cookieHeader)
       .file('attachments', PNG_FIXTURE, { contentType: 'image/png', filename: 'note.png' })
-      .redirects(0)
       .send()
 
-    uploadResponse.assertFound()
     uploadResponse.assertRedirectsTo(`/tickets/${ticket.id}`)
 
     const attachment = await TicketAttachment.query().where('ticketId', ticket.id).firstOrFail()
@@ -94,6 +96,7 @@ test.group('Ticket attachments HTTP', (group) => {
 
     const readResponse = await client
       .get(`/tickets/${ticket.id}/attachments/${attachment.id}/read`)
+      .header('cookie', cookieHeader)
       .redirects(0)
       .send()
 
@@ -111,7 +114,7 @@ test.group('Ticket attachments HTTP', (group) => {
     const tenantA = await createUser('tenant')
     const tenantB = await createUser('tenant')
     const { unit } = await seedBuildingUnit()
-    await UserUnit.create({ userId: tenantA.id, unitId: unit.id })
+    await UserUnit.create({ userId: tenantA.id, unitId: unit.id, relation: 'tenant' })
 
     const ticket = await Ticket.create({
       userId: tenantA.id,
@@ -138,10 +141,12 @@ test.group('Ticket attachments HTTP', (group) => {
     })
     const attachment = await TicketAttachment.findByOrFail('ticketId', ticket.id)
 
-    await loginWithWebForm(client, tenantB.email!, DEFAULT_PASSWORD)
+    const { cookieHeader } = await loginWithWebForm(client, tenantB.email!, DEFAULT_PASSWORD)
 
     const readResponse = await client
       .get(`/tickets/${ticket.id}/attachments/${attachment.id}/read`)
+      .header('cookie', cookieHeader)
+      .redirects(0)
       .send()
 
     readResponse.assertForbidden()
@@ -175,10 +180,12 @@ test.group('Ticket attachments HTTP', (group) => {
     })
     const attachment = await TicketAttachment.findByOrFail('ticketId', ticket.id)
 
-    await loginWithWebForm(client, manager.email!, DEFAULT_PASSWORD)
+    const { cookieHeader } = await loginWithWebForm(client, manager.email!, DEFAULT_PASSWORD)
 
     const readResponse = await client
       .get(`/tickets/${ticket.id}/attachments/${attachment.id}/read`)
+      .header('cookie', cookieHeader)
+      .redirects(0)
       .send()
 
     readResponse.assertNotFound()
@@ -188,7 +195,7 @@ test.group('Ticket attachments HTTP', (group) => {
     const readResponse = await client.get('/tickets/1/attachments/1/read').redirects(0).send()
 
     readResponse.assertFound()
-    readResponse.assertRedirectsTo('/login')
+    readResponse.assertHeader('location', '/login')
   })
 
   test('upload rejects disallowed MIME with redirect and flash (Inertia)', async ({ client }) => {
@@ -210,15 +217,14 @@ test.group('Ticket attachments HTTP', (group) => {
     const fakePdfPath = join(dir, 'fake.pdf')
     writeFileSync(fakePdfPath, 'not a pdf')
 
-    await loginWithWebForm(client, manager.email!, DEFAULT_PASSWORD)
+    const { cookieHeader } = await loginWithWebForm(client, manager.email!, DEFAULT_PASSWORD)
 
     const uploadResponse = await client
       .post(`/tickets/${ticket.id}/attachments`)
+      .header('cookie', cookieHeader)
       .file('attachments', fakePdfPath, { contentType: 'text/plain', filename: 'fake.pdf' })
-      .redirects(0)
       .send()
 
-    uploadResponse.assertFound()
     uploadResponse.assertRedirectsTo(`/tickets/${ticket.id}`)
   })
 })
