@@ -82,9 +82,12 @@ test.group('TicketAttachmentValidationService', () => {
   })
 
   test('accepts image/jpeg when provided as type+subtype', ({ assert }) => {
-    const err = service.validate([mockFile({ clientName: 'photo.jpg', type: 'image', subtype: 'jpeg' })], {
-      required: true,
-    })
+    const err = service.validate(
+      [mockFile({ clientName: 'photo.jpg', type: 'image', subtype: 'jpeg' })],
+      {
+        required: true,
+      }
+    )
     assert.isNull(err)
   })
 })
