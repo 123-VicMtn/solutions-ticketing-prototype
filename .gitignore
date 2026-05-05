@@ -17,6 +17,10 @@ tsconfig.inertia.tsbuildinfo
 # Frontend assets compiled code
 public/assets
 
+# Uploads (keep folder structure for tests)
+public/uploads/tickets/*
+!public/uploads/tickets/.gitkeep
+
 # Build tools specific
 npm-debug.log
 yarn-error.log
