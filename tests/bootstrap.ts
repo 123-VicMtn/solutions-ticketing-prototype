@@ -37,9 +37,13 @@ export const runnerHooks: Required<Pick<Config, 'setup' | 'teardown'>> = {
   setup: [
     async () => {
       /**
-       * Ensure DB schema exists for functional tests when running locally
-       * without relying on external orchestration (CI/Docker).
+       * Ensure DB schema exists for functional tests.
+       * - In CI, migrations are executed explicitly by the workflow.
+       * - In Docker, you may choose to do it explicitly too.
+       * - In local IDE runs, this keeps tests runnable out of the box.
        */
+      if (process.env.RUN_MIGRATIONS !== 'true') return
+
       await new Promise<void>((resolve, reject) => {
         const child = spawn(process.execPath, ['ace', 'migration:run'], {
           stdio: 'inherit',
